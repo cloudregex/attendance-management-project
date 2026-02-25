@@ -85,6 +85,8 @@ const Layout = ({ children }) => {
         { text: 'Departments', icon: <BusinessIcon />, path: '/departments' },
         { text: 'Employees', icon: <PeopleIcon />, path: '/employees' },
         { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports' },
+        { text: 'Permissions', icon: <PeopleIcon />, path: '/permissions' },
+        { text: 'Activity Logs', icon: <DescriptionIcon />, path: '/activity-logs' },
         { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
     ];
 

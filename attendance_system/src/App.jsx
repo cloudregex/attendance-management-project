@@ -5,6 +5,8 @@ import Layout from './components/Layout';
 import AdminDashboard from './pages/AdminDashboard';
 import DeptDashboard from './pages/DeptDashboard';
 import { EmployeesPage, ReportsPage, SettingsPage } from './pages/Placeholders';
+import PermissionsPage from './pages/Permissions';
+import ActivityLogsPage from './pages/ActivityLogs';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
             <Route path="/departments" element={<DeptDashboard />} />
             <Route path="/employees" element={<EmployeesPage />} />
             <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/permissions" element={<PermissionsPage />} />
+            <Route path="/activity-logs" element={<ActivityLogsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </Layout>
