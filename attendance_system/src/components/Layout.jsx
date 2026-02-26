@@ -27,6 +27,8 @@ import {
     Settings as SettingsIcon,
     Search as SearchIcon,
     Notifications as NotificationsIcon,
+    Security as SecurityIcon,
+    History as HistoryIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -81,9 +83,11 @@ const Layout = ({ children }) => {
     };
 
     const menuItems = [
-        { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+        { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
         { text: 'Departments', icon: <BusinessIcon />, path: '/departments' },
         { text: 'Employees', icon: <PeopleIcon />, path: '/employees' },
+        { text: 'Permissions', icon: <SecurityIcon />, path: '/permissions' },
+        { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs' },
         { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports' },
         { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
     ];

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Typography,
@@ -21,6 +22,7 @@ import { Visibility, VisibilityOff, LockOutlined, AccountTree, CheckCircleOutlin
 
 const AdminLogin = () => {
     const theme = useTheme();
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
@@ -64,6 +66,10 @@ const AdminLogin = () => {
         if (Object.keys(validationErrors).length === 0) {
             console.log('Login attempt with:', formData);
             setIsSubmitted(true);
+            // Simulate successful login and redirect
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1500);
         } else {
             setErrors(validationErrors);
         }
