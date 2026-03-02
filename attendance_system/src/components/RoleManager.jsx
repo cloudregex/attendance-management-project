@@ -21,6 +21,7 @@ import {
     Chip,
     Stack,
     Alert,
+    useTheme,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 
@@ -47,6 +48,8 @@ export function writeRoles(roles) {
 }
 
 const RoleManager = () => {
+    const theme = useTheme();
+    const mode = theme.palette.mode;
     const [roles, setRoles] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingRole, setEditingRole] = useState(null);
@@ -135,7 +138,7 @@ const RoleManager = () => {
                 }}
             >
                 <Table>
-                    <TableHead sx={{ bgcolor: 'grey.50' }}>
+                    <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 700 }}>Role Name</TableCell>
                             <TableCell sx={{ fontWeight: 700 }}>Default Permissions</TableCell>

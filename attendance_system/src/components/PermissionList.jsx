@@ -20,6 +20,7 @@ import {
   Stack,
   Snackbar,
   Checkbox,
+  useTheme,
 } from '@mui/material';
 import { Edit as EditIcon, Refresh as RefreshIcon, Search as SearchIcon } from '@mui/icons-material';
 import PermissionForm from './PermissionForm';
