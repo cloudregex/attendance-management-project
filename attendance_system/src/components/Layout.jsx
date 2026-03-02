@@ -17,6 +17,8 @@ import {
     InputBase,
     alpha,
     styled,
+    Collapse,
+    useTheme,
 } from '@mui/material';
 import {
     Menu as MenuIcon,
@@ -29,6 +31,11 @@ import {
     Notifications as NotificationsIcon,
     Security as SecurityIcon,
     History as HistoryIcon,
+    ExpandLess,
+    ExpandMore,
+    Person as PersonIcon,
+    Palette as PaletteIcon,
+    Backup as BackupIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -75,11 +82,17 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const Layout = ({ children }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [settingsOpen, setSettingsOpen] = useState(true); // Default open to show the new dropdown
     const navigate = useNavigate();
     const location = useLocation();
+    const theme = useTheme();
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
+    };
+
+    const handleSettingsToggle = () => {
+        setSettingsOpen(!settingsOpen);
     };
 
     const menuItems = [
@@ -89,7 +102,14 @@ const Layout = ({ children }) => {
         { text: 'Permissions', icon: <SecurityIcon />, path: '/permissions' },
         { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs' },
         { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports' },
-        { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+    ];
+
+    const settingsSubItems = [
+        { text: 'Account Details', icon: <PersonIcon />, path: '/settings/account' },
+        { text: 'Notifications', icon: <NotificationsIcon />, path: '/settings/notifications' },
+        { text: 'Security & Privacy', icon: <SecurityIcon />, path: '/settings/security' },
+        { text: 'Appearance', icon: <PaletteIcon />, path: '/settings/appearance' },
+        { text: 'Data & Backup', icon: <BackupIcon />, path: '/settings/backup' },
     ];
 
     const drawer = (
@@ -144,10 +164,73 @@ const Layout = ({ children }) => {
                         </ListItemButton>
                     </ListItem>
                 ))}
+
+                <ListItem disablePadding>
+                    <ListItemButton
+                        onClick={handleSettingsToggle}
+                        sx={{
+                            mx: 1,
+                            borderRadius: 1,
+                            mb: 0.5,
+                            bgcolor: location.pathname.startsWith('/settings') ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                        }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 40 }}>
+                            <SettingsIcon color={location.pathname.startsWith('/settings') ? 'primary' : 'inherit'} />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary="Settings"
+                            primaryTypographyProps={{
+                                fontSize: '0.9rem',
+                                fontWeight: location.pathname.startsWith('/settings') ? 700 : 500,
+                                color: location.pathname.startsWith('/settings') ? 'primary.main' : 'inherit'
+                            }}
+                        />
+                        {settingsOpen ? <ExpandLess size="small" /> : <ExpandMore size="small" />}
+                    </ListItemButton>
+                </ListItem>
+
+                <Collapse in={settingsOpen} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                        {settingsSubItems.map((subItem) => (
+                            <ListItemButton
+                                key={subItem.text}
+                                onClick={() => navigate(subItem.path)}
+                                selected={location.pathname === subItem.path}
+                                sx={{
+                                    pl: 4.5,
+                                    mx: 1,
+                                    borderRadius: 1,
+                                    mb: 0.5,
+                                    '&.Mui-selected': {
+                                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                        color: 'primary.main',
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.primary.main, 0.15),
+                                        },
+                                        '& .MuiListItemIcon-root': {
+                                            color: 'primary.main',
+                                        },
+                                    },
+                                }}
+                            >
+                                <ListItemIcon sx={{ minWidth: 32, '& svg': { fontSize: '1.2rem' } }}>
+                                    {subItem.icon}
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={subItem.text}
+                                    primaryTypographyProps={{
+                                        fontSize: '0.85rem',
+                                        fontWeight: location.pathname === subItem.path ? 600 : 400
+                                    }}
+                                />
+                            </ListItemButton>
+                        ))}
+                    </List>
+                </Collapse>
             </List>
         </div>
     );
-
     return (
         <Box sx={{ display: 'flex', bgcolor: 'background.default', minHeight: '100vh' }}>
             <AppBar

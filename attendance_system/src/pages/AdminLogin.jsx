@@ -76,16 +76,13 @@ const AdminLogin = () => {
     };
 
     return (
-        <Grid container component="main" sx={{ height: '100vh', overflow: 'hidden' }}>
+        <Box component="main" sx={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden' }}>
             <CssBaseline />
 
-            {/* Left Branding Panel */}
-            <Grid
-                item
-                xs={false}
-                sm={4}
-                md={7}
+            {/* Left Panel: Box Root (Branding Content) */}
+            <Box
                 sx={{
+                    width: '50%',
                     position: 'relative',
                     background: `linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2070')`,
                     backgroundSize: 'cover',
@@ -98,7 +95,7 @@ const AdminLogin = () => {
                     p: 6,
                 }}
             >
-                {/* Glassmorphism Overlay */}
+                {/* Visual Accent Layer */}
                 <Box
                     sx={{
                         position: 'absolute',
@@ -106,222 +103,241 @@ const AdminLogin = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        bgcolor: alpha(theme.palette.primary.dark, 0.4),
+                        bgcolor: alpha(theme.palette.primary.dark, 0.35),
                         zIndex: 1
                     }}
                 />
 
-                <Box sx={{ zIndex: 2, textAlign: 'center', maxWidth: 500 }}>
+                <Box sx={{ zIndex: 2, textAlign: 'center', maxWidth: 520 }}>
                     <Box
                         sx={{
                             display: 'inline-flex',
                             p: 2,
                             bgcolor: alpha(theme.palette.common.white, 0.1),
-                            backdropFilter: 'blur(10px)',
+                            backdropFilter: 'blur(12px)',
                             borderRadius: '24px',
                             mb: 4,
                             border: `1px solid ${alpha(theme.palette.common.white, 0.2)}`,
                         }}
                     >
-                        <AccountTree sx={{ fontSize: 56, color: theme.palette.primary.light }} />
+                        <AccountTree sx={{ fontSize: 64, color: theme.palette.primary.light }} />
                     </Box>
-                    <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 800, letterSpacing: '-1px' }}>
+                    <Typography variant="h1" component="h1" gutterBottom sx={{ fontWeight: 900, letterSpacing: '-2px', fontSize: { md: '3.5rem', lg: '4rem' } }}>
                         Attendance <span style={{ color: theme.palette.primary.light }}>Pro</span>
                     </Typography>
-                    <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 300, mb: 6, lineHeight: 1.6 }}>
+                    <Typography variant="h5" sx={{ opacity: 0.9, fontWeight: 300, mb: 6, lineHeight: 1.6, color: alpha('#fff', 0.8) }}>
                         Streamline your workforce management with our next-generation attendance tracking system. Built for scale, security, and simplicity.
                     </Typography>
 
-                    <Grid container spacing={3} sx={{ mt: 2 }}>
+                    <Grid container spacing={4} sx={{ mt: 2 }}>
                         {[
-                            { label: 'Real-time Sync', icon: <CheckCircleOutline sx={{ fontSize: 20 }} /> },
-                            { label: 'Cloud Security', icon: <CheckCircleOutline sx={{ fontSize: 20 }} /> },
-                            { label: 'AI Analytics', icon: <CheckCircleOutline sx={{ fontSize: 20 }} /> }
-                        ].map((item, index) => (
-                            <Grid item xs={4} key={index}>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                    <Box sx={{ color: theme.palette.primary.light }}>{item.icon}</Box>
-                                    <Typography variant="caption" sx={{ fontWeight: 600, opacity: 0.8 }}>{item.label}</Typography>
+                            { label: 'Real-time Sync', icon: <CheckCircleOutline sx={{ fontSize: 24 }} /> },
+                            { label: 'Cloud Security', icon: <CheckCircleOutline sx={{ fontSize: 24 }} /> },
+                            { label: 'AI Analytics', icon: <CheckCircleOutline sx={{ fontSize: 24 }} /> }
+                        ].map((item, iconIdx) => (
+                            <Grid item xs={4} key={iconIdx}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+                                    <Box sx={{ color: theme.palette.primary.light, display: 'flex', p: 1.5, bgcolor: alpha('#fff', 0.1), borderRadius: '50%' }}>{item.icon}</Box>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, opacity: 0.9, letterSpacing: '0.5px' }}>{item.label}</Typography>
                                 </Box>
                             </Grid>
                         ))}
                     </Grid>
                 </Box>
 
-                <Box sx={{ position: 'absolute', bottom: 40, zIndex: 2, opacity: 0.7 }}>
-                    <Typography variant="body2">Trusted by 500+ Enterprises Globally</Typography>
+                <Box sx={{ position: 'absolute', bottom: 40, zIndex: 2, opacity: 0.8 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 500, letterSpacing: '1px' }}>Trusted by 500+ Enterprises Globally</Typography>
                 </Box>
-            </Grid>
+            </Box>
 
-            {/* Right Login Panel */}
+            {/* Right Panel: Grid Root (Login Content) */}
             <Grid
-                item
+                container
                 xs={12}
-                sm={8}
-                md={5}
+                md={6}
                 sx={{
+                    width: '50%',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center', // Horizontal centering
-                    bgcolor: '#f8fafc'
+                    justifyContent: 'center',
+                    bgcolor: '#f8fafc',
+                    px: { xs: 2, md: 4 }
                 }}
             >
-                <Container maxWidth="xs" sx={{ p: 0 }}>
-                    <Paper
-                        elevation={0}
+                <Box
+                    sx={{
+                        p: { xs: 4, md: 6 },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        bgcolor: 'white',
+                        borderRadius: '24px',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.08)',
+                        width: '100%',
+                        maxWidth: '460px',
+                    }}
+                >
+                    <Box
                         sx={{
-                            p: { xs: 3, md: 5 },
+                            width: 60,
+                            height: 60,
+                            bgcolor: 'primary.main',
+                            borderRadius: '16px',
                             display: 'flex',
-                            flexDirection: 'column',
                             alignItems: 'center',
-                            bgcolor: 'transparent',
-                            width: '100%'
+                            justifyContent: 'center',
+                            mb: 3,
+                            boxShadow: `0 12px 20px ${alpha(theme.palette.primary.main, 0.3)}`
                         }}
                     >
-                        <Box
+                        <LockOutlined sx={{ color: 'white', fontSize: 32 }} />
+                    </Box>
+
+                    <Typography component="h1" variant="h3" sx={{ fontWeight: 800, mb: 1, color: '#1e293b', textAlign: 'center' }}>
+                        Admin Access
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: '#64748b', mb: 4, textAlign: 'center', fontSize: '1.05rem' }}>
+                        Enter your credentials to manage the workspace.
+                    </Typography>
+
+                    {isSubmitted && (
+                        <Alert
+                            severity="success"
                             sx={{
-                                width: 48,
-                                height: 48,
-                                bgcolor: 'primary.main',
-                                borderRadius: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
+                                width: '100%',
                                 mb: 3,
-                                boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.25)}`
+                                borderRadius: '14px',
+                                fontWeight: 600
                             }}
                         >
-                            <LockOutlined sx={{ color: 'white' }} />
+                            Success! Redirecting...
+                        </Alert>
+                    )}
+
+                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ width: '100%' }}>
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="email"
+                            label="Email Address"
+                            name="email"
+                            autoComplete="email"
+                            autoFocus
+                            value={formData.email}
+                            onChange={handleChange}
+                            error={!!errors.email}
+                            helperText={errors.email}
+                            sx={{
+                                mb: 1.5,
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '14px',
+                                    bgcolor: '#f1f5f9',
+                                    '&:hover': { bgcolor: '#e2e8f0' },
+                                    '&.Mui-focused': { bgcolor: 'white' },
+                                    '& input:-webkit-autofill': {
+                                        WebkitBoxShadow: '0 0 0 1000px #f1f5f9 inset',
+                                        WebkitTextFillColor: '#1e293b',
+                                        borderRadius: 'inherit'
+                                    }
+                                }
+                            }}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Password"
+                            type={showPassword ? 'text' : 'password'}
+                            id="password"
+                            autoComplete="current-password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            error={!!errors.password}
+                            helperText={errors.password}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{
+                                mb: 1.5,
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '14px',
+                                    bgcolor: '#f1f5f9',
+                                    '&:hover': { bgcolor: '#e2e8f0' },
+                                    '&.Mui-focused': { bgcolor: 'white' },
+                                    '& input:-webkit-autofill': {
+                                        WebkitBoxShadow: '0 0 0 1000px #f1f5f9 inset',
+                                        WebkitTextFillColor: '#1e293b',
+                                        borderRadius: 'inherit'
+                                    }
+                                }
+                            }}
+                        />
+
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, mb: 3.5 }}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        name="rememberMe"
+                                        color="primary"
+                                        checked={formData.rememberMe}
+                                        onChange={handleChange}
+                                        sx={{ borderRadius: 8 }}
+                                    />
+                                }
+                                label={<Typography variant="body2" sx={{ fontWeight: 600, color: '#475569' }}>Remember me</Typography>}
+                            />
+                            <Link href="#" variant="body2" sx={{ textDecoration: 'none', fontWeight: 700, color: 'primary.main', '&:hover': { textDecoration: 'underline' } }}>
+                                Forgot Password?
+                            </Link>
                         </Box>
 
-                        <Typography component="h1" variant="h4" sx={{ fontWeight: 800, mb: 1, color: '#1e293b' }}>
-                            Admin Access
-                        </Typography>
-                        <Typography variant="body1" sx={{ color: '#64748b', mb: 4, textAlign: 'center' }}>
-                            Enter your credentials to manage the workspace.
-                        </Typography>
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            size="large"
+                            sx={{
+                                py: 1.8,
+                                borderRadius: '14px',
+                                fontSize: '1rem',
+                                fontWeight: 800,
+                                textTransform: 'none',
+                                boxShadow: `0 10px 20px -5px ${alpha(theme.palette.primary.main, 0.4)}`,
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                    boxShadow: `0 15px 25px -5px ${alpha(theme.palette.primary.main, 0.5)}`,
+                                    transform: 'translateY(-1px)'
+                                },
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            Sign In to Dashboard
+                        </Button>
 
-                        {isSubmitted && (
-                            <Alert
-                                severity="success"
-                                sx={{
-                                    width: '100%',
-                                    mb: 3,
-                                    borderRadius: '12px',
-                                    fontWeight: 500
-                                }}
-                            >
-                                Success! Redirecting...
-                            </Alert>
-                        )}
-
-                        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ width: '100%' }}>
-                            <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                id="email"
-                                label="Email Address"
-                                name="email"
-                                autoComplete="email"
-                                autoFocus
-                                value={formData.email}
-                                onChange={handleChange}
-                                error={!!errors.email}
-                                helperText={errors.email}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: '12px',
-                                        bgcolor: 'white'
-                                    }
-                                }}
-                            />
-                            <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                name="password"
-                                label="Password"
-                                type={showPassword ? 'text' : 'password'}
-                                id="password"
-                                autoComplete="current-password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                error={!!errors.password}
-                                helperText={errors.password}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                aria-label="toggle password visibility"
-                                                onClick={handleClickShowPassword}
-                                                edge="end"
-                                            >
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: '12px',
-                                        bgcolor: 'white'
-                                    }
-                                }}
-                            />
-
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: 4 }}>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            name="rememberMe"
-                                            color="primary"
-                                            checked={formData.rememberMe}
-                                            onChange={handleChange}
-                                            sx={{ borderRadius: 6 }}
-                                        />
-                                    }
-                                    label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#475569' }}>Remember me</Typography>}
-                                />
-                                <Link href="#" variant="body2" sx={{ textDecoration: 'none', fontWeight: 600, color: 'primary.main' }}>
-                                    Forgot Password?
+                        <Box sx={{ mt: 4, textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
+                                Need assistance?{' '}
+                                <Link href="#" sx={{ fontWeight: 700, textDecoration: 'none', color: 'primary.main' }}>
+                                    Contact Support
                                 </Link>
-                            </Box>
-
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                size="large"
-                                sx={{
-                                    py: 2,
-                                    borderRadius: '12px',
-                                    fontSize: '1rem',
-                                    fontWeight: 700,
-                                    textTransform: 'none',
-                                    boxShadow: `0 10px 15px -3px ${alpha(theme.palette.primary.main, 0.25)}`,
-                                    '&:hover': {
-                                        bgcolor: 'primary.dark',
-                                        boxShadow: `0 20px 25px -5px ${alpha(theme.palette.primary.main, 0.3)}`,
-                                    }
-                                }}
-                            >
-                                Sign In to Dashboard
-                            </Button>
-
-                            <Box sx={{ mt: 4, textAlign: 'center' }}>
-                                <Typography variant="body2" sx={{ color: '#64748b' }}>
-                                    Need assistance?{' '}
-                                    <Link href="#" sx={{ fontWeight: 600, textDecoration: 'none' }}>
-                                        Contact Support
-                                    </Link>
-                                </Typography>
-                            </Box>
+                            </Typography>
                         </Box>
-                    </Paper>
-                </Container>
+                    </Box>
+                </Box>
             </Grid>
-        </Grid>
+        </Box>
     );
 };
 
