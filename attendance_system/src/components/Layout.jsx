@@ -17,6 +17,7 @@ import {
     InputBase,
     alpha,
     styled,
+    useTheme,
 } from '@mui/material';
 import {
     Menu as MenuIcon,
@@ -82,6 +83,7 @@ const Layout = ({ children }) => {
     const [permissionsOpen, setPermissionsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const theme = useTheme();
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -207,7 +209,7 @@ const Layout = ({ children }) => {
                     <ListItem key={item.text} disablePadding>
                         <ListItemButton
                             onClick={() => navigate(item.path)}
-                            selected={location.pathname === item.path}
+                            selected={location.pathname === item.path || (item.path === '/settings' && location.pathname.startsWith('/settings'))}
                             sx={{
                                 mx: 1,
                                 borderRadius: 1,
@@ -224,17 +226,18 @@ const Layout = ({ children }) => {
                                 },
                             }}
                         >
-                            <ListItemIcon sx={{ minWidth: 40, color: location.pathname === item.path ? 'white' : 'inherit' }}>
+                            <ListItemIcon sx={{ minWidth: 40, color: (location.pathname === item.path || (item.path === '/settings' && location.pathname.startsWith('/settings'))) ? 'white' : 'inherit' }}>
                                 {item.icon}
                             </ListItemIcon>
                             <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />
                         </ListItemButton>
                     </ListItem>
                 ))}
+
+
             </List>
         </div>
     );
-
     return (
         <Box sx={{ display: 'flex', bgcolor: 'background.default', minHeight: '100vh' }}>
             <AppBar
@@ -242,11 +245,11 @@ const Layout = ({ children }) => {
                 sx={{
                     width: { sm: `calc(100% - ${drawerWidth}px)` },
                     ml: { sm: `${drawerWidth}px` },
-                    bgcolor: 'white',
+                    bgcolor: theme.palette.mode === 'dark' ? '#0F172A' : 'white',
                     color: 'text.primary',
                     boxShadow: 'none',
                     borderBottom: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: theme.palette.mode === 'dark' ? '#334155' : 'divider',
                 }}
             >
                 <Toolbar>
@@ -260,7 +263,12 @@ const Layout = ({ children }) => {
                         <MenuIcon />
                     </IconButton>
 
-                    <Search sx={{ bgcolor: 'grey.100', '&:hover': { bgcolor: 'grey.200' }, color: 'text.secondary' }}>
+                    <Search sx={{
+                        bgcolor: theme.palette.mode === 'dark' ? '#1E293B' : 'grey.100',
+                        '&:hover': { bgcolor: theme.palette.mode === 'dark' ? '#334155' : 'grey.200' },
+                        color: theme.palette.mode === 'dark' ? '#94A3B8' : 'text.secondary',
+                        border: theme.palette.mode === 'dark' ? '1px solid #334155' : 'none'
+                    }}>
                         <SearchIconWrapper>
                             <SearchIcon />
                         </SearchIconWrapper>

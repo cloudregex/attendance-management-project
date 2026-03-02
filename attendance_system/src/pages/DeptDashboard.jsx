@@ -15,6 +15,8 @@ import {
     Chip,
     Breadcrumbs,
     Link,
+    alpha,
+    useTheme,
 } from '@mui/material';
 import {
     NavigateNext as NavigateNextIcon,
@@ -40,6 +42,9 @@ const teamAttendance = [
 ];
 
 const DeptDashboard = () => {
+    const theme = useTheme();
+    const mode = theme.palette.mode;
+
     return (
         <Box>
             <Box sx={{ mb: 4 }}>
@@ -51,21 +56,28 @@ const DeptDashboard = () => {
                 </Breadcrumbs>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
-                        <Typography variant="h5" sx={{ fontWeight: 700 }}>Engineering Team</Typography>
-                        <Typography variant="body2" color="text.secondary">Overview of your department's attendance.</Typography>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Engineering Team</Typography>
+                        <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Overview of your department's attendance.</Typography>
                     </Box>
-                    <Button variant="outlined" color="primary"> Manage Schedule </Button>
+                    <Button variant="outlined" color="primary" sx={{ fontWeight: 600 }}> Manage Schedule </Button>
                 </Box>
             </Box>
 
             <Grid container spacing={3}>
                 {deptStats.map((stat) => (
                     <Grid item xs={12} sm={6} md={3} key={stat.label}>
-                        <Paper sx={{ p: 3, borderRadius: 2, border: '1px solid', borderColor: 'grey.100', boxShadow: 'none' }}>
+                        <Paper sx={{
+                            p: 3,
+                            borderRadius: 3,
+                            border: '1px solid',
+                            borderColor: mode === 'dark' ? '#334155' : 'grey.100',
+                            bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : 'none'
+                        }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <Box
                                     sx={{
-                                        bgcolor: `${stat.color}15`,
+                                        bgcolor: mode === 'dark' ? alpha(stat.color, 0.15) : `${stat.color}15`,
                                         color: stat.color,
                                         p: 1.5,
                                         borderRadius: '50%',
@@ -75,10 +87,10 @@ const DeptDashboard = () => {
                                     {stat.icon}
                                 </Box>
                                 <Box>
-                                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                                    <Typography variant="h5" sx={{ fontWeight: 800, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>
                                         {stat.value}
                                     </Typography>
-                                    <Typography variant="caption" color="text.secondary">
+                                    <Typography variant="caption" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 500 }}>
                                         {stat.label}
                                     </Typography>
                                 </Box>
@@ -88,13 +100,21 @@ const DeptDashboard = () => {
                 ))}
 
                 <Grid item xs={12}>
-                    <Paper sx={{ p: 0, overflow: 'hidden' }}>
-                        <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
-                            <Typography variant="h6">Team Attendance Status</Typography>
+                    <Paper sx={{
+                        p: 0,
+                        overflow: 'hidden',
+                        borderRadius: 3,
+                        bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                        border: '1px solid',
+                        borderColor: mode === 'dark' ? '#334155' : 'divider',
+                    }}>
+                        <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: mode === 'dark' ? '#334155' : 'divider' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Team Attendance Status</Typography>
                         </Box>
                         <TableContainer>
                             <Table>
-                                <TableHead sx={{ bgcolor: 'grey.50' }}>
+                                <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
                                     <TableRow>
                                         <TableCell sx={{ fontWeight: 600 }}>Employee Name</TableCell>
                                         <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
@@ -115,7 +135,11 @@ const DeptDashboard = () => {
                                                 </Box>
                                             </TableCell>
                                             <TableCell>
-                                                <Typography variant="caption" sx={{ bgcolor: 'grey.100', px: 1, py: 0.5, borderRadius: 1 }}>
+                                                <Typography variant="caption" sx={{
+                                                    bgcolor: mode === 'dark' ? '#0F172A' : 'grey.100',
+                                                    color: mode === 'dark' ? '#E2E8F0' : 'text.primary',
+                                                    px: 1, py: 0.5, borderRadius: 1
+                                                }}>
                                                     {row.role}
                                                 </Typography>
                                             </TableCell>

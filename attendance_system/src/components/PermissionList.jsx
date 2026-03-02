@@ -60,6 +60,9 @@ function addLog(entry) {
 }
 
 const PermissionList = () => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [editing, setEditing] = useState(null);
@@ -137,6 +140,11 @@ const PermissionList = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>) }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+              }
+            }}
           />
           <Select
             size="small"
@@ -151,7 +159,7 @@ const PermissionList = () => {
             ))}
           </Select>
           <Tooltip title="Refresh">
-            <IconButton onClick={refresh}><RefreshIcon /></IconButton>
+            <IconButton onClick={refresh} sx={{ bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper', border: '1px solid', borderColor: mode === 'dark' ? '#334155' : 'divider' }}><RefreshIcon /></IconButton>
           </Tooltip>
         </Box>
       </Box>
@@ -192,7 +200,7 @@ const PermissionList = () => {
         }}
       >
         <Table>
-          <TableHead sx={{ bgcolor: 'grey.50' }}>
+          <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox
