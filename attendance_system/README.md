@@ -14,3 +14,49 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+---
+
+## Permissions & Activity Module (Frontend-only)
+
+This workspace includes a simple frontend module for managing user roles and permissions, plus an activity log. It is entirely client-side and uses `localStorage` for persistence.
+
+### Roles
+
+- `Admin` – full access
+- `Teacher` – regular users, can be granted attendance/take/approve rights
+- `Subadmin` – a subset of teachers with elevated privileges
+- `Staff` – basic employees
+
+Admins can:
+
+- view all users and their current role/permissions
+- search and filter users by name or role
+- select one or multiple users (checkboxes) and change their role in bulk
+- edit individual user permissions via a modal
+
+Bulk actions are handy for "teacher-wise" operations: filter to "Teacher" then select all and assign them to `Subadmin`, `Staff` or even `Admin`.
+
+### Activity Logs
+
+Every role change and permission update is logged to `localStorage` and visible under the **Activity Logs** page. Logs include time, actor, action, and target.
+
+### Data Storage
+
+The following keys are used in localStorage:
+
+```
+am_users_v1  # JSON array of user objects
+am_logs_v1   # array of activity entries (time, actor, action, target)
+```
+
+These are scratch/mock stores; clear them via the browser devtools or the "Clear Logs" button on the Activity Logs page.
+
+### Notes & Next Steps
+
+This implementation is purely frontend. For a real app you would:
+
+1. Replace localStorage helpers with API calls to a backend service.
+2. Add authentication/authorization to guard routes and actions.
+3. Possibly add a role-permission matrix that defines default permissions per role.
+4. Add unit/integration tests for the components.

@@ -29,7 +29,11 @@ import {
     Notifications as NotificationsIcon,
     Security as SecurityIcon,
     History as HistoryIcon,
+    ExpandLess,
+    ExpandMore,
+    RadioButtonUnchecked,
 } from '@mui/icons-material';
+import { Collapse } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidth = 260;
@@ -75,6 +79,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const Layout = ({ children }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [permissionsOpen, setPermissionsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -82,11 +87,14 @@ const Layout = ({ children }) => {
         setMobileOpen(!mobileOpen);
     };
 
+    const handlePermissionsClick = () => {
+        setPermissionsOpen(!permissionsOpen);
+    };
+
     const menuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
         { text: 'Departments', icon: <BusinessIcon />, path: '/departments' },
         { text: 'Employees', icon: <PeopleIcon />, path: '/employees' },
-        { text: 'Permissions', icon: <SecurityIcon />, path: '/permissions' },
         { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs' },
         { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports' },
         { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
@@ -116,7 +124,86 @@ const Layout = ({ children }) => {
             </Box>
             <Divider />
             <List>
-                {menuItems.map((item) => (
+                {menuItems.slice(0, 3).map((item) => (
+                    <ListItem key={item.text} disablePadding>
+                        <ListItemButton
+                            onClick={() => navigate(item.path)}
+                            selected={location.pathname === item.path}
+                            sx={{
+                                mx: 1,
+                                borderRadius: 1,
+                                mb: 0.5,
+                                '&.Mui-selected': {
+                                    bgcolor: 'primary.main',
+                                    color: 'white',
+                                    '&:hover': {
+                                        bgcolor: 'primary.dark',
+                                    },
+                                    '& .MuiListItemIcon-root': {
+                                        color: 'white',
+                                    },
+                                },
+                            }}
+                        >
+                            <ListItemIcon sx={{ minWidth: 40, color: location.pathname === item.path ? 'white' : 'inherit' }}>
+                                {item.icon}
+                            </ListItemIcon>
+                            <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+
+                {/* Collapsible Permissions Menu */}
+                <ListItem disablePadding>
+                    <ListItemButton
+                        onClick={handlePermissionsClick}
+                        selected={location.pathname.startsWith('/permissions')}
+                        sx={{
+                            mx: 1,
+                            borderRadius: 1,
+                            mb: 0.5,
+                            '&.Mui-selected': {
+                                bgcolor: location.pathname.startsWith('/permissions') ? 'rgba(19, 91, 236, 0.08)' : 'transparent',
+                                color: 'primary.main',
+                                '& .MuiListItemIcon-root': {
+                                    color: 'primary.main',
+                                },
+                            },
+                        }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 40, color: location.pathname.startsWith('/permissions') ? 'primary.main' : 'inherit' }}>
+                            <SecurityIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="User Management" primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />
+                        {permissionsOpen ? <ExpandLess /> : <ExpandMore />}
+                    </ListItemButton>
+                </ListItem>
+                <Collapse in={permissionsOpen} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                        <ListItemButton
+                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
+                            selected={location.pathname === '/permissions' && !location.search.includes('view=roles')}
+                            onClick={() => navigate('/permissions?view=users')}
+                        >
+                            <ListItemIcon sx={{ minWidth: 32 }}>
+                                <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
+                            </ListItemIcon>
+                            <ListItemText primary="User Role Permission" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                        </ListItemButton>
+                        <ListItemButton
+                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
+                            selected={location.search.includes('view=roles')}
+                            onClick={() => navigate('/permissions?view=roles')}
+                        >
+                            <ListItemIcon sx={{ minWidth: 32 }}>
+                                <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
+                            </ListItemIcon>
+                            <ListItemText primary="Role Management" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                        </ListItemButton>
+                    </List>
+                </Collapse>
+
+                {menuItems.slice(3).map((item) => (
                     <ListItem key={item.text} disablePadding>
                         <ListItemButton
                             onClick={() => navigate(item.path)}

@@ -19,18 +19,20 @@ import {
   Chip,
   Stack,
   Snackbar,
+  Checkbox,
 } from '@mui/material';
 import { Edit as EditIcon, Refresh as RefreshIcon, Search as SearchIcon } from '@mui/icons-material';
 import PermissionForm from './PermissionForm';
+import { readRoles } from './RoleManager';
 
 const STORAGE_USERS = 'am_users_v1';
 const STORAGE_LOGS = 'am_logs_v1';
 
 const defaultUsers = [
-  { id: 1, name: 'Alex Johnson', role: 'Admin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-  { id: 2, name: 'Sara Parker', role: 'Teacher', permissions: { canGrant: false, canApprove: true, canTakeAttendance: true } },
-  { id: 3, name: 'Mark Lee', role: 'Staff', permissions: { canGrant: false, canApprove: false, canTakeAttendance: true } },
-  { id: 4, name: 'Nina Gomez', role: 'Teacher', permissions: { canGrant: false, canApprove: true, canTakeAttendance: false } },
+  { id: 1, name: 'Alex Johnson', roleId: 'admin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
+  { id: 2, name: 'Sara Parker', roleId: 'teacher', permissions: { canGrant: false, canApprove: true, canTakeAttendance: true } },
+  { id: 3, name: 'Mark Lee', roleId: 'staff', permissions: { canGrant: false, canApprove: false, canTakeAttendance: true } },
+  { id: 4, name: 'Nina Gomez', roleId: 'subadmin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
 ];
 
 function readUsers() {
@@ -59,23 +61,45 @@ function addLog(entry) {
 
 const PermissionList = () => {
   const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [editing, setEditing] = useState(null);
   const [query, setQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [selectedIds, setSelectedIds] = useState([]);
   const [snack, setSnack] = useState({ open: false, message: '' });
 
   useEffect(() => {
-    const u = readUsers();
-    setUsers(u);
+    setUsers(readUsers());
+    setRoles(readRoles());
   }, []);
 
-  const refresh = () => setUsers(readUsers());
+  // clear selection when filters change to avoid stale selections
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [query, roleFilter]);
 
-  const handleRoleChange = (userId, newRole) => {
-    const updated = users.map((u) => (u.id === userId ? { ...u, role: newRole } : u));
+  const refresh = () => {
+    setUsers(readUsers());
+    setRoles(readRoles());
+  };
+
+  const handleRoleChange = (userId, newRoleId) => {
+    const roleObj = roles.find(r => r.id === newRoleId);
+    const updated = users.map((u) => {
+      if (u.id === userId) {
+        return {
+          ...u,
+          roleId: newRoleId,
+          permissions: roleObj ? { ...roleObj.permissions } : u.permissions
+        };
+      }
+      return u;
+    });
     setUsers(updated);
     writeUsers(updated);
-    addLog({ actor: 'System', action: `Role changed to ${newRole}`, targetId: userId, targetName: users.find(u => u.id === userId)?.name });
-    setSnack({ open: true, message: `Role updated to ${newRole}` });
+    const roleName = roleObj ? roleObj.name : newRoleId;
+    addLog({ actor: 'System', action: `Role changed to ${roleName}`, targetId: userId, targetName: users.find(u => u.id === userId)?.name });
+    setSnack({ open: true, message: `Role updated to ${roleName}` });
   };
 
   const handleEditSave = (user) => {
@@ -87,18 +111,25 @@ const PermissionList = () => {
     setSnack({ open: true, message: `Permissions updated for ${user.name}` });
   };
 
-  const filtered = users.filter((u) => u.name.toLowerCase().includes(query.toLowerCase()));
+  const filtered = users
+    .filter((u) => u.name.toLowerCase().includes(query.toLowerCase()))
+    .filter((u) => (roleFilter ? u.roleId === roleFilter : true));
 
-  const roleColor = (role) => {
-    if (role === 'Admin') return 'primary';
-    if (role === 'Teacher') return 'success';
+  const roleColor = (roleId) => {
+    if (roleId === 'admin') return 'primary';
+    if (roleId === 'teacher') return 'success';
+    if (roleId === 'subadmin') return 'warning';
     return 'default';
+  };
+
+  const getRoleName = (roleId) => {
+    const role = roles.find(r => r.id === roleId);
+    return role ? role.name : roleId;
   };
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>Permissions</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 2 }}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <TextField
             size="small"
@@ -107,33 +138,104 @@ const PermissionList = () => {
             onChange={(e) => setQuery(e.target.value)}
             InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>) }}
           />
+          <Select
+            size="small"
+            displayEmpty
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            sx={{ minWidth: 120 }}
+          >
+            <MenuItem value="">All roles</MenuItem>
+            {roles.map((r) => (
+              <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>
+            ))}
+          </Select>
           <Tooltip title="Refresh">
             <IconButton onClick={refresh}><RefreshIcon /></IconButton>
           </Tooltip>
         </Box>
       </Box>
 
-      <Paper sx={{ p: 2 }}>
+      {selectedIds.length > 0 && (
+        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2">{selectedIds.length} selected:</Typography>
+          <Select
+            size="small"
+            value=""
+            displayEmpty
+            onChange={(e) => {
+              const newRole = e.target.value;
+              if (newRole) {
+                selectedIds.forEach((id) => handleRoleChange(id, newRole));
+                setSelectedIds([]);
+              }
+            }}
+            sx={{ minWidth: 140 }}
+          >
+            <MenuItem value="" disabled>Change role to…</MenuItem>
+            {roles.map((r) => (
+              <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>
+            ))}
+          </Select>
+        </Box>
+      )}
+
+      <Paper
+        elevation={0}
+        sx={{
+          p: 0,
+          borderRadius: 3,
+          border: '1px solid',
+          borderColor: 'divider',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          overflow: 'hidden'
+        }}
+      >
         <Table>
           <TableHead sx={{ bgcolor: 'grey.50' }}>
             <TableRow>
-              <TableCell>User</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Permissions</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  checked={selectedIds.length > 0 && selectedIds.length === filtered.length && filtered.length > 0}
+                  indeterminate={selectedIds.length > 0 && selectedIds.length < filtered.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedIds(filtered.map((u) => u.id));
+                    } else {
+                      setSelectedIds([]);
+                    }
+                  }}
+                />
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>User</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Permissions</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} align="center">No users found.</TableCell>
+                <TableCell colSpan={5} align="center">No users found.</TableCell>
               </TableRow>
             )}
             {filtered.map((user) => (
               <TableRow key={user.id} hover>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={selectedIds.includes(user.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds((s) => [...s, user.id]);
+                      } else {
+                        setSelectedIds((s) => s.filter((id) => id !== user.id));
+                      }
+                    }}
+                  />
+                </TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Avatar sx={{ bgcolor: user.role === 'Admin' ? 'primary.main' : 'primary.light' }}>{user.name.split(' ').map(n => n[0]).slice(0,2).join('')}</Avatar>
+                    <Avatar sx={{ bgcolor: user.roleId === 'admin' ? 'primary.main' : 'primary.light' }}>{user.name.split(' ').map(n => n[0]).slice(0, 2).join('')}</Avatar>
                     <Box>
                       <Typography sx={{ fontWeight: 600 }}>{user.name}</Typography>
                       <Typography variant="caption" color="text.secondary">ID: {user.id}</Typography>
@@ -142,11 +244,11 @@ const PermissionList = () => {
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <Chip label={user.role} color={roleColor(user.role)} size="small" />
-                    <Select value={user.role} onChange={(e) => handleRoleChange(user.id, e.target.value)} size="small">
-                      <MenuItem value="Admin">Admin</MenuItem>
-                      <MenuItem value="Teacher">Teacher (Subadmin)</MenuItem>
-                      <MenuItem value="Staff">Staff</MenuItem>
+                    <Chip label={getRoleName(user.roleId)} color={roleColor(user.roleId)} size="small" />
+                    <Select value={user.roleId || ''} onChange={(e) => handleRoleChange(user.id, e.target.value)} size="small">
+                      {roles.map((r) => (
+                        <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>
+                      ))}
                     </Select>
                   </Stack>
                 </TableCell>
@@ -158,7 +260,9 @@ const PermissionList = () => {
                   </Stack>
                 </TableCell>
                 <TableCell align="right">
-                  <Button startIcon={<EditIcon />} size="small" onClick={() => setEditing(user)}>Edit</Button>
+                  <IconButton onClick={() => setEditing(user)} size="small" sx={{ color: 'primary.main', bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main', color: 'white' } }}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
