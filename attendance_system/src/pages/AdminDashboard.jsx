@@ -13,6 +13,8 @@ import {
     TableHead,
     TableRow,
     Chip,
+    alpha,
+    useTheme,
 } from '@mui/material';
 import {
     People as PeopleIcon,
@@ -38,12 +40,15 @@ const recentAttendance = [
 ];
 
 const AdminDashboard = () => {
+    const theme = useTheme();
+    const mode = theme.palette.mode;
+
     return (
         <Box>
             <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700 }}>Welcome back, Alex</Typography>
-                    <Typography variant="body2" color="text.secondary">Here's what's happening with attendance today.</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Welcome back, Alex</Typography>
+                    <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Here's what's happening with attendance today.</Typography>
                 </Box>
                 <Button variant="contained" startIcon={<TrendingUpIcon />}>
                     Export Report
@@ -53,14 +58,21 @@ const AdminDashboard = () => {
             <Grid container spacing={3}>
                 {stats.map((stat) => (
                     <Grid item xs={12} sm={6} md={3} key={stat.label}>
-                        <Paper sx={{ p: 3, borderRadius: 2 }}>
+                        <Paper sx={{
+                            p: 3,
+                            borderRadius: 3,
+                            bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                            border: '1px solid',
+                            borderColor: mode === 'dark' ? '#334155' : 'transparent',
+                        }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                                 <Box
                                     sx={{
-                                        bgcolor: `${stat.color}15`,
+                                        bgcolor: mode === 'dark' ? alpha(stat.color, 0.15) : `${stat.color}15`,
                                         color: stat.color,
                                         p: 1,
-                                        borderRadius: 1,
+                                        borderRadius: 2,
                                         display: 'flex',
                                     }}
                                 >
@@ -69,23 +81,23 @@ const AdminDashboard = () => {
                                 <Typography
                                     variant="caption"
                                     sx={{
-                                        color: stat.trend.startsWith('+') ? 'success.main' : 'error.main',
+                                        color: stat.trend.startsWith('+') ? (mode === 'dark' ? '#4ade80' : 'success.main') : (mode === 'dark' ? '#f87171' : 'error.main'),
                                         fontWeight: 600,
-                                        bgcolor: stat.trend.startsWith('+') ? 'success.light' : 'error.light',
+                                        bgcolor: stat.trend.startsWith('+') ? (mode === 'dark' ? alpha('#4ade80', 0.15) : alpha(theme.palette.success.main, 0.1)) : (mode === 'dark' ? alpha('#f87171', 0.15) : alpha(theme.palette.error.main, 0.1)),
                                         px: 1,
+                                        py: 0.5,
                                         borderRadius: 1,
                                         display: 'flex',
                                         alignItems: 'center',
-                                        opacity: 0.9,
                                     }}
                                 >
                                     {stat.trend}
                                 </Typography>
                             </Box>
-                            <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+                            <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>
                                 {stat.value}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 500 }}>
                                 {stat.label}
                             </Typography>
                         </Paper>
@@ -93,14 +105,22 @@ const AdminDashboard = () => {
                 ))}
 
                 <Grid item xs={12} md={8}>
-                    <Paper sx={{ p: 0, overflow: 'hidden' }}>
-                        <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="h6">Recent Attendance</Typography>
-                            <Button color="primary" size="small">View All</Button>
+                    <Paper sx={{
+                        p: 0,
+                        overflow: 'hidden',
+                        borderRadius: 3,
+                        bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                        border: '1px solid',
+                        borderColor: mode === 'dark' ? '#334155' : 'divider',
+                    }}>
+                        <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: mode === 'dark' ? '#334155' : 'divider' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Recent Attendance</Typography>
+                            <Button color="primary" size="small" sx={{ fontWeight: 600 }}>View All</Button>
                         </Box>
                         <TableContainer>
                             <Table>
-                                <TableHead sx={{ bgcolor: 'grey.50' }}>
+                                <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
                                     <TableRow>
                                         <TableCell sx={{ fontWeight: 600 }}>Employee</TableCell>
                                         <TableCell sx={{ fontWeight: 600 }}>Department</TableCell>
@@ -141,8 +161,16 @@ const AdminDashboard = () => {
                 </Grid>
 
                 <Grid item xs={12} md={4}>
-                    <Paper sx={{ p: 3, height: '100%' }}>
-                        <Typography variant="h6" sx={{ mb: 3 }}>Department Stats</Typography>
+                    <Paper sx={{
+                        p: 3,
+                        height: '100%',
+                        borderRadius: 3,
+                        bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                        border: '1px solid',
+                        borderColor: mode === 'dark' ? '#334155' : 'divider',
+                    }}>
+                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Department Stats</Typography>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                             {[
                                 { name: 'Engineering', value: 85, color: '#135bec' },
@@ -152,10 +180,10 @@ const AdminDashboard = () => {
                             ].map((dept) => (
                                 <Box key={dept.name}>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>{dept.name}</Typography>
-                                        <Typography variant="body2" color="text.secondary">{dept.value}%</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, color: mode === 'dark' ? '#E2E8F0' : 'text.primary' }}>{dept.name}</Typography>
+                                        <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 500 }}>{dept.value}%</Typography>
                                     </Box>
-                                    <Box sx={{ width: '100%', height: 8, bgcolor: 'grey.100', borderRadius: 4, overflow: 'hidden' }}>
+                                    <Box sx={{ width: '100%', height: 8, bgcolor: mode === 'dark' ? '#0F172A' : 'grey.100', borderRadius: 4, overflow: 'hidden' }}>
                                         <Box sx={{ width: `${dept.value}%`, height: '100%', bgcolor: dept.color }} />
                                     </Box>
                                 </Box>
@@ -164,7 +192,7 @@ const AdminDashboard = () => {
                     </Paper>
                 </Grid>
             </Grid>
-        </Box>
+        </Box >
     );
 };
 

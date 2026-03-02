@@ -116,10 +116,10 @@ const Settings = () => {
         <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: 1200, margin: '0 auto' }}>
             <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 800, color: '#1e293b', mb: 0.5 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 800, color: mode === 'dark' ? '#F8FAFC' : '#1e293b', mb: 0.5 }}>
                         System Settings
                     </Typography>
-                    <Typography variant="body1" color="text.secondary">
+                    <Typography variant="body1" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>
                         Manage your account preferences and global system configurations.
                     </Typography>
                 </Box>
@@ -149,12 +149,14 @@ const Settings = () => {
                         sx={{
                             borderRadius: '16px',
                             minHeight: 500,
+                            bgcolor: mode === 'dark' ? '#0F172A' : 'background.paper',
                             border: '1px solid',
-                            borderColor: 'divider',
+                            borderColor: mode === 'dark' ? '#1E293B' : 'divider',
+                            boxShadow: mode === 'dark' ? '0 10px 30px rgba(0,0,0,0.5)' : 'none',
                             overflow: 'hidden',
                         }}
                     >
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: alpha(theme.palette.primary.main, 0.02) }}>
+                        <Box sx={{ borderBottom: 1, borderColor: mode === 'dark' ? '#1E293B' : 'divider', bgcolor: mode === 'dark' ? alpha('#1E293B', 0.4) : alpha(theme.palette.primary.main, 0.02) }}>
                             <Tabs
                                 value={tabIndex}
                                 onChange={handleTabChange}
@@ -166,15 +168,22 @@ const Settings = () => {
                                         px: 3,
                                         fontSize: '0.9rem',
                                         fontWeight: 600,
-                                        color: 'text.secondary',
+                                        color: mode === 'dark' ? '#94A3B8' : 'text.secondary',
                                         minHeight: 64,
+                                        transition: 'all 0.2s',
+                                        '&:hover': {
+                                            color: mode === 'dark' ? '#cbd5e1' : 'text.primary',
+                                        },
                                         '&.Mui-selected': {
-                                            color: 'primary.main',
+                                            color: mode === 'dark' ? '#3B82F6' : 'primary.main',
+                                            bgcolor: mode === 'dark' ? alpha('#3B82F6', 0.05) : 'transparent',
                                         },
                                     },
                                     '& .MuiTabs-indicator': {
                                         height: 3,
                                         borderRadius: '3px 3px 0 0',
+                                        backgroundColor: mode === 'dark' ? '#3B82F6' : 'primary.main',
+                                        boxShadow: mode === 'dark' ? '0 -2px 10px rgba(59, 130, 246, 0.6)' : 'none',
                                     },
                                 }}
                             >
@@ -269,7 +278,12 @@ const Settings = () => {
 
                                 <Grid container spacing={3}>
                                     <Grid item xs={12}>
-                                        <Card variant="outlined" sx={{ borderRadius: '12px', bgcolor: alpha(theme.palette.success.main, 0.02) }}>
+                                        <Card variant="outlined" sx={{
+                                            borderRadius: '12px',
+                                            bgcolor: mode === 'dark' ? '#1E293B' : alpha(theme.palette.success.main, 0.02),
+                                            borderColor: mode === 'dark' ? '#334155' : 'divider',
+                                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.2)' : 'none',
+                                        }}>
                                             <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                                 <Box sx={{ display: 'flex', gap: 2 }}>
                                                     <Security color="success" />
@@ -302,19 +316,21 @@ const Settings = () => {
                                             sx={{
                                                 p: 3,
                                                 border: '2px solid',
-                                                borderColor: mode === 'light' ? 'primary.main' : 'divider',
-                                                borderRadius: '16px',
-                                                bgcolor: mode === 'light' ? alpha(theme.palette.primary.main, 0.05) : 'transparent',
+                                                borderColor: mode === 'light' ? 'primary.main' : (mode === 'dark' ? '#1E293B' : 'divider'),
+                                                borderRadius: '12px',
+                                                bgcolor: mode === 'light' ? alpha(theme.palette.primary.main, 0.05) : (mode === 'dark' ? '#1E293B' : 'transparent'),
+                                                boxShadow: mode === 'light' ? '0 4px 14px rgba(59, 130, 246, 0.15)' : '0 4px 14px rgba(0,0,0,0.2)',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.2s ease',
                                                 '&:hover': {
-                                                    borderColor: mode === 'light' ? 'primary.main' : 'primary.light',
-                                                    bgcolor: alpha(theme.palette.primary.main, 0.02),
+                                                    borderColor: mode === 'light' ? 'primary.main' : (mode === 'dark' ? '#334155' : 'primary.light'),
+                                                    transform: 'translateY(-2px)',
+                                                    boxShadow: mode === 'dark' ? '0 6px 20px rgba(0,0,0,0.4)' : '0 6px 16px rgba(59, 130, 246, 0.1)',
                                                 },
                                             }}
                                         >
                                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                                                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Light Mode</Typography>
+                                                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: mode === 'light' ? 'primary.main' : 'text.primary' }}>Light Mode</Typography>
                                                 <Palette color={mode === 'light' ? 'primary' : 'inherit'} />
                                             </Box>
                                             <Box sx={{ p: 2, bgcolor: '#ffffff', borderRadius: '8px', border: '1px solid #ddd', height: 40 }} />
@@ -327,22 +343,24 @@ const Settings = () => {
                                             sx={{
                                                 p: 3,
                                                 border: '2px solid',
-                                                borderColor: mode === 'dark' ? 'primary.main' : 'divider',
-                                                borderRadius: '16px',
-                                                bgcolor: mode === 'dark' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                                                borderColor: mode === 'dark' ? '#3B82F6' : 'divider',
+                                                borderRadius: '12px',
+                                                bgcolor: mode === 'dark' ? '#1E293B' : 'transparent',
+                                                boxShadow: mode === 'dark' ? '0 4px 20px rgba(59, 130, 246, 0.2)' : '0 2px 8px rgba(0,0,0,0.05)',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.2s ease',
                                                 '&:hover': {
-                                                    borderColor: mode === 'dark' ? 'primary.main' : 'primary.light',
-                                                    bgcolor: mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.02),
+                                                    borderColor: mode === 'dark' ? '#3B82F6' : 'primary.light',
+                                                    transform: 'translateY(-2px)',
+                                                    boxShadow: mode === 'dark' ? '0 6px 25px rgba(59, 130, 246, 0.3)' : '0 6px 16px rgba(0,0,0,0.1)',
                                                 },
                                             }}
                                         >
                                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                                                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Dark Mode</Typography>
+                                                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: mode === 'dark' ? '#3B82F6' : 'text.primary' }}>Dark Mode</Typography>
                                                 <Palette color={mode === 'dark' ? 'primary' : 'inherit'} />
                                             </Box>
-                                            <Box sx={{ p: 2, bgcolor: '#1e293b', borderRadius: '8px', border: '1px solid #334155', height: 40 }} />
+                                            <Box sx={{ p: 2, bgcolor: '#0B1220', borderRadius: '8px', border: '1px solid #334155', height: 40 }} />
                                             <Box sx={{ p: 1, mt: 1, bgcolor: '#334155', borderRadius: '4px', width: '60%' }} />
                                         </Box>
                                     </Grid>
@@ -358,7 +376,18 @@ const Settings = () => {
 
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} md={6}>
-                                        <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', textAlign: 'center' }}>
+                                        <Paper variant="outlined" sx={{
+                                            p: 3,
+                                            borderRadius: '12px',
+                                            textAlign: 'center',
+                                            bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+                                            borderColor: mode === 'dark' ? '#334155' : 'divider',
+                                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.2)' : 'none',
+                                            transition: 'all 0.2s',
+                                            '&:hover': {
+                                                boxShadow: mode === 'dark' ? '0 6px 24px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.05)',
+                                            }
+                                        }}>
                                             <Backup sx={{ fontSize: 40, color: 'primary.main', mb: 2 }} />
                                             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Automated Backups</Typography>
                                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Last backup: 2 hours ago</Typography>
@@ -366,7 +395,18 @@ const Settings = () => {
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                        <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', textAlign: 'center' }}>
+                                        <Paper variant="outlined" sx={{
+                                            p: 3,
+                                            borderRadius: '12px',
+                                            textAlign: 'center',
+                                            bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+                                            borderColor: mode === 'dark' ? '#334155' : 'divider',
+                                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.2)' : 'none',
+                                            transition: 'all 0.2s',
+                                            '&:hover': {
+                                                boxShadow: mode === 'dark' ? '0 6px 24px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.05)',
+                                            }
+                                        }}>
                                             <CloudUpload sx={{ fontSize: 40, color: 'text.secondary', mb: 2 }} />
                                             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Export Data</Typography>
                                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>CSV, JSON, and PDF supported</Typography>

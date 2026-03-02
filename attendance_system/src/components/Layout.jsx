@@ -17,7 +17,6 @@ import {
     InputBase,
     alpha,
     styled,
-    Collapse,
     useTheme,
 } from '@mui/material';
 import {
@@ -31,11 +30,6 @@ import {
     Notifications as NotificationsIcon,
     Security as SecurityIcon,
     History as HistoryIcon,
-    ExpandLess,
-    ExpandMore,
-    Person as PersonIcon,
-    Palette as PaletteIcon,
-    Backup as BackupIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -82,17 +76,12 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const Layout = ({ children }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [settingsOpen, setSettingsOpen] = useState(true); // Default open to show the new dropdown
     const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
-    };
-
-    const handleSettingsToggle = () => {
-        setSettingsOpen(!settingsOpen);
     };
 
     const menuItems = [
@@ -102,14 +91,7 @@ const Layout = ({ children }) => {
         { text: 'Permissions', icon: <SecurityIcon />, path: '/permissions' },
         { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs' },
         { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports' },
-    ];
-
-    const settingsSubItems = [
-        { text: 'Account Details', icon: <PersonIcon />, path: '/settings/account' },
-        { text: 'Notifications', icon: <NotificationsIcon />, path: '/settings/notifications' },
-        { text: 'Security & Privacy', icon: <SecurityIcon />, path: '/settings/security' },
-        { text: 'Appearance', icon: <PaletteIcon />, path: '/settings/appearance' },
-        { text: 'Data & Backup', icon: <BackupIcon />, path: '/settings/backup' },
+        { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
     ];
 
     const drawer = (
@@ -140,7 +122,7 @@ const Layout = ({ children }) => {
                     <ListItem key={item.text} disablePadding>
                         <ListItemButton
                             onClick={() => navigate(item.path)}
-                            selected={location.pathname === item.path}
+                            selected={location.pathname === item.path || (item.path === '/settings' && location.pathname.startsWith('/settings'))}
                             sx={{
                                 mx: 1,
                                 borderRadius: 1,
@@ -157,7 +139,7 @@ const Layout = ({ children }) => {
                                 },
                             }}
                         >
-                            <ListItemIcon sx={{ minWidth: 40, color: location.pathname === item.path ? 'white' : 'inherit' }}>
+                            <ListItemIcon sx={{ minWidth: 40, color: (location.pathname === item.path || (item.path === '/settings' && location.pathname.startsWith('/settings'))) ? 'white' : 'inherit' }}>
                                 {item.icon}
                             </ListItemIcon>
                             <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />
@@ -165,69 +147,7 @@ const Layout = ({ children }) => {
                     </ListItem>
                 ))}
 
-                <ListItem disablePadding>
-                    <ListItemButton
-                        onClick={handleSettingsToggle}
-                        sx={{
-                            mx: 1,
-                            borderRadius: 1,
-                            mb: 0.5,
-                            bgcolor: location.pathname.startsWith('/settings') ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
-                        }}
-                    >
-                        <ListItemIcon sx={{ minWidth: 40 }}>
-                            <SettingsIcon color={location.pathname.startsWith('/settings') ? 'primary' : 'inherit'} />
-                        </ListItemIcon>
-                        <ListItemText
-                            primary="Settings"
-                            primaryTypographyProps={{
-                                fontSize: '0.9rem',
-                                fontWeight: location.pathname.startsWith('/settings') ? 700 : 500,
-                                color: location.pathname.startsWith('/settings') ? 'primary.main' : 'inherit'
-                            }}
-                        />
-                        {settingsOpen ? <ExpandLess size="small" /> : <ExpandMore size="small" />}
-                    </ListItemButton>
-                </ListItem>
 
-                <Collapse in={settingsOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                        {settingsSubItems.map((subItem) => (
-                            <ListItemButton
-                                key={subItem.text}
-                                onClick={() => navigate(subItem.path)}
-                                selected={location.pathname === subItem.path}
-                                sx={{
-                                    pl: 4.5,
-                                    mx: 1,
-                                    borderRadius: 1,
-                                    mb: 0.5,
-                                    '&.Mui-selected': {
-                                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                        color: 'primary.main',
-                                        '&:hover': {
-                                            bgcolor: alpha(theme.palette.primary.main, 0.15),
-                                        },
-                                        '& .MuiListItemIcon-root': {
-                                            color: 'primary.main',
-                                        },
-                                    },
-                                }}
-                            >
-                                <ListItemIcon sx={{ minWidth: 32, '& svg': { fontSize: '1.2rem' } }}>
-                                    {subItem.icon}
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={subItem.text}
-                                    primaryTypographyProps={{
-                                        fontSize: '0.85rem',
-                                        fontWeight: location.pathname === subItem.path ? 600 : 400
-                                    }}
-                                />
-                            </ListItemButton>
-                        ))}
-                    </List>
-                </Collapse>
             </List>
         </div>
     );
@@ -238,11 +158,11 @@ const Layout = ({ children }) => {
                 sx={{
                     width: { sm: `calc(100% - ${drawerWidth}px)` },
                     ml: { sm: `${drawerWidth}px` },
-                    bgcolor: 'white',
+                    bgcolor: theme.palette.mode === 'dark' ? '#0F172A' : 'white',
                     color: 'text.primary',
                     boxShadow: 'none',
                     borderBottom: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: theme.palette.mode === 'dark' ? '#334155' : 'divider',
                 }}
             >
                 <Toolbar>
@@ -256,7 +176,12 @@ const Layout = ({ children }) => {
                         <MenuIcon />
                     </IconButton>
 
-                    <Search sx={{ bgcolor: 'grey.100', '&:hover': { bgcolor: 'grey.200' }, color: 'text.secondary' }}>
+                    <Search sx={{
+                        bgcolor: theme.palette.mode === 'dark' ? '#1E293B' : 'grey.100',
+                        '&:hover': { bgcolor: theme.palette.mode === 'dark' ? '#334155' : 'grey.200' },
+                        color: theme.palette.mode === 'dark' ? '#94A3B8' : 'text.secondary',
+                        border: theme.palette.mode === 'dark' ? '1px solid #334155' : 'none'
+                    }}>
                         <SearchIconWrapper>
                             <SearchIcon />
                         </SearchIconWrapper>

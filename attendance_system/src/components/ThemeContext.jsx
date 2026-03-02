@@ -44,7 +44,7 @@ const ThemeProvider = ({ children }) => {
                         main: '#ef4444',
                     },
                     background: {
-                        default: mode === 'light' ? '#f8f9fa' : '#0f172a',
+                        default: mode === 'light' ? '#f8f9fa' : '#0b1220',
                         paper: mode === 'light' ? '#ffffff' : '#1e293b',
                     },
                     text: {
@@ -54,7 +54,7 @@ const ThemeProvider = ({ children }) => {
                     divider: mode === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
                 },
                 typography: {
-                    fontFamily: '"Lexend", "Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+                    fontFamily: '"Inter", "Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
                     h1: { fontWeight: 800, color: mode === 'light' ? '#0f172a' : '#f8fafc' },
                     h2: { fontWeight: 800, color: mode === 'light' ? '#0f172a' : '#f8fafc' },
                     h3: { fontWeight: 700, color: mode === 'light' ? '#0f172a' : '#f8fafc' },
@@ -72,12 +72,12 @@ const ThemeProvider = ({ children }) => {
                     MuiCssBaseline: {
                         styleOverrides: {
                             body: {
-                                scrollbarColor: mode === 'dark' ? '#334155 #0f172a' : '#cbd5e1 #f8f9fa',
+                                scrollbarColor: mode === 'dark' ? '#334155 #0b1220' : '#cbd5e1 #f8f9fa',
                                 '&::-webkit-scrollbar': {
                                     width: 8,
                                 },
                                 '&::-webkit-scrollbar-track': {
-                                    backgroundColor: mode === 'dark' ? '#0f172a' : '#f8f9fa',
+                                    backgroundColor: mode === 'dark' ? '#0b1220' : '#f8f9fa',
                                 },
                                 '&::-webkit-scrollbar-thumb': {
                                     backgroundColor: mode === 'dark' ? '#334155' : '#cbd5e1',

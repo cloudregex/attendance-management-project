@@ -9,6 +9,7 @@ import {
   TableCell,
   TableBody,
   Button,
+  useTheme,
 } from '@mui/material';
 
 const STORAGE_LOGS = 'am_logs_v1';
@@ -27,6 +28,9 @@ function clearLogs() {
 }
 
 const ActivityLogList = () => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
@@ -42,17 +46,24 @@ const ActivityLogList = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>Activity Logs</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Activity Logs</Typography>
         <Box>
-          <Button onClick={refresh} sx={{ mr: 1 }}>Refresh</Button>
-          <Button color="error" variant="outlined" onClick={handleClear}>Clear Logs</Button>
+          <Button onClick={refresh} sx={{ mr: 1, fontWeight: 600 }}>Refresh</Button>
+          <Button color="error" variant="outlined" onClick={handleClear} sx={{ fontWeight: 600 }}>Clear Logs</Button>
         </Box>
       </Box>
 
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{
+        p: 2,
+        borderRadius: 3,
+        bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+        border: '1px solid',
+        borderColor: mode === 'dark' ? '#334155' : 'divider',
+      }}>
         <Table>
-          <TableHead sx={{ bgcolor: 'grey.50' }}>
+          <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
             <TableRow>
               <TableCell>Time</TableCell>
               <TableCell>Actor</TableCell>

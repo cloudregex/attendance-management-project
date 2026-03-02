@@ -19,6 +19,7 @@ import {
   Chip,
   Stack,
   Snackbar,
+  useTheme,
 } from '@mui/material';
 import { Edit as EditIcon, Refresh as RefreshIcon, Search as SearchIcon } from '@mui/icons-material';
 import PermissionForm from './PermissionForm';
@@ -58,6 +59,9 @@ function addLog(entry) {
 }
 
 const PermissionList = () => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+
   const [users, setUsers] = useState([]);
   const [editing, setEditing] = useState(null);
   const [query, setQuery] = useState('');
@@ -97,8 +101,8 @@ const PermissionList = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>Permissions</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Permissions</Typography>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <TextField
             size="small"
@@ -106,16 +110,28 @@ const PermissionList = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>) }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+              }
+            }}
           />
           <Tooltip title="Refresh">
-            <IconButton onClick={refresh}><RefreshIcon /></IconButton>
+            <IconButton onClick={refresh} sx={{ bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper', border: '1px solid', borderColor: mode === 'dark' ? '#334155' : 'divider' }}><RefreshIcon /></IconButton>
           </Tooltip>
         </Box>
       </Box>
 
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{
+        p: 2,
+        borderRadius: 3,
+        bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+        border: '1px solid',
+        borderColor: mode === 'dark' ? '#334155' : 'divider',
+      }}>
         <Table>
-          <TableHead sx={{ bgcolor: 'grey.50' }}>
+          <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
             <TableRow>
               <TableCell>User</TableCell>
               <TableCell>Role</TableCell>
@@ -133,7 +149,7 @@ const PermissionList = () => {
               <TableRow key={user.id} hover>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Avatar sx={{ bgcolor: user.role === 'Admin' ? 'primary.main' : 'primary.light' }}>{user.name.split(' ').map(n => n[0]).slice(0,2).join('')}</Avatar>
+                    <Avatar sx={{ bgcolor: user.role === 'Admin' ? 'primary.main' : 'primary.light' }}>{user.name.split(' ').map(n => n[0]).slice(0, 2).join('')}</Avatar>
                     <Box>
                       <Typography sx={{ fontWeight: 600 }}>{user.name}</Typography>
                       <Typography variant="caption" color="text.secondary">ID: {user.id}</Typography>
