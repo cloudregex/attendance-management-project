@@ -15,6 +15,8 @@ import {
     Chip,
     Fade,
     IconButton,
+    Alert,
+    Snackbar,
 } from '@mui/material';
 import {
     People as PeopleIcon,
@@ -26,6 +28,8 @@ import {
     MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
+import AddEmployeeForm from '../components/AddEmployeeForm';
+import AddStudentForm from '../components/AddStudentForm';
 
 // Mock Data
 const departments = [
@@ -55,8 +59,27 @@ const employeesData = [
 ];
 
 const DeptDashboard = () => {
+
     const [dept, setDept] = useState(departments[0]);
     const [view, setView] = useState('students');
+
+    const [employeeFormOpen, setEmployeeFormOpen] = React.useState(false);
+    const [studentFormOpen, setStudentFormOpen] = React.useState(false);
+    const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
+
+    const handleAddEmployee = (data) => {
+        console.log('Adding employee:', data);
+        setSnackbar({ open: true, message: `Employee ${data.name} added successfully!`, severity: 'success' });
+    };
+
+    const handleAddStudent = (data) => {
+        console.log('Adding student:', data);
+        setSnackbar({ open: true, message: `Student ${data.name} added successfully!`, severity: 'success' });
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
 
     const handleViewChange = (event, newView) => {
         if (newView !== null) {
@@ -185,6 +208,15 @@ const DeptDashboard = () => {
                             boxShadow: 'none',
                             '&:hover': { boxShadow: '0 4px 12px rgba(19, 91, 236, 0.2)' }
                         }}
+
+                        onClick={() => {
+                            if (view === 'students') {
+                                setStudentFormOpen(true);
+                            }
+                            else {
+                                setEmployeeFormOpen(true);
+                            }
+                        }}
                     >
                         Add {view === 'students' ? 'Student' : 'Employee'}
                     </Button>
@@ -286,7 +318,30 @@ const DeptDashboard = () => {
                     </Box>
                 </Fade>
             </Box>
+
+            <AddEmployeeForm
+                open={employeeFormOpen}
+                onClose={() => setEmployeeFormOpen(false)}
+                onAdd={handleAddEmployee}
+            />
+            <AddStudentForm
+                open={studentFormOpen}
+                onClose={() => setStudentFormOpen(false)}
+                onAdd={handleAddStudent}
+            />
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius: 2 }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
+
     );
 };
 
