@@ -22,7 +22,7 @@ import {
     CardContent,
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useColorMode } from '../components/ThemeContext';
+import { useColorMode } from '../../../shared/components/ThemeContext';
 import {
     Notifications,
     Security,
