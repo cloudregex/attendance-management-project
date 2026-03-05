@@ -54,9 +54,11 @@ const AdminDashboard = () => {
                     <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Welcome back, Alex</Typography>
                     <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Here's what's happening with attendance today.</Typography>
                 </Box>
-                <Button variant="contained" startIcon={<TrendingUpIcon />}>
-                    Export Report
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button variant="contained" startIcon={<TrendingUpIcon />}>
+                        Export Report
+                    </Button>
+                </Box>
             </Box>
 
             <Grid container spacing={3} sx={{ mb: 3, width: '100%' }} alignItems="stretch">
