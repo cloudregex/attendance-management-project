@@ -202,6 +202,16 @@ const Layout = ({ children }) => {
                             </ListItemIcon>
                             <ListItemText primary="Role Management" primaryTypographyProps={{ fontSize: '0.85rem' }} />
                         </ListItemButton>
+                        <ListItemButton
+                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0 }}
+                            selected={location.search.includes('view=definitions')}
+                            onClick={() => navigate('/permissions?view=definitions')}
+                        >
+                            <ListItemIcon sx={{ minWidth: 32 }}>
+                                <RadioButtonUnchecked sx={{ fontSize: '0.7rem' }} />
+                            </ListItemIcon>
+                            <ListItemText primary="Permission List" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                        </ListItemButton>
                     </List>
                 </Collapse>
 

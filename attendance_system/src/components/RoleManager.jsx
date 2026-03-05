@@ -21,17 +21,53 @@ import {
     Chip,
     Stack,
     Alert,
-    useTheme,
+    Grid,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 
 const STORAGE_ROLES = 'am_roles_v1';
 
 const defaultRoles = [
-    { id: 'admin', name: 'Admin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-    { id: 'subadmin', name: 'Subadmin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-    { id: 'teacher', name: 'Teacher', permissions: { canGrant: false, canApprove: true, canTakeAttendance: true } },
-    { id: 'staff', name: 'Staff', permissions: { canGrant: false, canApprove: false, canTakeAttendance: true } },
+    {
+        id: 'admin',
+        name: 'Admin',
+        permissions: {
+            canGrant: true, canApprove: true, canTakeAttendance: true,
+            canManageUsers: true, canManageRoles: true, canViewReports: true,
+            canModifyRecords: true, canExportData: true, canAccessLogs: true,
+            canManageDepts: true, canViewSchedules: true, canSystemConfig: true
+        }
+    },
+    {
+        id: 'subadmin',
+        name: 'Subadmin',
+        permissions: {
+            canGrant: true, canApprove: true, canTakeAttendance: true,
+            canManageUsers: true, canManageRoles: false, canViewReports: true,
+            canModifyRecords: true, canExportData: true, canAccessLogs: true,
+            canManageDepts: true, canViewSchedules: true, canSystemConfig: false
+        }
+    },
+    {
+        id: 'teacher',
+        name: 'Teacher',
+        permissions: {
+            canGrant: false, canApprove: true, canTakeAttendance: true,
+            canManageUsers: false, canManageRoles: false, canViewReports: true,
+            canModifyRecords: false, canExportData: false, canAccessLogs: false,
+            canManageDepts: false, canViewSchedules: true, canSystemConfig: false
+        }
+    },
+    {
+        id: 'staff',
+        name: 'Staff',
+        permissions: {
+            canGrant: false, canApprove: false, canTakeAttendance: true,
+            canManageUsers: false, canManageRoles: false, canViewReports: false,
+            canModifyRecords: false, canExportData: false, canAccessLogs: false,
+            canManageDepts: false, canViewSchedules: false, canSystemConfig: false
+        }
+    },
 ];
 
 export function readRoles() {
@@ -48,8 +84,6 @@ export function writeRoles(roles) {
 }
 
 const RoleManager = () => {
-    const theme = useTheme();
-    const mode = theme.palette.mode;
     const [roles, setRoles] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingRole, setEditingRole] = useState(null);
@@ -72,7 +106,12 @@ const RoleManager = () => {
         } else {
             setEditingRole(null);
             setRoleName('');
-            setPermissions({ canGrant: false, canApprove: false, canTakeAttendance: false });
+            setPermissions({
+                canGrant: false, canApprove: false, canTakeAttendance: false,
+                canManageUsers: false, canManageRoles: false, canViewReports: false,
+                canModifyRecords: false, canExportData: false, canAccessLogs: false,
+                canManageDepts: false, canViewSchedules: false, canSystemConfig: false
+            });
         }
         setOpen(true);
     };
@@ -138,7 +177,7 @@ const RoleManager = () => {
                 }}
             >
                 <Table>
-                    <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
+                    <TableHead sx={{ bgcolor: 'grey.50' }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 700 }}>Role Name</TableCell>
                             <TableCell sx={{ fontWeight: 700 }}>Default Permissions</TableCell>
@@ -223,20 +262,29 @@ const RoleManager = () => {
                             placeholder="e.g. Intern, Moderator"
                         />
                         <Typography variant="subtitle2" color="text.secondary">Default Permissions</Typography>
-                        <FormGroup>
-                            <FormControlLabel
-                                control={<Switch checked={!!permissions.canGrant} onChange={() => handleToggle('canGrant')} />}
-                                label="Can grant permissions"
-                            />
-                            <FormControlLabel
-                                control={<Switch checked={!!permissions.canApprove} onChange={() => handleToggle('canApprove')} />}
-                                label="Can approve requests"
-                            />
-                            <FormControlLabel
-                                control={<Switch checked={!!permissions.canTakeAttendance} onChange={() => handleToggle('canTakeAttendance')} />}
-                                label="Can take attendance"
-                            />
-                        </FormGroup>
+                        <Grid container spacing={1}>
+                            {[
+                                { k: 'canGrant', l: 'Grant Permissions' },
+                                { k: 'canApprove', l: 'Approve Requests' },
+                                { k: 'canTakeAttendance', l: 'Take Attendance' },
+                                { k: 'canManageUsers', l: 'Manage Users' },
+                                { k: 'canManageRoles', l: 'Manage Roles' },
+                                { k: 'canViewReports', l: 'View Reports' },
+                                { k: 'canModifyRecords', l: 'Modify Records' },
+                                { k: 'canExportData', l: 'Export Data' },
+                                { k: 'canAccessLogs', l: 'Access Logs' },
+                                { k: 'canManageDepts', l: 'Manage Depts' },
+                                { k: 'canViewSchedules', l: 'View Schedules' },
+                                { k: 'canSystemConfig', l: 'System Config' },
+                            ].map((p) => (
+                                <Grid item xs={6} key={p.k}>
+                                    <FormControlLabel
+                                        control={<Switch size="small" checked={!!permissions[p.k]} onChange={() => handleToggle(p.k)} />}
+                                        label={<Typography variant="caption">{p.l}</Typography>}
+                                    />
+                                </Grid>
+                            ))}
+                        </Grid>
                     </Box>
                 </DialogContent>
                 <DialogActions>
