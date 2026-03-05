@@ -195,6 +195,7 @@ const DeptDashboard = () => {
                 </Box>
             </Box>
 
+
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
                 <Autocomplete
                     options={departments}
