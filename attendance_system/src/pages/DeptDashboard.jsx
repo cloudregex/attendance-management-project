@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Grid,
     Paper,
@@ -6,47 +6,157 @@ import {
     Box,
     Button,
     Avatar,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Chip,
     Breadcrumbs,
     Link,
-    alpha,
+    Autocomplete,
+    TextField,
+    ToggleButtonGroup,
+    ToggleButton,
+    Card,
+    CardContent,
+    Chip,
+    Fade,
+    IconButton,
+    Alert,
+    Snackbar,
     useTheme,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
-    NavigateNext as NavigateNextIcon,
     People as PeopleIcon,
-    CheckCircle as CheckCircleIcon,
-    Schedule as ScheduleIcon,
-    CalendarMonth as CalendarIcon,
+    Person as PersonIcon,
+    Add as AddIcon,
+    Work as WorkIcon,
+    School as SchoolIcon,
+    Email as EmailIcon,
+    MoreVert as MoreVertIcon,
+    NavigateNext as NavigateNextIcon,
 } from '@mui/icons-material';
+import { DataGrid } from '@mui/x-data-grid';
+import AddEmployeeForm from '../components/AddEmployeeForm';
+import AddStudentForm from '../components/AddStudentForm';
 
-const deptStats = [
-    { label: 'Dept Employees', value: '42', icon: <PeopleIcon />, color: '#135bec' },
-    { label: 'Present Today', value: '38', icon: <CheckCircleIcon />, color: '#2e7d32' },
-    { label: 'Late', value: '3', icon: <ScheduleIcon />, color: '#ed6c02' },
-    { label: 'Leave/Absent', value: '1', icon: <CalendarIcon />, color: '#d32f2f' },
+// Mock Data
+const departments = [
+    { id: 'all', name: 'All Departments' },
+    { id: 'eng', name: 'Engineering' },
+    { id: 'des', name: 'Design' },
+    { id: 'mkt', name: 'Marketing' },
+    { id: 'hr', name: 'Human Resources' }
 ];
 
-const teamAttendance = [
-    { id: 1, name: 'Alice Wong', role: 'Frontend Dev', time: '08:45 AM', status: 'On-Time', avatar: 'AW' },
-    { id: 2, name: 'Bob Smith', role: 'Backend Dev', time: '09:05 AM', status: 'Late', avatar: 'BS' },
-    { id: 3, name: 'Charlie Day', role: 'UI Designer', time: '08:55 AM', status: 'On-Time', avatar: 'CD' },
-    { id: 4, name: 'Diana Prince', role: 'QA Engineer', time: '-', status: 'Absent', avatar: 'DP' },
-    { id: 5, name: 'Ethan Hunt', role: 'DevOps', time: '08:30 AM', status: 'On-Time', avatar: 'EH' },
+const studentsData = [
+    { id: 1, name: 'John Smith', roll: 'CS001', year: '3rd Year', attendance: 85, status: 'Present', avatar: 'JS', deptId: 'eng' },
+    { id: 2, name: 'Emily Brown', roll: 'CS002', year: '3rd Year', attendance: 92, status: 'Present', avatar: 'EB', deptId: 'eng' },
+    { id: 3, name: 'Michael Ross', roll: 'DS001', year: '2nd Year', attendance: 78, status: 'Late', avatar: 'MR', deptId: 'des' },
+    { id: 4, name: 'Sarah Parker', roll: 'MK001', year: '1st Year', attendance: 88, status: 'Present', avatar: 'SP', deptId: 'mkt' },
+    { id: 5, name: 'Kevin Lee', roll: 'HR001', year: '2nd Year', attendance: 65, status: 'Absent', avatar: 'KL', deptId: 'hr' },
+    { id: 6, name: 'Jessica Chen', roll: 'CS003', year: '4th Year', attendance: 95, status: 'Present', avatar: 'JC', deptId: 'eng' },
+];
+
+const employeesData = [
+    { id: 101, name: 'Robert Miller', designation: 'Senior Engineer', email: 'robert@example.com', status: 'Active', avatar: 'RM', deptId: 'eng' },
+    { id: 102, name: 'Amanda Green', designation: 'UI Architect', email: 'amanda@example.com', status: 'Active', avatar: 'AG', deptId: 'des' },
+    { id: 103, name: 'David Smith', designation: 'Marketing Expert', email: 'david@example.com', status: 'On Leave', avatar: 'DS', deptId: 'mkt' },
+    { id: 104, name: 'Rachel White', designation: 'HR Coordinator', email: 'rachel@example.com', status: 'Active', avatar: 'RW', deptId: 'hr' },
+    { id: 105, name: 'Steven Jobs', designation: 'Hardware Lead', email: 'steven@example.com', status: 'Active', avatar: 'SJ', deptId: 'eng' },
+    { id: 106, name: 'Emma Watson', designation: 'Product Designer', email: 'emma@example.com', status: 'Active', avatar: 'EW', deptId: 'des' },
 ];
 
 const DeptDashboard = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
 
+    const [dept, setDept] = useState(departments[0]);
+    const [view, setView] = useState('students');
+
+    const [employeeFormOpen, setEmployeeFormOpen] = React.useState(false);
+    const [studentFormOpen, setStudentFormOpen] = React.useState(false);
+    const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
+
+    const handleAddEmployee = (data) => {
+        console.log('Adding employee:', data);
+        setSnackbar({ open: true, message: `Employee ${data.name} added successfully!`, severity: 'success' });
+    };
+
+    const handleAddStudent = (data) => {
+        console.log('Adding student:', data);
+        setSnackbar({ open: true, message: `Student ${data.name} added successfully!`, severity: 'success' });
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
+
+    const handleViewChange = (event, newView) => {
+        if (newView !== null) {
+            setView(newView);
+        }
+    };
+
+    const filteredStudents = studentsData.filter(s => dept.id === 'all' || s.deptId === dept.id);
+    const filteredEmployees = employeesData.filter(e => dept.id === 'all' || e.deptId === dept.id);
+    const deptStats = [
+        { label: 'Total Students', value: filteredStudents.length, icon: <SchoolIcon />, color: '#2563EB' },
+        { label: 'Total Employees', value: filteredEmployees.length, icon: <WorkIcon />, color: '#059669' },
+        { label: 'Present Today', value: filteredStudents.filter(s => s.status === 'Present').length, icon: <PeopleIcon />, color: '#EA580C' },
+        { label: 'Avg Attendance', value: `${Math.round(filteredStudents.reduce((sum, s) => sum + s.attendance, 0) / (filteredStudents.length || 1))}%`, icon: <PersonIcon />, color: '#7C3AED' },
+    ];
+
+    const studentColumns = [
+        {
+            field: 'avatar',
+            headerName: 'Avatar',
+            width: 80,
+            renderCell: (params) => (
+                <Avatar sx={{ width: 32, height: 32, bgcolor: params.row.status === 'Present' ? 'primary.light' : 'grey.400', fontSize: '0.8rem' }}>
+                    {params.value}
+                </Avatar>
+            ),
+        },
+        { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
+        { field: 'roll', headerName: 'Roll Number', width: 130 },
+        { field: 'year', headerName: 'Year', width: 120 },
+        {
+            field: 'attendance',
+            headerName: 'Attendance %',
+            width: 130,
+            renderCell: (params) => (
+                <Box sx={{ width: '100%' }}>
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>{params.value}%</Typography>
+                    <Box sx={{ width: '100%', height: 4, bgcolor: 'grey.100', borderRadius: 2 }}>
+                        <Box sx={{ width: `${params.value}%`, height: '100%', bgcolor: params.value > 80 ? 'success.main' : params.value > 60 ? 'warning.main' : 'error.main', borderRadius: 2 }} />
+                    </Box>
+                </Box>
+            )
+        },
+        {
+            field: 'status',
+            headerName: 'Status',
+            width: 120,
+            renderCell: (params) => (
+                <Chip
+                    label={params.value}
+                    size="small"
+                    color={params.value === 'Present' ? 'success' : params.value === 'Late' ? 'warning' : 'error'}
+                    variant="outlined"
+                    sx={{ fontWeight: 500 }}
+                />
+            )
+        },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 110,
+            sortable: false,
+            renderCell: () => (
+                <Button size="small" sx={{ textTransform: 'none' }}>Edit</Button>
+            )
+        }
+    ];
+
     return (
-        <Box>
+        <Box sx={{ width: '100%' }}>
             <Box sx={{ mb: 4 }}>
                 <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb" sx={{ mb: 1 }}>
                     <Link underline="hover" color="inherit" href="/">
@@ -59,13 +169,146 @@ const DeptDashboard = () => {
                         <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Engineering Team</Typography>
                         <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Overview of your department's attendance.</Typography>
                     </Box>
-                    <Button variant="outlined" color="primary" sx={{ fontWeight: 600 }}> Manage Schedule </Button>
+
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        sx={{
+                            borderRadius: 1.5,
+                            textTransform: 'none',
+                            px: 3,
+                            boxShadow: 'none',
+                            '&:hover': { boxShadow: '0 4px 12px rgba(19, 91, 236, 0.2)' }
+                        }}
+
+                        onClick={() => {
+                            if (view === 'students') {
+                                setStudentFormOpen(true);
+                            }
+                            else {
+                                setEmployeeFormOpen(true);
+                            }
+                        }}
+                    >
+                        Add {view === 'students' ? 'Student' : 'Employee'}
+                    </Button>
                 </Box>
             </Box>
 
-            <Grid container spacing={3}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+                <Autocomplete
+                    options={departments}
+                    value={dept}
+                    onChange={(event, newValue) => setDept(newValue || departments[0])}
+                    getOptionLabel={(option) => option.name}
+                    sx={{ minWidth: 260 }}
+                    renderInput={(params) => <TextField {...params} label="Department" size="small" />}
+                />
+                <ToggleButtonGroup size="small" value={view} exclusive onChange={handleViewChange}>
+                    <ToggleButton value="students">Students</ToggleButton>
+                    <ToggleButton value="employees">Employees</ToggleButton>
+                </ToggleButtonGroup>
+            </Box>
+
+            {/* Content Area */}
+            <Box sx={{ position: 'relative' }}>
+                <Fade in={view === 'students'} timeout={500} unmountOnExit>
+                    <Box>
+                        <Paper sx={{ height: 480, width: '100%', borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+                            <DataGrid
+                                rows={filteredStudents}
+                                columns={studentColumns}
+                                initialState={{
+                                    pagination: {
+                                        paginationModel: { pageSize: 5 },
+                                    },
+                                }}
+                                pageSizeOptions={[5, 10]}
+                                disableSelectionOnClick
+                                sx={{
+                                    border: 'none',
+                                    '& .MuiDataGrid-columnHeaders': {
+                                        bgcolor: 'grey.50',
+                                        color: 'text.secondary',
+                                        fontWeight: 600,
+                                    },
+                                    '& .MuiDataGrid-row:hover': {
+                                        bgcolor: 'rgba(19, 91, 236, 0.04)',
+                                    }
+                                }}
+                            />
+                        </Paper>
+                    </Box>
+                </Fade>
+
+                <Fade in={view === 'employees'} timeout={500} unmountOnExit>
+                    <Box sx={{ mt: view === 'students' ? 0 : 0 }}>
+                        <Grid container spacing={3}>
+                            {filteredEmployees.map((employee) => (
+                                <Grid item xs={12} sm={6} md={4} lg={3} key={employee.id}>
+                                    <Card
+                                        sx={{
+                                            height: '100%',
+                                            borderRadius: 2,
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            boxShadow: 'none',
+                                            transition: 'transform 0.2s, box-shadow 0.2s',
+                                            '&:hover': {
+                                                transform: 'scale(1.02)',
+                                                boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                                            }
+                                        }}
+                                    >
+                                        <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -3 }}>
+                                                <IconButton size="small">
+                                                    <MoreVertIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
+                                            <Avatar
+                                                sx={{
+                                                    width: 64,
+                                                    height: 64,
+                                                    mx: 'auto',
+                                                    mb: 2,
+                                                    bgcolor: 'primary.light',
+                                                    fontSize: '1.5rem',
+                                                    fontWeight: 700
+                                                }}
+                                            >
+                                                {employee.avatar}
+                                            </Avatar>
+                                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                                                {employee.name}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, height: 20 }}>
+                                                {employee.designation}
+                                            </Typography>
+
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2, color: 'text.secondary' }}>
+                                                <EmailIcon sx={{ fontSize: '0.9rem' }} />
+                                                <Typography variant="caption">{employee.email}</Typography>
+                                            </Box>
+
+                                            <Chip
+                                                label={employee.status}
+                                                size="small"
+                                                color={employee.status === 'Active' ? 'success' : 'warning'}
+                                                sx={{ fontWeight: 600, borderRadius: 1 }}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                </Fade>
+            </Box>
+
+            <Grid container spacing={3} sx={{ width: '100%', mt: 1 }} alignItems="stretch">
                 {deptStats.map((stat) => (
-                    <Grid item xs={12} sm={6} md={3} key={stat.label}>
+                    <Grid item xs={12} md={3} key={stat.label} sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Paper sx={{
                             p: 3,
                             borderRadius: 3,
@@ -98,76 +341,31 @@ const DeptDashboard = () => {
                         </Paper>
                     </Grid>
                 ))}
-
-                <Grid item xs={12}>
-                    <Paper sx={{
-                        p: 0,
-                        overflow: 'hidden',
-                        borderRadius: 3,
-                        bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
-                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
-                        border: '1px solid',
-                        borderColor: mode === 'dark' ? '#334155' : 'divider',
-                    }}>
-                        <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: mode === 'dark' ? '#334155' : 'divider' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Team Attendance Status</Typography>
-                        </Box>
-                        <TableContainer>
-                            <Table>
-                                <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
-                                    <TableRow>
-                                        <TableCell sx={{ fontWeight: 600 }}>Employee Name</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Check-in Time</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                                        <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>Action</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {teamAttendance.map((row) => (
-                                        <TableRow key={row.id} hover>
-                                            <TableCell>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                                    <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem', bgcolor: 'secondary.light' }}>
-                                                        {row.avatar}
-                                                    </Avatar>
-                                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{row.name}</Typography>
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Typography variant="caption" sx={{
-                                                    bgcolor: mode === 'dark' ? '#0F172A' : 'grey.100',
-                                                    color: mode === 'dark' ? '#E2E8F0' : 'text.primary',
-                                                    px: 1, py: 0.5, borderRadius: 1
-                                                }}>
-                                                    {row.role}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>{row.time}</TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={row.status}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    color={
-                                                        row.status === 'On-Time' ? 'success' :
-                                                            row.status === 'Late' ? 'warning' : 'error'
-                                                    }
-                                                    sx={{ fontWeight: 500 }}
-                                                />
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: 'right' }}>
-                                                <Button size="small">Details</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
-                </Grid>
             </Grid>
+
+            <AddEmployeeForm
+                open={employeeFormOpen}
+                onClose={() => setEmployeeFormOpen(false)}
+                onSubmit={handleAddEmployee}
+            />
+            <AddStudentForm
+                open={studentFormOpen}
+                onClose={() => setStudentFormOpen(false)}
+                onSubmit={handleAddStudent}
+            />
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius: 2 }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
+
     );
 };
 

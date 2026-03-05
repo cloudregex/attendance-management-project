@@ -202,6 +202,16 @@ const Layout = ({ children }) => {
                             </ListItemIcon>
                             <ListItemText primary="Role Management" primaryTypographyProps={{ fontSize: '0.85rem' }} />
                         </ListItemButton>
+                        <ListItemButton
+                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0 }}
+                            selected={location.search.includes('view=definitions')}
+                            onClick={() => navigate('/permissions?view=definitions')}
+                        >
+                            <ListItemIcon sx={{ minWidth: 32 }}>
+                                <RadioButtonUnchecked sx={{ fontSize: '0.7rem' }} />
+                            </ListItemIcon>
+                            <ListItemText primary="Permission List" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                        </ListItemButton>
                     </List>
                 </Collapse>
 
@@ -328,7 +338,14 @@ const Layout = ({ children }) => {
             </Box>
             <Box
                 component="main"
-                sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` }, mt: '64px' }}
+                sx={{
+                    flexGrow: 1,
+                    flexBasis: 0, // allow flex item to shrink properly alongside drawer
+                    minWidth: 0, // prevents overflow when using flex
+                    p: 3,
+                    mt: '64px',
+                    overflowX: 'hidden',
+                }}
             >
                 {children}
             </Box>

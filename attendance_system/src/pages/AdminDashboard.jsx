@@ -22,21 +22,25 @@ import {
     Schedule as ScheduleIcon,
     Cancel as CancelIcon,
     TrendingUp as TrendingUpIcon,
+    Business as BusinessIcon,
+    School as SchoolIcon,
+    Person as PersonIcon,
+    Badge as BadgeIcon,
 } from '@mui/icons-material';
 
 const stats = [
-    { label: 'Total Employees', value: '1,248', icon: <PeopleIcon />, color: '#135bec', trend: '+12%' },
-    { label: 'On-time Today', value: '1,082', icon: <CheckCircleIcon />, color: '#2e7d32', trend: '+5%' },
-    { label: 'Late Arrival', value: '94', icon: <ScheduleIcon />, color: '#ed6c02', trend: '-2%' },
-    { label: 'Absent', value: '72', icon: <CancelIcon />, color: '#d32f2f', trend: '+3%' },
+    { label: 'Total Departments', value: '12', icon: <BusinessIcon />, color: '#9c27b0', trend: '+1' },
+    { label: 'Total Students', value: '3,450', icon: <SchoolIcon />, color: '#135bec', trend: '+52' },
+    { label: 'Total Teachers', value: '150', icon: <PersonIcon />, color: '#2e7d32', trend: '+5' },
+    { label: 'Total Staff', value: '45', icon: <BadgeIcon />, color: '#ed6c02', trend: '+2' },
 ];
 
-const recentAttendance = [
-    { id: 1, name: 'John Doe', department: 'Engineering', time: '08:45 AM', status: 'On-Time', avatar: 'JD' },
-    { id: 2, name: 'Jane Smith', department: 'Product', time: '09:12 AM', status: 'Late', avatar: 'JS' },
-    { id: 3, name: 'Robert Brown', department: 'Marketing', time: '08:55 AM', status: 'On-Time', avatar: 'RB' },
-    { id: 4, name: 'Emily Davis', department: 'Engineering', time: '-', status: 'Absent', avatar: 'ED' },
-    { id: 5, name: 'Michael Wilson', department: 'Sales', time: '08:30 AM', status: 'On-Time', avatar: 'MW' },
+const departmentStats = [
+    { id: 1, name: 'Computer Science', students: 1250, capacity: 1500, color: '#135bec' },
+    { id: 2, name: 'Mechanical Eng.', students: 850, capacity: 1000, color: '#ed6c02' },
+    { id: 3, name: 'Civil Engineering', students: 620, capacity: 800, color: '#2e7d32' },
+    { id: 4, name: 'Electronics Dept', students: 480, capacity: 600, color: '#9c27b0' },
+    { id: 5, name: 'Information Tech.', students: 250, capacity: 400, color: '#d32f2f' },
 ];
 
 const AdminDashboard = () => {
@@ -44,155 +48,156 @@ const AdminDashboard = () => {
     const mode = theme.palette.mode;
 
     return (
-        <Box>
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ width: '100%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                 <Box>
                     <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Welcome back, Alex</Typography>
                     <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Here's what's happening with attendance today.</Typography>
                 </Box>
-                <Button variant="contained" startIcon={<TrendingUpIcon />}>
-                    Export Report
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button variant="contained" startIcon={<TrendingUpIcon />}>
+                        Export Report
+                    </Button>
+                </Box>
             </Box>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{ mb: 3, width: '100%' }} alignItems="stretch">
                 {stats.map((stat) => (
-                    <Grid item xs={12} sm={6} md={3} key={stat.label}>
+                    // always reserve one quarter of the available width on md+ screens (4 columns)
+                    <Grid item xs={12} md={3} key={stat.label} sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Paper sx={{
+                            width: '100%',
+                            flex: 1,
+                            boxSizing: 'border-box',
                             p: 3,
-                            borderRadius: 3,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '16px',
                             bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
-                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'translateY(-4px)',
+                                boxShadow: mode === 'dark' ? '0 10px 25px rgba(0,0,0,0.5)' : '0 12px 20px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.05)',
+                            },
                             border: '1px solid',
                             borderColor: mode === 'dark' ? '#334155' : 'transparent',
                         }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                                <Box
-                                    sx={{
-                                        bgcolor: mode === 'dark' ? alpha(stat.color, 0.15) : `${stat.color}15`,
-                                        color: stat.color,
-                                        p: 1,
-                                        borderRadius: 2,
-                                        display: 'flex',
-                                    }}
-                                >
-                                    {stat.icon}
-                                </Box>
-                                <Typography
-                                    variant="caption"
-                                    sx={{
-                                        color: stat.trend.startsWith('+') ? (mode === 'dark' ? '#4ade80' : 'success.main') : (mode === 'dark' ? '#f87171' : 'error.main'),
-                                        fontWeight: 600,
-                                        bgcolor: stat.trend.startsWith('+') ? (mode === 'dark' ? alpha('#4ade80', 0.15) : alpha(theme.palette.success.main, 0.1)) : (mode === 'dark' ? alpha('#f87171', 0.15) : alpha(theme.palette.error.main, 0.1)),
-                                        px: 1,
-                                        py: 0.5,
-                                        borderRadius: 1,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    {stat.trend}
-                                </Typography>
+                            <Box
+                                sx={{
+                                    bgcolor: mode === 'dark' ? alpha(stat.color, 0.15) : alpha(stat.color, 0.1),
+                                    color: stat.color,
+                                    p: 1.5,
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    mb: 2,
+                                }}
+                            >
+                                {React.cloneElement(stat.icon, { fontSize: 'large' })}
                             </Box>
-                            <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>
+                            <Typography variant="h3" sx={{ fontWeight: 800, mb: 0.5, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', textAlign: 'center' }}>
                                 {stat.value}
                             </Typography>
-                            <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 500 }}>
+                            <Typography variant="body1" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 600, textAlign: 'center' }}>
                                 {stat.label}
                             </Typography>
                         </Paper>
                     </Grid>
                 ))}
+            </Grid>
 
-                <Grid item xs={12} md={8}>
+            <Grid container spacing={3} alignItems="stretch" sx={{ flexGrow: 1, pb: 1, width: '100%' }}>
+                <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Paper sx={{
-                        p: 0,
-                        overflow: 'hidden',
-                        borderRadius: 3,
+                        width: '100%',
+                        flex: 1,
+                        boxSizing: 'border-box',
+                        p: 3,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        borderRadius: '16px',
                         bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
-                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05)',
                         border: '1px solid',
-                        borderColor: mode === 'dark' ? '#334155' : 'divider',
+                        borderColor: mode === 'dark' ? '#334155' : 'transparent',
                     }}>
-                        <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: mode === 'dark' ? '#334155' : 'divider' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Recent Attendance</Typography>
-                            <Button color="primary" size="small" sx={{ fontWeight: 600 }}>View All</Button>
+                        <Typography variant="h6" sx={{ mb: 1, fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', flexShrink: 0 }}>Weekly Student Attendance</Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', flexGrow: 1, pt: 2 }}>
+                            {[
+                                { day: 'Mon', present: 3250, total: 3450, color: '#135bec' },
+                                { day: 'Tue', present: 3380, total: 3450, color: '#2e7d32' },
+                                { day: 'Wed', present: 3100, total: 3450, color: '#ed6c02' },
+                                { day: 'Thu', present: 3400, total: 3450, color: '#9c27b0' },
+                                { day: 'Fri', present: 3200, total: 3450, color: '#d32f2f' },
+                            ].map((stat) => {
+                                const percentage = ((stat.present / stat.total) * 100).toFixed(1);
+                                return (
+                                    <Box key={stat.day} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '15%' }}>
+                                        <Typography variant="caption" sx={{ color: stat.color, fontWeight: 700, mb: 1 }}>
+                                            {percentage}%
+                                        </Typography>
+                                        <Box sx={{ width: '100%', maxWidth: 48, height: '100%', minHeight: 120, bgcolor: mode === 'dark' ? '#0F172A' : 'grey.100', borderRadius: '8px 8px 0 0', overflow: 'hidden', display: 'flex', alignItems: 'flex-end' }}>
+                                            <Box sx={{ width: '100%', height: `${percentage}%`, bgcolor: stat.color, transition: 'height 1s ease-in-out', borderRadius: '8px 8px 0 0' }} />
+                                        </Box>
+                                        <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: mode === 'dark' ? '#E2E8F0' : 'text.primary' }}>{stat.day}</Typography>
+                                        <Typography variant="caption" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>
+                                            {stat.present} / {stat.total}
+                                        </Typography>
+                                    </Box>
+                                );
+                            })}
                         </Box>
-                        <TableContainer>
-                            <Table>
-                                <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
-                                    <TableRow>
-                                        <TableCell sx={{ fontWeight: 600 }}>Employee</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Department</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Check-in</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {recentAttendance.map((row) => (
-                                        <TableRow key={row.id} hover>
-                                            <TableCell>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                                    <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem', bgcolor: 'primary.light' }}>
-                                                        {row.avatar}
-                                                    </Avatar>
-                                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{row.name}</Typography>
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>{row.department}</TableCell>
-                                            <TableCell>{row.time}</TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={row.status}
-                                                    size="small"
-                                                    color={
-                                                        row.status === 'On-Time' ? 'success' :
-                                                            row.status === 'Late' ? 'warning' : 'error'
-                                                    }
-                                                    sx={{ fontWeight: 500 }}
-                                                />
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
                     </Paper>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Paper sx={{
+                        width: '100%',
+                        flex: 1,
+                        boxSizing: 'border-box',
                         p: 3,
-                        height: '100%',
-                        borderRadius: 3,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        borderRadius: '16px',
                         bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
-                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05)',
                         border: '1px solid',
-                        borderColor: mode === 'dark' ? '#334155' : 'divider',
+                        borderColor: mode === 'dark' ? '#334155' : 'transparent',
                     }}>
-                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Department Stats</Typography>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                            {[
-                                { name: 'Engineering', value: 85, color: '#135bec' },
-                                { name: 'Design', value: 92, color: '#2e7d32' },
-                                { name: 'Marketing', value: 78, color: '#ed6c02' },
-                                { name: 'Operations', value: 88, color: '#9c27b0' },
-                            ].map((dept) => (
-                                <Box key={dept.name}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                        <Typography variant="body2" sx={{ fontWeight: 600, color: mode === 'dark' ? '#E2E8F0' : 'text.primary' }}>{dept.name}</Typography>
-                                        <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 500 }}>{dept.value}%</Typography>
+                        <Typography variant="h6" sx={{ mb: 1, fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', flexShrink: 0 }}>Department Student Count</Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', flexGrow: 1, pt: 2 }}>
+                            {departmentStats.map((dept) => {
+                                const percentage = ((dept.students / dept.capacity) * 100).toFixed(1);
+
+                                // Extract acronym for label since names are long
+                                const acro = dept.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+                                return (
+                                    <Box key={dept.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '15%' }}>
+                                        <Typography variant="caption" sx={{ color: dept.color, fontWeight: 700, mb: 1 }}>
+                                            {percentage}%
+                                        </Typography>
+                                        <Box sx={{ width: '100%', maxWidth: 48, height: '100%', minHeight: 120, bgcolor: mode === 'dark' ? '#0F172A' : 'grey.100', borderRadius: '8px 8px 0 0', overflow: 'hidden', display: 'flex', alignItems: 'flex-end' }}>
+                                            <Box sx={{ width: '100%', height: `${percentage}%`, bgcolor: dept.color, transition: 'height 1s ease-in-out', borderRadius: '8px 8px 0 0' }} />
+                                        </Box>
+                                        <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: mode === 'dark' ? '#E2E8F0' : 'text.primary' }}>{acro}</Typography>
+                                        <Typography variant="caption" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>
+                                            {dept.students}
+                                        </Typography>
                                     </Box>
-                                    <Box sx={{ width: '100%', height: 8, bgcolor: mode === 'dark' ? '#0F172A' : 'grey.100', borderRadius: 4, overflow: 'hidden' }}>
-                                        <Box sx={{ width: `${dept.value}%`, height: '100%', bgcolor: dept.color }} />
-                                    </Box>
-                                </Box>
-                            ))}
+                                );
+                            })}
                         </Box>
                     </Paper>
                 </Grid>
             </Grid>
-        </Box >
+        </Box>
     );
 };
 

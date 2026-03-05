@@ -9,6 +9,7 @@ import { EmployeesPage, ReportsPage } from './pages/Placeholders';
 import SettingsPage from './pages/Settings';
 import PermissionsPage from './pages/Permissions';
 import ActivityLogsPage from './pages/ActivityLogs';
+import EditUserPermissions from './pages/EditUserPermissions';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
                   <Route path="/employees" element={<EmployeesPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
                   <Route path="/permissions" element={<PermissionsPage />} />
+                  <Route path="/permissions/edit/:userId" element={<EditUserPermissions />} />
                   <Route path="/activity-logs" element={<ActivityLogsPage />} />
                   <Route path="/settings/*" element={<SettingsPage />} />
 
