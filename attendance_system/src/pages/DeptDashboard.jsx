@@ -46,7 +46,7 @@ const DeptDashboard = () => {
     const mode = theme.palette.mode;
 
     return (
-        <Box>
+        <Box sx={{ width: '100%' }}>
             <Box sx={{ mb: 4 }}>
                 <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb" sx={{ mb: 1 }}>
                     <Link underline="hover" color="inherit" href="/">
@@ -63,9 +63,9 @@ const DeptDashboard = () => {
                 </Box>
             </Box>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{ width: '100%' }} alignItems="stretch">
                 {deptStats.map((stat) => (
-                    <Grid item xs={12} sm={6} md={3} key={stat.label}>
+                    <Grid item xs={12} md={3} key={stat.label} sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Paper sx={{
                             p: 3,
                             borderRadius: 3,
