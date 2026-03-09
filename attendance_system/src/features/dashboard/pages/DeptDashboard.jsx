@@ -109,12 +109,31 @@ const DeptDashboard = () => {
             headerName: 'Avatar',
             width: 80,
             renderCell: (params) => (
-                <Avatar sx={{ width: 32, height: 32, bgcolor: params.row.status === 'Present' ? 'primary.light' : 'grey.400', fontSize: '0.8rem' }}>
-                    {params.value}
+                <Avatar sx={{
+                    width: 30,
+                    height: 30,
+                    marginTop: '0.8rem',
+                    bgcolor: params?.row?.status === 'Present' ? 'success.light' : params?.row?.status === 'Late' ? 'warning.light' : 'error.light',
+                    color: params?.row?.status === 'Present' ? 'success.contrastText' : params?.row?.status === 'Late' ? 'warning.contrastText' : 'error.contrastText',
+                    fontSize: '0.8rem',
+                    fontWeight: 600
+                }}>
+                    {params?.value || ''}
                 </Avatar>
             ),
         },
         { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
+        {
+            field: 'deptId',
+            headerName: 'Department',
+            width: 130,
+            valueGetter: (value, row) => {
+                const val = (value && typeof value === 'object' && 'value' in value) ? value.value : value;
+                if (!val) return '';
+                const d = departments.find(deptOption => deptOption.id === val);
+                return d ? d.name : val;
+            }
+        },
         { field: 'roll', headerName: 'Roll Number', width: 130 },
         { field: 'year', headerName: 'Year', width: 120 },
         {
@@ -162,12 +181,14 @@ const DeptDashboard = () => {
                     <Link underline="hover" color="inherit" href="/">
                         Dashboard
                     </Link>
-                    <Typography color="text.primary">Engineering Department</Typography>
+                    <Typography color="text.primary">{dept?.id === 'all' ? 'All Departments' : dept?.name || 'Department'}</Typography>
                 </Breadcrumbs>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Engineering Team</Typography>
-                        <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Overview of your department's attendance.</Typography>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>
+                            {dept?.id === 'all' ? 'All Departments' : `${dept?.name} Team`}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Overview of {dept?.id === 'all' ? 'all' : 'your'} department's attendance.</Typography>
                     </Box>
 
                     <Button
