@@ -1,15 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import ThemeProviderWrapper from './components/ThemeContext';
-import Layout from './components/Layout';
-import AdminDashboard from './pages/AdminDashboard';
-import DeptDashboard from './pages/DeptDashboard';
-import AdminLogin from './pages/AdminLogin';
-import { EmployeesPage, ReportsPage } from './pages/Placeholders';
-import SettingsPage from './pages/Settings';
-import PermissionsPage from './pages/Permissions';
-import ActivityLogsPage from './pages/ActivityLogs';
-import EditUserPermissions from './pages/EditUserPermissions';
+import ThemeProviderWrapper from './shared/components/ThemeContext';
+import Layout from './shared/components/Layout';
+import AdminDashboard from './features/dashboard/pages/AdminDashboard';
+import DeptDashboard from './features/dashboard/pages/DeptDashboard';
+import AdminLogin from './features/auth/pages/AdminLogin';
+import { EmployeesPage, ReportsPage } from './shared/pages/Placeholders';
+import SettingsPage from './features/settings/pages/Settings';
+import PermissionsPage from './features/permissions/pages/Permissions';
+import ActivityLogsPage from './features/activity-logs/pages/ActivityLogs';
+import EditUserPermissions from './features/permissions/pages/EditUserPermissions';
 
 function App() {
   return (

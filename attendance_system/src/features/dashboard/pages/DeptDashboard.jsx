@@ -33,8 +33,8 @@ import {
     NavigateNext as NavigateNextIcon,
 } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
-import AddEmployeeForm from '../components/AddEmployeeForm';
-import AddStudentForm from '../components/AddStudentForm';
+import AddEmployeeForm from '../../employees/components/AddEmployeeForm';
+import AddStudentForm from '../../students/components/AddStudentForm';
 
 // Mock Data
 const departments = [
