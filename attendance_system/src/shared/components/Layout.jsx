@@ -96,7 +96,6 @@ const Layout = ({ children }) => {
     const menuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
         { text: 'Departments', icon: <BusinessIcon />, path: '/departments' },
-        { text: 'Employees', icon: <PeopleIcon />, path: '/employees' },
         { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs' },
         { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports' },
         { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },

@@ -10,14 +10,17 @@ import SettingsPage from './features/settings/pages/Settings';
 import PermissionsPage from './features/permissions/pages/Permissions';
 import ActivityLogsPage from './features/activity-logs/pages/ActivityLogs';
 import EditUserPermissions from './features/permissions/pages/EditUserPermissions';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
   return (
     <ThemeProviderWrapper>
       <CssBaseline />
-      <Router>
-        <Routes>
-          {/* Public Routes */}
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
           <Route path="/login" element={<AdminLogin />} />
 
           {/* Protected/Dashboard Routes */}
@@ -46,6 +49,7 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
+      </LocalizationProvider>
     </ThemeProviderWrapper>
     //comment by darshan 
   );
