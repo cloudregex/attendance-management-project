@@ -1,26 +1,13 @@
 import React from 'react';
 import {
-    Grid,
     Paper,
     Typography,
     Box,
     Button,
-    Avatar,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Chip,
     alpha,
     useTheme,
 } from '@mui/material';
 import {
-    People as PeopleIcon,
-    CheckCircle as CheckCircleIcon,
-    Schedule as ScheduleIcon,
-    Cancel as CancelIcon,
     TrendingUp as TrendingUpIcon,
     Business as BusinessIcon,
     School as SchoolIcon,
@@ -61,57 +48,54 @@ const AdminDashboard = () => {
                 </Box>
             </Box>
 
-            <Grid container spacing={3} sx={{ mb: 3, width: '100%' }} alignItems="stretch">
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 3 }}>
                 {stats.map((stat) => (
-                    // always reserve one quarter of the available width on md+ screens (4 columns)
-                    <Grid item xs={12} md={3} key={stat.label} sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Paper sx={{
-                            width: '100%',
-                            flex: 1,
-                            boxSizing: 'border-box',
-                            p: 3,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: '16px',
-                            bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
-                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05)',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                transform: 'translateY(-4px)',
-                                boxShadow: mode === 'dark' ? '0 10px 25px rgba(0,0,0,0.5)' : '0 12px 20px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.05)',
-                            },
-                            border: '1px solid',
-                            borderColor: mode === 'dark' ? '#334155' : 'transparent',
-                        }}>
-                            <Box
-                                sx={{
-                                    bgcolor: mode === 'dark' ? alpha(stat.color, 0.15) : alpha(stat.color, 0.1),
-                                    color: stat.color,
-                                    p: 1.5,
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    mb: 2,
-                                }}
-                            >
-                                {React.cloneElement(stat.icon, { fontSize: 'large' })}
-                            </Box>
-                            <Typography variant="h3" sx={{ fontWeight: 800, mb: 0.5, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', textAlign: 'center' }}>
-                                {stat.value}
-                            </Typography>
-                            <Typography variant="body1" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 600, textAlign: 'center' }}>
-                                {stat.label}
-                            </Typography>
-                        </Paper>
-                    </Grid>
+                    <Paper key={stat.label} sx={{
+                        width: '100%',
+                        flex: 1,
+                        boxSizing: 'border-box',
+                        p: 3,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '16px',
+                        bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
+                        boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: mode === 'dark' ? '0 10px 25px rgba(0,0,0,0.5)' : '0 12px 20px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.05)',
+                        },
+                        border: '1px solid',
+                        borderColor: mode === 'dark' ? '#334155' : 'transparent',
+                    }}>
+                        <Box
+                            sx={{
+                                bgcolor: mode === 'dark' ? alpha(stat.color, 0.15) : alpha(stat.color, 0.1),
+                                color: stat.color,
+                                p: 1.5,
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                mb: 2,
+                            }}
+                        >
+                            {React.cloneElement(stat.icon, { fontSize: 'large' })}
+                        </Box>
+                        <Typography variant="h3" sx={{ fontWeight: 800, mb: 0.5, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', textAlign: 'center' }}>
+                            {stat.value}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 600, textAlign: 'center' }}>
+                            {stat.label}
+                        </Typography>
+                    </Paper>
                 ))}
-            </Grid>
+            </Box>
 
-            <Grid container spacing={3} alignItems="stretch" sx={{ flexGrow: 1, pb: 1, width: '100%' }}>
-                <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, flexGrow: 1, pb: 1 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Paper sx={{
                         width: '100%',
                         flex: 1,
@@ -153,9 +137,9 @@ const AdminDashboard = () => {
                             })}
                         </Box>
                     </Paper>
-                </Grid>
+                </Box>
 
-                <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Paper sx={{
                         width: '100%',
                         flex: 1,
@@ -195,8 +179,8 @@ const AdminDashboard = () => {
                             })}
                         </Box>
                     </Paper>
-                </Grid>
-            </Grid>
+                </Box>
+            </Box>
         </Box>
     );
 };

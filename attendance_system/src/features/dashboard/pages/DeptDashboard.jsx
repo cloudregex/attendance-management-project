@@ -12,11 +12,8 @@ import {
     TextField,
     ToggleButtonGroup,
     ToggleButton,
-    Card,
-    CardContent,
     Chip,
     Fade,
-    IconButton,
     Alert,
     Snackbar,
     useTheme,
@@ -28,12 +25,10 @@ import {
     Add as AddIcon,
     Work as WorkIcon,
     School as SchoolIcon,
-    Email as EmailIcon,
-    MoreVert as MoreVertIcon,
     NavigateNext as NavigateNextIcon,
 } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
-import AddEmployeeForm from '../../employees/components/AddEmployeeForm';
+import AddTeacherForm from '../../employees/components/AddTeacherForm';
 import AddStudentForm from '../../students/components/AddStudentForm';
 
 // Mock Data
@@ -54,7 +49,7 @@ const studentsData = [
     { id: 6, name: 'Jessica Chen', roll: 'CS003', year: '4th Year', attendance: 95, status: 'Present', avatar: 'JC', deptId: 'eng' },
 ];
 
-const employeesData = [
+const teachersData = [
     { id: 101, name: 'Robert Miller', designation: 'Senior Engineer', email: 'robert@example.com', status: 'Active', avatar: 'RM', deptId: 'eng' },
     { id: 102, name: 'Amanda Green', designation: 'UI Architect', email: 'amanda@example.com', status: 'Active', avatar: 'AG', deptId: 'des' },
     { id: 103, name: 'David Smith', designation: 'Marketing Expert', email: 'david@example.com', status: 'On Leave', avatar: 'DS', deptId: 'mkt' },
@@ -69,14 +64,15 @@ const DeptDashboard = () => {
 
     const [dept, setDept] = useState(departments[0]);
     const [view, setView] = useState('students');
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
 
-    const [employeeFormOpen, setEmployeeFormOpen] = React.useState(false);
+    const [teacherFormOpen, setTeacherFormOpen] = React.useState(false);
     const [studentFormOpen, setStudentFormOpen] = React.useState(false);
     const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
 
-    const handleAddEmployee = (data) => {
-        console.log('Adding employee:', data);
-        setSnackbar({ open: true, message: `Employee ${data.name} added successfully!`, severity: 'success' });
+    const handleAddTeacher = (data) => {
+        console.log('Adding teacher:', data);
+        setSnackbar({ open: true, message: `Teacher ${data.name} added successfully!`, severity: 'success' });
     };
 
     const handleAddStudent = (data) => {
@@ -95,10 +91,10 @@ const DeptDashboard = () => {
     };
 
     const filteredStudents = studentsData.filter(s => dept.id === 'all' || s.deptId === dept.id);
-    const filteredEmployees = employeesData.filter(e => dept.id === 'all' || e.deptId === dept.id);
+    const filteredTeachers = teachersData.filter(e => dept.id === 'all' || e.deptId === dept.id);
     const deptStats = [
         { label: 'Total Students', value: filteredStudents.length, icon: <SchoolIcon />, color: '#2563EB' },
-        { label: 'Total Employees', value: filteredEmployees.length, icon: <WorkIcon />, color: '#059669' },
+        { label: 'Total Teachers', value: filteredTeachers.length, icon: <WorkIcon />, color: '#059669' },
         { label: 'Present Today', value: filteredStudents.filter(s => s.status === 'Present').length, icon: <PeopleIcon />, color: '#EA580C' },
         { label: 'Avg Attendance', value: `${Math.round(filteredStudents.reduce((sum, s) => sum + s.attendance, 0) / (filteredStudents.length || 1))}%`, icon: <PersonIcon />, color: '#7C3AED' },
     ];
@@ -174,6 +170,64 @@ const DeptDashboard = () => {
         }
     ];
 
+    const teacherColumns = [
+        {
+            field: 'avatar',
+            headerName: 'Avatar',
+            width: 80,
+            renderCell: (params) => (
+                <Avatar sx={{
+                    width: 30,
+                    height: 30,
+                    marginTop: '0.8rem',
+                    bgcolor: params?.row?.status === 'Active' ? 'success.light' : 'warning.light',
+                    color: params?.row?.status === 'Active' ? 'success.contrastText' : 'warning.contrastText',
+                    fontSize: '0.8rem',
+                    fontWeight: 600
+                }}>
+                    {params?.value || ''}
+                </Avatar>
+            ),
+        },
+        { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
+        {
+            field: 'deptId',
+            headerName: 'Department',
+            width: 160,
+            valueGetter: (value) => {
+                const val = (value && typeof value === 'object' && 'value' in value) ? value.value : value;
+                if (!val) return '';
+                const d = departments.find(deptOption => deptOption.id === val);
+                return d ? d.name : val;
+            }
+        },
+        { field: 'designation', headerName: 'Designation', flex: 1, minWidth: 140 },
+        { field: 'email', headerName: 'Email', flex: 1, minWidth: 180 },
+        {
+            field: 'status',
+            headerName: 'Status',
+            width: 120,
+            renderCell: (params) => (
+                <Chip
+                    label={params.value}
+                    size="small"
+                    color={params.value === 'Active' ? 'success' : 'warning'}
+                    variant="outlined"
+                    sx={{ fontWeight: 500 }}
+                />
+            )
+        },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 110,
+            sortable: false,
+            renderCell: () => (
+                <Button size="small" sx={{ textTransform: 'none' }}>Edit</Button>
+            )
+        }
+    ];
+
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ mb: 4 }}>
@@ -207,11 +261,11 @@ const DeptDashboard = () => {
                                 setStudentFormOpen(true);
                             }
                             else {
-                                setEmployeeFormOpen(true);
+                                setTeacherFormOpen(true);
                             }
                         }}
                     >
-                        Add {view === 'students' ? 'Student' : 'Employee'}
+                        Add {view === 'students' ? 'Student' : 'Teacher'}
                     </Button>
                 </Box>
             </Box>
@@ -226,17 +280,26 @@ const DeptDashboard = () => {
                     sx={{ minWidth: 260 }}
                     renderInput={(params) => <TextField {...params} label="Department" size="small" />}
                 />
+                <TextField 
+                    type="date"
+                    size="small"
+                    label="Date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ minWidth: 160 }}
+                />
                 <ToggleButtonGroup size="small" value={view} exclusive onChange={handleViewChange}>
                     <ToggleButton value="students">Students</ToggleButton>
-                    <ToggleButton value="employees">Employees</ToggleButton>
+                    <ToggleButton value="teachers">Teachers</ToggleButton>
                 </ToggleButtonGroup>
             </Box>
 
-            {/* Content Area */}
-            <Box sx={{ position: 'relative' }}>
-                <Fade in={view === 'students'} timeout={500} unmountOnExit>
-                    <Box>
-                        <Paper sx={{ height: 480, width: '100%', borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+            {/* Content Area — fixed height so both Fade panels overlap during crossfade */}
+            <Box sx={{ position: 'relative', height: 480, mb: 3 }}>
+                <Fade in={view === 'students'} timeout={400} unmountOnExit>
+                    <Box sx={{ position: 'absolute', inset: 0 }}>
+                        <Paper sx={{ height: '100%', width: '100%', borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
                             <DataGrid
                                 rows={filteredStudents}
                                 columns={studentColumns}
@@ -263,67 +326,32 @@ const DeptDashboard = () => {
                     </Box>
                 </Fade>
 
-                <Fade in={view === 'employees'} timeout={500} unmountOnExit>
-                    <Box sx={{ mt: view === 'students' ? 0 : 0 }}>
-                        <Grid container spacing={3}>
-                            {filteredEmployees.map((employee) => (
-                                <Grid item xs={12} sm={6} md={4} lg={3} key={employee.id}>
-                                    <Card
-                                        sx={{
-                                            height: '100%',
-                                            borderRadius: 2,
-                                            border: '1px solid',
-                                            borderColor: 'divider',
-                                            boxShadow: 'none',
-                                            transition: 'transform 0.2s, box-shadow 0.2s',
-                                            '&:hover': {
-                                                transform: 'scale(1.02)',
-                                                boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-                                            }
-                                        }}
-                                    >
-                                        <CardContent sx={{ p: 3, textAlign: 'center' }}>
-                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -3 }}>
-                                                <IconButton size="small">
-                                                    <MoreVertIcon fontSize="small" />
-                                                </IconButton>
-                                            </Box>
-                                            <Avatar
-                                                sx={{
-                                                    width: 64,
-                                                    height: 64,
-                                                    mx: 'auto',
-                                                    mb: 2,
-                                                    bgcolor: 'primary.light',
-                                                    fontSize: '1.5rem',
-                                                    fontWeight: 700
-                                                }}
-                                            >
-                                                {employee.avatar}
-                                            </Avatar>
-                                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                                                {employee.name}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, height: 20 }}>
-                                                {employee.designation}
-                                            </Typography>
-
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2, color: 'text.secondary' }}>
-                                                <EmailIcon sx={{ fontSize: '0.9rem' }} />
-                                                <Typography variant="caption">{employee.email}</Typography>
-                                            </Box>
-
-                                            <Chip
-                                                label={employee.status}
-                                                size="small"
-                                                color={employee.status === 'Active' ? 'success' : 'warning'}
-                                                sx={{ fontWeight: 600, borderRadius: 1 }}
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            ))}
-                        </Grid>
+                <Fade in={view === 'teachers'} timeout={400} unmountOnExit>
+                    <Box sx={{ position: 'absolute', inset: 0 }}>
+                        <Paper sx={{ height: '100%', width: '100%', borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+                            <DataGrid
+                                rows={filteredTeachers}
+                                columns={teacherColumns}
+                                initialState={{
+                                    pagination: {
+                                        paginationModel: { pageSize: 5 },
+                                    },
+                                }}
+                                pageSizeOptions={[5, 10]}
+                                disableSelectionOnClick
+                                sx={{
+                                    border: 'none',
+                                    '& .MuiDataGrid-columnHeaders': {
+                                        bgcolor: 'grey.50',
+                                        color: 'text.secondary',
+                                        fontWeight: 600,
+                                    },
+                                    '& .MuiDataGrid-row:hover': {
+                                        bgcolor: 'rgba(19, 91, 236, 0.04)',
+                                    }
+                                }}
+                            />
+                        </Paper>
                     </Box>
                 </Fade>
             </Box>
@@ -365,10 +393,10 @@ const DeptDashboard = () => {
                 ))}
             </Grid>
 
-            <AddEmployeeForm
-                open={employeeFormOpen}
-                onClose={() => setEmployeeFormOpen(false)}
-                onSubmit={handleAddEmployee}
+            <AddTeacherForm
+                open={teacherFormOpen}
+                onClose={() => setTeacherFormOpen(false)}
+                onSubmit={handleAddTeacher}
             />
             <AddStudentForm
                 open={studentFormOpen}
