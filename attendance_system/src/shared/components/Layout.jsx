@@ -33,6 +33,7 @@ import {
     ExpandLess,
     ExpandMore,
     RadioButtonUnchecked,
+    AdminPanelSettings,
 } from '@mui/icons-material';
 import { Collapse } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -99,6 +100,7 @@ const Layout = ({ children }) => {
         { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs' },
         { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports' },
         { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+        { text: 'System AI', icon: <AdminPanelSettings />, path: '/system-admin' },
     ];
 
     const drawer = (
