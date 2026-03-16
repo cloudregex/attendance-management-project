@@ -12,6 +12,7 @@ import ActivityLogsPage from './features/activity-logs/pages/ActivityLogs';
 import EditUserPermissions from './features/permissions/pages/EditUserPermissions';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import SystemAdmin from './features/admin/pages/SystemAdmin';
 
 function App() {
   return (
@@ -21,34 +22,35 @@ function App() {
         <Router>
           <Routes>
             {/* Public Routes */}
-          <Route path="/login" element={<AdminLogin />} />
+            <Route path="/login" element={<AdminLogin />} />
 
-          {/* Protected/Dashboard Routes */}
-          <Route
-            path="/*"
-            element={
-              <Layout>
-                <Routes>
-                  <Route path="/dashboard" element={<AdminDashboard />} />
-                  <Route path="/departments" element={<DeptDashboard />} />
-                  <Route path="/employees" element={<EmployeesPage />} />
-                  <Route path="/reports" element={<ReportsPage />} />
-                  <Route path="/permissions" element={<PermissionsPage />} />
-                  <Route path="/permissions/edit/:userId" element={<EditUserPermissions />} />
-                  <Route path="/activity-logs" element={<ActivityLogsPage />} />
-                  <Route path="/settings/*" element={<SettingsPage />} />
+            {/* Protected/Dashboard Routes */}
+            <Route
+              path="/*"
+              element={
+                <Layout>
+                  <Routes>
+                    <Route path="/dashboard" element={<AdminDashboard />} />
+                    <Route path="/departments" element={<DeptDashboard />} />
+                    <Route path="/employees" element={<EmployeesPage />} />
+                    <Route path="/reports" element={<ReportsPage />} />
+                    <Route path="/permissions" element={<PermissionsPage />} />
+                    <Route path="/permissions/edit/:userId" element={<EditUserPermissions />} />
+                    <Route path="/activity-logs" element={<ActivityLogsPage />} />
+                    <Route path="/system-admin" element={<SystemAdmin />} />
+                    <Route path="/settings/*" element={<SettingsPage />} />
 
-                  {/* Default dashboard route */}
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                </Routes>
-              </Layout>
-            }
-          />
+                    {/* Default dashboard route */}
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  </Routes>
+                </Layout>
+              }
+            />
 
-          {/* Global Fallback */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
+            {/* Global Fallback */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Router>
       </LocalizationProvider>
     </ThemeProviderWrapper>
     //comment by darshan 
