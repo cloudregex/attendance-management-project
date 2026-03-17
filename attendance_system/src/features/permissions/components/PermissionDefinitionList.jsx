@@ -333,34 +333,51 @@ const PermissionDefinitionList = () => {
                                 )}
                                 {columns.actions && (
                                     <TableCell align="right" sx={{ py: 1.5 }}>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleOpen(item)}
-                                            sx={{
-                                                color: mode === 'dark' ? 'primary.light' : 'primary.main',
-                                                bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
-                                                mr: 1,
-                                                opacity: 0.8,
-                                                transition: 'all 0.2s',
-                                                '&:hover': { bgcolor: 'primary.main', color: 'white', opacity: 1, transform: 'scale(1.05)' }
-                                            }}
-                                        >
-                                            <EditIcon fontSize="small" />
-                                        </IconButton>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleDelete(item.id)}
-                                            disabled={item.id <= 9}
-                                            sx={{
-                                                color: mode === 'dark' ? '#fca5a5' : 'error.main',
-                                                bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
-                                                opacity: 0.8,
-                                                transition: 'all 0.2s',
-                                                '&:hover': { bgcolor: 'error.main', color: 'white', opacity: 1, transform: 'scale(1.05)' }
-                                            }}
-                                        >
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
+                                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                            <Button
+                                                variant="outlined"
+                                                size="small"
+                                                startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
+                                                onClick={() => handleOpen(item)}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    textTransform: 'none',
+                                                    fontWeight: 600,
+                                                    borderColor: 'divider',
+                                                    color: mode === 'dark' ? 'primary.light' : 'primary.main',
+                                                    '&:hover': {
+                                                        bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
+                                                        borderColor: 'primary.main',
+                                                    }
+                                                }}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                variant="outlined"
+                                                size="small"
+                                                startIcon={<DeleteIcon sx={{ fontSize: '1rem !important' }} />}
+                                                onClick={() => handleDelete(item.id)}
+                                                disabled={item.id <= 9}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    textTransform: 'none',
+                                                    fontWeight: 600,
+                                                    borderColor: 'divider',
+                                                    color: mode === 'dark' ? '#fca5a5' : 'error.main',
+                                                    '&:hover': {
+                                                        bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
+                                                        borderColor: 'error.main',
+                                                    },
+                                                    '&.Mui-disabled': {
+                                                        borderColor: 'divider',
+                                                        opacity: mode === 'dark' ? 0.3 : 0.5
+                                                    }
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Stack>
                                     </TableCell>
                                 )}
                             </TableRow>

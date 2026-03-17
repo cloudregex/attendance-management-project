@@ -23,6 +23,7 @@ import {
     Avatar,
     Alert,
     useTheme,
+    Stack,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, People as PeopleIcon } from '@mui/icons-material';
 import { readRoles } from './RoleManager';
@@ -420,34 +421,51 @@ const UserManager = () => {
                                     />
                                 </TableCell>
                                 <TableCell align="right">
-                                    <IconButton
-                                        onClick={() => handleOpen(user)}
-                                        size="small"
-                                        sx={{
-                                            color: mode === 'dark' ? 'primary.light' : 'primary.main',
-                                            bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
-                                            mr: 1,
-                                            opacity: 0.8,
-                                            transition: 'all 0.2s',
-                                            '&:hover': { bgcolor: 'primary.main', color: 'white', opacity: 1, transform: 'scale(1.05)' }
-                                        }}
-                                    >
-                                        <EditIcon fontSize="small" />
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => handleDelete(user)}
-                                        size="small"
-                                        sx={{
-                                            color: mode === 'dark' ? '#fca5a5' : 'error.main',
-                                            bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
-                                            opacity: 0.8,
-                                            transition: 'all 0.2s',
-                                            '&:hover': { bgcolor: 'error.main', color: 'white', opacity: 1, transform: 'scale(1.05)' }
-                                        }}
-                                        disabled={user.id === 1}
-                                    >
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
+                                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
+                                            onClick={() => handleOpen(user)}
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: 'none',
+                                                fontWeight: 600,
+                                                borderColor: 'divider',
+                                                color: mode === 'dark' ? 'primary.light' : 'primary.main',
+                                                '&:hover': {
+                                                    bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
+                                                    borderColor: 'primary.main',
+                                                }
+                                            }}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            startIcon={<DeleteIcon sx={{ fontSize: '1rem !important' }} />}
+                                            onClick={() => handleDelete(user)}
+                                            disabled={user.id === 1}
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: 'none',
+                                                fontWeight: 600,
+                                                borderColor: 'divider',
+                                                color: mode === 'dark' ? '#fca5a5' : 'error.main',
+                                                '&:hover': {
+                                                    bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
+                                                    borderColor: 'error.main',
+                                                },
+                                                '&.Mui-disabled': {
+                                                    borderColor: 'divider',
+                                                    opacity: mode === 'dark' ? 0.3 : 0.5
+                                                }
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </Stack>
                                 </TableCell>
                             </TableRow>
                         ))}

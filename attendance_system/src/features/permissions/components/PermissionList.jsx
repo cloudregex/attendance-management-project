@@ -274,25 +274,27 @@ const PermissionList = () => {
                   </Stack>
                 </TableCell>
                 <TableCell align="right">
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
-                    onClick={() => navigate(`/permissions/edit/${user.id}`)}
-                    sx={{
-                      borderRadius: 1.5,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      borderColor: 'divider',
-                      color: mode === 'dark' ? 'primary.light' : 'primary.main',
-                      '&:hover': {
-                        bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
-                        borderColor: 'primary.main',
-                      }
-                    }}
-                  >
-                    Edit
-                  </Button>
+                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
+                      onClick={() => navigate(`/permissions/edit/${user.id}`)}
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        borderColor: 'divider',
+                        color: mode === 'dark' ? 'primary.light' : 'primary.main',
+                        '&:hover': {
+                          bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
+                          borderColor: 'primary.main',
+                        }
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Stack>
                 </TableCell>
               </TableRow>
             ))}
