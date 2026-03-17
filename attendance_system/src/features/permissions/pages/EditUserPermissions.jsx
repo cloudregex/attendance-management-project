@@ -9,6 +9,7 @@ import {
     Chip,
     Grid,
     Checkbox,
+    useTheme,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -25,12 +26,19 @@ import { readRoles } from '../components/RoleManager';
 const STORAGE_USERS = 'am_users_v1';
 const STORAGE_LOGS = 'am_logs_v1';
 
+const defaultUsers = [
+    { id: 1, name: 'Alex Johnson', roleId: 'admin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
+    { id: 2, name: 'Sara Parker', roleId: 'teacher', permissions: { canGrant: false, canApprove: true, canTakeAttendance: true } },
+    { id: 3, name: 'Mark Lee', roleId: 'staff', permissions: { canGrant: false, canApprove: false, canTakeAttendance: true } },
+    { id: 4, name: 'Nina Gomez', roleId: 'subadmin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
+];
+
 function readUsers() {
     try {
         const raw = localStorage.getItem(STORAGE_USERS);
-        return raw ? JSON.parse(raw) : [];
+        return raw ? JSON.parse(raw) : defaultUsers;
     } catch (e) {
-        return [];
+        return defaultUsers;
     }
 }
 
@@ -52,6 +60,8 @@ function addLog(entry) {
 const EditUserPermissions = () => {
     const { userId } = useParams();
     const navigate = useNavigate();
+    const theme = useTheme();
+    const mode = theme.palette.mode;
     const [user, setUser] = useState(null);
     const [roles, setRoles] = useState([]);
     const [roleId, setRoleId] = useState('');
@@ -175,11 +185,12 @@ const EditUserPermissions = () => {
                     borderColor: 'divider',
                     height: '100%',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    bgcolor: 'background.paper'
                 }}
             >
                 <Box sx={{
-                    bgcolor: '#4484f4',
+                    bgcolor: mode === 'dark' ? 'primary.dark' : '#4484f4',
                     color: 'white',
                     px: 2,
                     py: 1,
@@ -197,7 +208,7 @@ const EditUserPermissions = () => {
                         sx={{ p: 0, color: 'rgba(255,255,255,0.7)', '&.Mui-checked': { color: 'white' } }}
                     />
                 </Box>
-                <Box sx={{ p: 2, flex: 1, bgcolor: 'white' }}>
+                <Box sx={{ p: 2, flex: 1, bgcolor: mode === 'dark' ? 'background.default' : 'white' }}>
                     <Stack spacing={1}>
                         {groupPerms.map((p) => (
                             <Box key={p.key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -263,12 +274,12 @@ const EditUserPermissions = () => {
     ];
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', pb: 10 }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: mode === 'dark' ? 'background.default' : '#f8fafc', pb: 10 }}>
             {/* Top Bar */}
             <Box sx={{
-                bgcolor: 'white',
+                bgcolor: mode === 'dark' ? 'background.paper' : 'white',
                 borderBottom: '1px solid',
-                borderColor: '#e2e8f0',
+                borderColor: 'divider',
                 px: { xs: 2, md: 4 },
                 py: 2,
                 display: 'flex',
@@ -279,7 +290,7 @@ const EditUserPermissions = () => {
                 zIndex: 10,
                 mb: 4
             }}>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#1e293b' }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
                     Edit Role Permission
                 </Typography>
                 <Button
@@ -302,18 +313,18 @@ const EditUserPermissions = () => {
             <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 } }}>
                 {/* Role Name Display */}
                 <Box sx={{ mb: 4 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#64748b', mb: 1.5, ml: 0.5 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary', mb: 1.5, ml: 0.5 }}>
                         Role Name
                     </Typography>
                     <Box sx={{
-                        bgcolor: 'white',
+                        bgcolor: mode === 'dark' ? 'background.paper' : 'white',
                         border: '1px solid',
-                        borderColor: '#e2e8f0',
+                        borderColor: 'divider',
                         borderLeft: '4px solid',
-                        borderLeftColor: '#4484f4',
+                        borderLeftColor: mode === 'dark' ? 'primary.main' : '#4484f4',
                         borderRadius: 2,
                         p: 2.5,
-                        color: '#1e293b',
+                        color: 'text.primary',
                         fontWeight: 700,
                         fontSize: '1.1rem',
                         boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)'
@@ -324,7 +335,7 @@ const EditUserPermissions = () => {
 
                 {/* Role Selection Grid */}
                 <Box sx={{ mb: 6 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#64748b', mb: 2, ml: 0.5 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary', mb: 2, ml: 0.5 }}>
                         Select Role Type
                     </Typography>
                     <Grid container spacing={2}>
@@ -342,7 +353,7 @@ const EditUserPermissions = () => {
 
                 {/* Permissions Section Header */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5, px: 0.5 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 800, color: '#1e293b' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
                         Select Permission
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -359,7 +370,7 @@ const EditUserPermissions = () => {
                                 setPermissions(updated);
                             }}
                         />
-                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#64748b' }}>Select All</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.secondary' }}>Select All</Typography>
                     </Box>
                 </Box>
 
@@ -382,7 +393,7 @@ const EditUserPermissions = () => {
                     justifyContent: 'flex-end',
                     gap: 2,
                     borderTop: '1px solid',
-                    borderColor: '#e2e8f0',
+                    borderColor: 'divider',
                     pt: 4
                 }}>
                     <Button
@@ -390,12 +401,12 @@ const EditUserPermissions = () => {
                         onClick={() => navigate('/permissions')}
                         sx={{
                             borderRadius: 2,
-                            color: '#64748b',
-                            borderColor: '#e2e8f0',
+                            color: 'text.secondary',
+                            borderColor: 'divider',
                             textTransform: 'none',
                             px: 4,
                             fontWeight: 600,
-                            '&:hover': { borderColor: '#cbd5e1', bgcolor: '#f8fafc' }
+                            '&:hover': { borderColor: 'text.primary', bgcolor: 'action.hover' }
                         }}
                     >
                         Cancel

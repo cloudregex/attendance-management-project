@@ -284,7 +284,11 @@ const PermissionList = () => {
                       textTransform: 'none',
                       fontWeight: 600,
                       borderColor: 'divider',
-                      '&:hover': { bgcolor: 'primary.light', borderColor: 'primary.main' }
+                      color: mode === 'dark' ? 'primary.light' : 'primary.main',
+                      '&:hover': {
+                        bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
+                        borderColor: 'primary.main',
+                      }
                     }}
                   >
                     Edit

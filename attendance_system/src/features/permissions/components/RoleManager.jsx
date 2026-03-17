@@ -15,58 +15,41 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    FormControlLabel,
-    Switch,
-    FormGroup,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel,
     Chip,
-    Stack,
+    Avatar,
     Alert,
-    Grid,
+    useTheme,
+    Stack,
+    Tooltip,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Security as SecurityIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 
 const STORAGE_ROLES = 'am_roles_v1';
 
 const defaultRoles = [
     {
         id: 'admin',
-        name: 'Admin',
-        permissions: {
-            canGrant: true, canApprove: true, canTakeAttendance: true,
-            canManageUsers: true, canManageRoles: true, canViewReports: true,
-            canModifyRecords: true, canExportData: true, canAccessLogs: true,
-            canManageDepts: true, canViewSchedules: true, canSystemConfig: true
-        }
-    },
-    {
-        id: 'subadmin',
-        name: 'Subadmin',
-        permissions: {
-            canGrant: true, canApprove: true, canTakeAttendance: true,
-            canManageUsers: true, canManageRoles: false, canViewReports: true,
-            canModifyRecords: true, canExportData: true, canAccessLogs: true,
-            canManageDepts: true, canViewSchedules: true, canSystemConfig: false
-        }
+        name: 'Administrator',
+        permissions: { canGrant: true, canApprove: true, canTakeAttendance: true, canManageUsers: true, canManageRoles: true }
     },
     {
         id: 'teacher',
         name: 'Teacher',
-        permissions: {
-            canGrant: false, canApprove: true, canTakeAttendance: true,
-            canManageUsers: false, canManageRoles: false, canViewReports: true,
-            canModifyRecords: false, canExportData: false, canAccessLogs: false,
-            canManageDepts: false, canViewSchedules: true, canSystemConfig: false
-        }
+        permissions: { canGrant: false, canApprove: true, canTakeAttendance: true, canManageUsers: false, canManageRoles: false }
     },
     {
         id: 'staff',
         name: 'Staff',
-        permissions: {
-            canGrant: false, canApprove: false, canTakeAttendance: true,
-            canManageUsers: false, canManageRoles: false, canViewReports: false,
-            canModifyRecords: false, canExportData: false, canAccessLogs: false,
-            canManageDepts: false, canViewSchedules: false, canSystemConfig: false
-        }
+        permissions: { canGrant: false, canApprove: false, canTakeAttendance: true, canManageUsers: false, canManageRoles: false }
+    },
+    {
+        id: 'subadmin',
+        name: 'Sub Administrator',
+        permissions: { canGrant: true, canApprove: true, canTakeAttendance: true, canManageUsers: true, canManageRoles: false }
     },
 ];
 
@@ -84,35 +67,98 @@ export function writeRoles(roles) {
 }
 
 const RoleManager = () => {
+    const theme = useTheme();
+    const mode = theme.palette.mode;
     const [roles, setRoles] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingRole, setEditingRole] = useState(null);
     const [roleName, setRoleName] = useState('');
+    const [roleId, setRoleId] = useState('');
     const [permissions, setPermissions] = useState({
         canGrant: false,
         canApprove: false,
         canTakeAttendance: false,
+        canManageUsers: false,
+        canManageRoles: false,
     });
+
+    // Validation states
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
+
+    // Delete confirmation states
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [roleToDelete, setRoleToDelete] = useState(null);
 
     useEffect(() => {
         setRoles(readRoles());
     }, []);
 
+    const validateField = (name, value) => {
+        let error = '';
+        switch (name) {
+            case 'roleId':
+                if (!value.trim()) {
+                    error = 'Role ID is required';
+                } else if (!/^[a-z0-9_]+$/.test(value)) {
+                    error = 'Role ID can only contain lowercase letters, numbers, and underscores';
+                } else if (!editingRole && roles.some(r => r.id === value.trim())) {
+                    error = 'This Role ID already exists';
+                } else if (editingRole && roles.some(r => r.id !== editingRole.id && r.id === value.trim())) {
+                    error = 'This Role ID already exists';
+                }
+                break;
+            case 'roleName':
+                if (!value.trim()) {
+                    error = 'Role Name is required';
+                } else if (value.trim().length < 2) {
+                    error = 'Role Name must be at least 2 characters long';
+                }
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
+    const handleFieldChange = (name, value) => {
+        if (name === 'roleId') setRoleId(value.toLowerCase().replace(/\s+/g, ''));
+        if (name === 'roleName') setRoleName(value);
+
+        const error = validateField(name, name === 'roleId' ? value.toLowerCase().replace(/\s+/g, '') : value);
+        setErrors(prev => ({ ...prev, [name]: error }));
+
+        if (!touched[name]) {
+            setTouched(prev => ({ ...prev, [name]: true }));
+        }
+    };
+
+    const handleFieldBlur = (name) => {
+        setTouched(prev => ({ ...prev, [name]: true }));
+        const error = validateField(name, name === 'roleId' ? roleId : roleName);
+        setErrors(prev => ({ ...prev, [name]: error }));
+    };
+
     const handleOpen = (role = null) => {
         if (role) {
             setEditingRole(role);
             setRoleName(role.name);
-            setPermissions(role.permissions);
+            setRoleId(role.id);
+            setPermissions({ ...role.permissions });
         } else {
             setEditingRole(null);
             setRoleName('');
+            setRoleId('');
             setPermissions({
-                canGrant: false, canApprove: false, canTakeAttendance: false,
-                canManageUsers: false, canManageRoles: false, canViewReports: false,
-                canModifyRecords: false, canExportData: false, canAccessLogs: false,
-                canManageDepts: false, canViewSchedules: false, canSystemConfig: false
+                canGrant: false,
+                canApprove: false,
+                canTakeAttendance: false,
+                canManageUsers: false,
+                canManageRoles: false,
             });
         }
+        setErrors({});
+        setTouched({});
         setOpen(true);
     };
 
@@ -121,17 +167,33 @@ const RoleManager = () => {
     };
 
     const handleSave = () => {
-        if (!roleName.trim()) return;
+        const fieldsToValidate = ['roleId', 'roleName'];
+        let hasErrors = false;
+        const newErrors = {};
+
+        fieldsToValidate.forEach(field => {
+            const value = field === 'roleId' ? roleId : roleName;
+            const error = validateField(field, value);
+            if (error) {
+                newErrors[field] = error;
+                hasErrors = true;
+            }
+        });
+
+        setErrors(newErrors);
+        setTouched(Object.fromEntries(fieldsToValidate.map(field => [field, true])));
+
+        if (hasErrors) return;
 
         let updatedRoles;
         if (editingRole) {
-            updatedRoles = roles.map((r) =>
-                r.id === editingRole.id ? { ...r, name: roleName, permissions } : r
+            updatedRoles = roles.map(r =>
+                r.id === editingRole.id ? { ...r, name: roleName.trim(), id: roleId.trim(), permissions } : r
             );
         } else {
             const newRole = {
-                id: roleName.toLowerCase().replace(/\s+/g, '-'),
-                name: roleName,
+                id: roleId.trim(),
+                name: roleName.trim(),
                 permissions,
             };
             updatedRoles = [...roles, newRole];
@@ -142,27 +204,86 @@ const RoleManager = () => {
         handleClose();
     };
 
-    const handleDelete = (id) => {
-        if (id === 'admin') return; // Protect admin role
-        const updatedRoles = roles.filter((r) => r.id !== id);
-        setRoles(updatedRoles);
-        writeRoles(updatedRoles);
+    const handleDelete = (role) => {
+        if (role.id === 'admin') return; // Protect admin role
+        setRoleToDelete(role);
+        setDeleteDialogOpen(true);
     };
 
-    const handleToggle = (key) => {
-        setPermissions((p) => ({ ...p, [key]: !p[key] }));
+    const handleConfirmDelete = () => {
+        if (roleToDelete) {
+            const updatedRoles = roles.filter(r => r.id !== roleToDelete.id);
+            setRoles(updatedRoles);
+            writeRoles(updatedRoles);
+        }
+        setDeleteDialogOpen(false);
+        setRoleToDelete(null);
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteDialogOpen(false);
+        setRoleToDelete(null);
+    };
+
+    const getPermissionLabel = (key) => {
+        const labels = {
+            canGrant: 'Grant Permissions',
+            canApprove: 'Approve Requests',
+            canTakeAttendance: 'Take Attendance',
+            canManageUsers: 'Manage Users',
+            canManageRoles: 'Manage Roles',
+        };
+        return labels[key] || key;
     };
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 2 }}>
-                <Button startIcon={<AddIcon />} variant="contained" onClick={() => handleOpen()}>
-                    Add New Role
-                </Button>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.9rem', color: 'text.primary' }}>
+                        ROLE MANAGEMENT
+                    </Typography>
+                    <Box sx={{ bgcolor: 'primary.light', color: 'primary.main', px: 1, py: 0.2, borderRadius: 10, fontSize: '0.7rem', fontWeight: 800, opacity: 0.8 }}>
+                        {roles.length} ROLES
+                    </Box>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1.5 }}>
+                    <Tooltip title="Refresh Data">
+                        <IconButton
+                            onClick={() => setRoles(readRoles())}
+                            sx={{
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                borderRadius: 2,
+                                bgcolor: mode === 'dark' ? '#1E293B' : 'white'
+                            }}
+                        >
+                            <RefreshIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    <Button
+                        startIcon={<AddIcon />}
+                        variant="contained"
+                        onClick={() => handleOpen()}
+                        sx={{
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            px: 3,
+                            boxShadow: 'none',
+                            bgcolor: mode === 'dark' ? 'primary.main' : '#4484f4',
+                            '&:hover': {
+                                bgcolor: mode === 'dark' ? 'primary.dark' : '#3374e3',
+                                boxShadow: '0 4px 12px rgba(68, 132, 244, 0.2)'
+                            }
+                        }}
+                    >
+                        Add New Role
+                    </Button>
+                </Box>
             </Box>
 
-            <Alert severity="info" sx={{ mb: 2 }}>
-                Define roles and their default permissions here. These will be available in the user assignment dropdown.
+            <Alert severity="info" sx={{ mb: 3, borderRadius: 2, border: '1px solid', borderColor: mode === 'dark' ? 'rgba(56, 189, 248, 0.2)' : 'info.light' }}>
+                Manage system roles and their permissions here. Changes will affect all users assigned to these roles.
             </Alert>
 
             <Paper
@@ -172,77 +293,99 @@ const RoleManager = () => {
                     borderRadius: 3,
                     border: '1px solid',
                     borderColor: 'divider',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                    overflow: 'hidden'
+                    boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.05)',
+                    overflow: 'hidden',
+                    bgcolor: mode === 'dark' ? '#1E293B' : 'white',
                 }}
             >
                 <Table>
-                    <TableHead sx={{ bgcolor: 'grey.50' }}>
+                    <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
                         <TableRow>
-                            <TableCell sx={{ fontWeight: 700 }}>Role Name</TableCell>
-                            <TableCell sx={{ fontWeight: 700 }}>Default Permissions</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 700 }}>Actions</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>Role</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>Permissions</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {roles.map((role) => (
                             <TableRow key={role.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                 <TableCell>
-                                    <Typography sx={{ fontWeight: 600, color: 'primary.main' }}>{role.name}</Typography>
-                                    <Typography variant="caption" color="text.secondary">Internal ID: {role.id}</Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                        <Avatar sx={{
+                                            width: 40, height: 40,
+                                            bgcolor: 'primary.main',
+                                            fontSize: '0.9rem', fontWeight: 700
+                                        }}>
+                                            <SecurityIcon fontSize="small" />
+                                        </Avatar>
+                                        <Box>
+                                            <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>{role.name}</Typography>
+                                            <Typography variant="caption" color="text.secondary">ID: {role.id}</Typography>
+                                        </Box>
+                                    </Box>
                                 </TableCell>
                                 <TableCell>
-                                    <Stack direction="row" spacing={1}>
-                                        <Chip
-                                            label="Grant"
-                                            size="small"
-                                            color={role.permissions.canGrant ? 'primary' : 'default'}
-                                            variant={role.permissions.canGrant ? 'filled' : 'outlined'}
-                                            sx={{ minWidth: 70 }}
-                                        />
-                                        <Chip
-                                            label="Approve"
-                                            size="small"
-                                            color={role.permissions.canApprove ? 'success' : 'default'}
-                                            variant={role.permissions.canApprove ? 'filled' : 'outlined'}
-                                            sx={{ minWidth: 80 }}
-                                        />
-                                        <Chip
-                                            label="Take"
-                                            size="small"
-                                            color={role.permissions.canTakeAttendance ? 'secondary' : 'default'}
-                                            variant={role.permissions.canTakeAttendance ? 'filled' : 'outlined'}
-                                            sx={{ minWidth: 70 }}
-                                        />
-                                    </Stack>
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                        {Object.entries(role.permissions).map(([key, value]) => (
+                                            value && (
+                                                <Chip
+                                                    key={key}
+                                                    label={getPermissionLabel(key)}
+                                                    size="small"
+                                                    color="primary"
+                                                    variant="outlined"
+                                                    sx={{ fontSize: '0.7rem' }}
+                                                />
+                                            )
+                                        ))}
+                                    </Box>
                                 </TableCell>
                                 <TableCell align="right">
-                                    <IconButton
-                                        onClick={() => handleOpen(role)}
-                                        size="small"
-                                        sx={{
-                                            color: 'primary.main',
-                                            bgcolor: 'primary.light',
-                                            mr: 1,
-                                            opacity: 0.8,
-                                            '&:hover': { bgcolor: 'primary.main', color: 'white', opacity: 1 }
-                                        }}
-                                    >
-                                        <EditIcon fontSize="small" />
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => handleDelete(role.id)}
-                                        size="small"
-                                        sx={{
-                                            color: 'error.main',
-                                            bgcolor: 'error.light',
-                                            opacity: 0.8,
-                                            '&:hover': { bgcolor: 'error.main', color: 'white', opacity: 1 }
-                                        }}
-                                        disabled={role.id === 'admin'}
-                                    >
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
+                                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
+                                            onClick={() => handleOpen(role)}
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: 'none',
+                                                fontWeight: 600,
+                                                borderColor: 'divider',
+                                                color: mode === 'dark' ? 'primary.light' : 'primary.main',
+                                                '&:hover': {
+                                                    bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
+                                                    borderColor: 'primary.main',
+                                                }
+                                            }}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            startIcon={<DeleteIcon sx={{ fontSize: '1rem !important' }} />}
+                                            onClick={() => handleDelete(role)}
+                                            disabled={role.id === 'admin'}
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: 'none',
+                                                fontWeight: 600,
+                                                borderColor: 'divider',
+                                                color: mode === 'dark' ? '#fca5a5' : 'error.main',
+                                                '&:hover': {
+                                                    bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
+                                                    borderColor: 'error.main',
+                                                },
+                                                '&.Mui-disabled': {
+                                                    borderColor: 'divider',
+                                                    opacity: mode === 'dark' ? 0.3 : 0.5
+                                                }
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </Stack>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -250,46 +393,173 @@ const RoleManager = () => {
                 </Table>
             </Paper>
 
-            <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
-                <DialogTitle>{editingRole ? 'Edit Role' : 'Add New Role'}</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <TextField
-                            fullWidth
-                            label="Role Name"
-                            value={roleName}
-                            onChange={(e) => setRoleName(e.target.value)}
-                            placeholder="e.g. Intern, Moderator"
-                        />
-                        <Typography variant="subtitle2" color="text.secondary">Default Permissions</Typography>
-                        <Grid container spacing={1}>
-                            {[
-                                { k: 'canGrant', l: 'Grant Permissions' },
-                                { k: 'canApprove', l: 'Approve Requests' },
-                                { k: 'canTakeAttendance', l: 'Take Attendance' },
-                                { k: 'canManageUsers', l: 'Manage Users' },
-                                { k: 'canManageRoles', l: 'Manage Roles' },
-                                { k: 'canViewReports', l: 'View Reports' },
-                                { k: 'canModifyRecords', l: 'Modify Records' },
-                                { k: 'canExportData', l: 'Export Data' },
-                                { k: 'canAccessLogs', l: 'Access Logs' },
-                                { k: 'canManageDepts', l: 'Manage Depts' },
-                                { k: 'canViewSchedules', l: 'View Schedules' },
-                                { k: 'canSystemConfig', l: 'System Config' },
-                            ].map((p) => (
-                                <Grid item xs={6} key={p.k}>
-                                    <FormControlLabel
-                                        control={<Switch size="small" checked={!!permissions[p.k]} onChange={() => handleToggle(p.k)} />}
-                                        label={<Typography variant="caption">{p.l}</Typography>}
-                                    />
-                                </Grid>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                fullWidth
+                maxWidth="md"
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: mode === 'dark' ? '#1E293B' : 'white',
+                        backgroundImage: 'none'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ fontWeight: 800, borderBottom: '1px solid', borderColor: 'divider', pb: 2 }}>
+                    {editingRole ? 'Edit Role' : 'Add New Role'}
+                </DialogTitle>
+                <DialogContent sx={{ pt: 3, pb: 1 }}>
+                    <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <TextField
+                                fullWidth
+                                label="Role ID"
+                                value={roleId}
+                                onChange={(e) => handleFieldChange('roleId', e.target.value)}
+                                onBlur={() => handleFieldBlur('roleId')}
+                                placeholder="e.g. teacher"
+                                disabled={!!editingRole}
+                                required
+                                error={touched.roleId && !!errors.roleId}
+                                helperText={touched.roleId && errors.roleId}
+                            />
+                            <TextField
+                                fullWidth
+                                label="Role Name"
+                                value={roleName}
+                                onChange={(e) => handleFieldChange('roleName', e.target.value)}
+                                onBlur={() => handleFieldBlur('roleName')}
+                                placeholder="e.g. Teacher"
+                                required
+                                error={touched.roleName && !!errors.roleName}
+                                helperText={touched.roleName && errors.roleName}
+                            />
+                        </Box>
+
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', mt: 2 }}>
+                            Permissions
+                        </Typography>
+
+                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
+                            {Object.entries(permissions).map(([key, value]) => (
+                                <FormControl key={key} component="fieldset" variant="standard">
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={value}
+                                            onChange={(e) => setPermissions(prev => ({ ...prev, [key]: e.target.checked }))}
+                                            style={{ transform: 'scale(1.2)' }}
+                                        />
+                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                            {getPermissionLabel(key)}
+                                        </Typography>
+                                    </Box>
+                                </FormControl>
                             ))}
-                        </Grid>
+                        </Box>
                     </Box>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSave}>Save Role</Button>
+                <DialogActions sx={{ p: 2.5, borderTop: '1px solid', borderColor: 'divider' }}>
+                    <Button
+                        onClick={handleClose}
+                        sx={{
+                            color: 'text.secondary',
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            borderRadius: 2
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleSave}
+                        sx={{
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            px: 3,
+                            boxShadow: 'none',
+                            fontWeight: 600,
+                        }}
+                    >
+                        Save Role
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={handleCancelDelete}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: mode === 'dark' ? '#1E293B' : 'white',
+                        backgroundImage: 'none'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ fontWeight: 800, borderBottom: '1px solid', borderColor: 'divider', pb: 2 }}>
+                    Confirm Delete Role
+                </DialogTitle>
+                <DialogContent sx={{ pt: 3, pb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                        <Avatar sx={{
+                            width: 50, height: 50,
+                            bgcolor: 'primary.main',
+                            fontSize: '1.2rem', fontWeight: 700
+                        }}>
+                            <SecurityIcon />
+                        </Avatar>
+                        <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                                {roleToDelete?.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                ID: {roleToDelete?.id}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                        <Typography variant="body2">
+                            Are you sure you want to delete this role? This action cannot be undone and may affect users assigned to this role.
+                        </Typography>
+                    </Alert>
+                </DialogContent>
+                <DialogActions sx={{ p: 2.5, borderTop: '1px solid', borderColor: 'divider' }}>
+                    <Button
+                        onClick={handleCancelDelete}
+                        sx={{
+                            color: 'text.secondary',
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            borderRadius: 2
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleConfirmDelete}
+                        color="error"
+                        sx={{
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            px: 3,
+                            boxShadow: 'none',
+                            fontWeight: 600,
+                            bgcolor: 'error.main',
+                            '&:hover': {
+                                bgcolor: 'error.dark',
+                                boxShadow: '0 4px 12px rgba(211, 47, 47, 0.2)'
+                            }
+                        }}
+                    >
+                        Delete Role
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Box>

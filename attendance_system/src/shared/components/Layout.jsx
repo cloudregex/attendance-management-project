@@ -185,13 +185,23 @@ const Layout = ({ children }) => {
                     <List component="div" disablePadding>
                         <ListItemButton
                             sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
-                            selected={location.pathname === '/permissions' && !location.search.includes('view=roles')}
+                            selected={location.pathname === '/permissions' && (!location.search || location.search.includes('view=manage_users'))}
+                            onClick={() => navigate('/permissions?view=manage_users')}
+                        >
+                            <ListItemIcon sx={{ minWidth: 32 }}>
+                                <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
+                            </ListItemIcon>
+                            <ListItemText primary="User List" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                        </ListItemButton>
+                        <ListItemButton
+                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
+                            selected={location.search.includes('view=users')}
                             onClick={() => navigate('/permissions?view=users')}
                         >
                             <ListItemIcon sx={{ minWidth: 32 }}>
                                 <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
                             </ListItemIcon>
-                            <ListItemText primary="User Role Permission" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                            <ListItemText primary="Permissions" primaryTypographyProps={{ fontSize: '0.85rem' }} />
                         </ListItemButton>
                         <ListItemButton
                             sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
