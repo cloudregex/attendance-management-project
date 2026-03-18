@@ -1,10 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import testRoutes from './routes/testRoutes.js';
-
-// Load environment variables
-dotenv.config();
+import sequelize from './config/db.js';
+import userRoutes from './routes/user.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,9 +10,15 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/api", userRoutes);
+
+
+// ✅ Correct DB connection check
+sequelize.authenticate()
+  .then(() => console.log("✅ Database connected successfully"))
+  .catch((e) => console.log("❌ DB Error:", e));
 
 // Routes
-app.use('/api', testRoutes);
 
 // General route
 app.get('/', (req, res) => {
