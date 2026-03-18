@@ -63,6 +63,9 @@ const sectionCard = (mode) => ({
 
 const getFieldSx = (mode) => ({
     '& .MuiOutlinedInput-root': { borderRadius: 2 },
+    '& input': {
+        color: mode === 'dark' ? '#fff' : '#000',
+    },
     '& input:-webkit-autofill': {
         WebkitBoxShadow: '0 0 0 1000px transparent inset',
         WebkitTextFillColor: mode === 'dark' ? '#fff !important' : '#000 !important',

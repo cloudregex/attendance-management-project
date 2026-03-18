@@ -16,7 +16,8 @@ import {
     CssBaseline,
     Container,
     alpha,
-    useTheme
+    useTheme,
+    CircularProgress
 } from '@mui/material';
 import { Visibility, VisibilityOff, LockOutlined, AccountTree, CheckCircleOutline } from '@mui/icons-material';
 
@@ -31,7 +32,8 @@ const AdminLogin = () => {
     });
     const [errors, setErrors] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false);
-
+    const [loading, setLoading] = useState(false);
+    const [loginError, setLoginError] = useState('');
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
     const validate = () => {
@@ -60,16 +62,42 @@ const AdminLogin = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validate();
         if (Object.keys(validationErrors).length === 0) {
-            console.log('Login attempt with:', formData);
-            setIsSubmitted(true);
-            // Simulate successful login and redirect
-            setTimeout(() => {
-                navigate('/dashboard');
-            }, 1500);
+            setLoading(true);
+            setLoginError(''); // Clear previous login errors
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: formData.email,
+                        password: formData.password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    console.log('Login success:', data);
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminEmail', data.admin.email);
+                    setIsSubmitted(true);
+                    setLoginError('');
+                    setTimeout(() => {
+                        navigate('/dashboard');
+                    }, 1500);
+                } else {
+                    setLoginError(data.message || 'Invalid email or password');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                setLoginError('Server connection failed. Please try again.');
+            } finally {
+                setLoading(false);
+            }
         } else {
             setErrors(validationErrors);
         }
@@ -214,6 +242,20 @@ const AdminLogin = () => {
                         </Alert>
                     )}
 
+                    {loginError && (
+                        <Alert
+                            severity="error"
+                            sx={{
+                                width: '100%',
+                                mb: 3,
+                                borderRadius: '14px',
+                                fontWeight: 600
+                            }}
+                            onClose={() => setLoginError('')}
+                        >
+                            {loginError}
+                        </Alert>
+                    )}
                     <Box component="form" noValidate onSubmit={handleSubmit} sx={{ width: '100%' }}>
                         <TextField
                             margin="normal"
@@ -235,9 +277,12 @@ const AdminLogin = () => {
                                     bgcolor: '#f1f5f9',
                                     '&:hover': { bgcolor: '#e2e8f0' },
                                     '&.Mui-focused': { bgcolor: 'white' },
+                                    '& input': {
+                                        color: '#000000', // Ensure text is black
+                                    },
                                     '& input:-webkit-autofill': {
                                         WebkitBoxShadow: '0 0 0 1000px #f1f5f9 inset',
-                                        WebkitTextFillColor: '#1e293b',
+                                        WebkitTextFillColor: '#000000',
                                         borderRadius: 'inherit'
                                     }
                                 }
@@ -276,9 +321,12 @@ const AdminLogin = () => {
                                     bgcolor: '#f1f5f9',
                                     '&:hover': { bgcolor: '#e2e8f0' },
                                     '&.Mui-focused': { bgcolor: 'white' },
+                                    '& input': {
+                                        color: '#000000', // Ensure text is black
+                                    },
                                     '& input:-webkit-autofill': {
                                         WebkitBoxShadow: '0 0 0 1000px #f1f5f9 inset',
-                                        WebkitTextFillColor: '#1e293b',
+                                        WebkitTextFillColor: '#000000',
                                         borderRadius: 'inherit'
                                     }
                                 }
@@ -322,8 +370,9 @@ const AdminLogin = () => {
                                 },
                                 transition: 'all 0.2s ease'
                             }}
+                            disabled={loading}
                         >
-                            Sign In to Dashboard
+                            {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In to Dashboard'}
                         </Button>
 
                         <Box sx={{ mt: 4, textAlign: 'center' }}>
