@@ -34,6 +34,7 @@ import {
     ExpandMore,
     RadioButtonUnchecked,
     AdminPanelSettings,
+    Logout,
 } from '@mui/icons-material';
 import { Collapse } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -92,6 +93,12 @@ const Layout = ({ children }) => {
 
     const handlePermissionsClick = () => {
         setPermissionsOpen(!permissionsOpen);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        navigate('/login');
     };
 
     const menuItems = [
@@ -307,12 +314,17 @@ const Layout = ({ children }) => {
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>Alex Johnson</Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    {localStorage.getItem('adminEmail') || 'Admin'}
+                                </Typography>
                                 <Typography variant="caption" color="text.secondary">Main Admin</Typography>
                             </Box>
                             <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}>A</Avatar>
+                            <IconButton color="error" onClick={handleLogout} title="Logout">
+                                <Logout />
+                            </IconButton>
                         </Box>
                     </Box>
                 </Toolbar>
