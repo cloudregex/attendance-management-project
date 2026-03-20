@@ -19,13 +19,13 @@ export const loginAdmin = async (req, res) => {
         const token = jwt.sign(
             { id: admin.id, email: admin.email, role: 'admin' },
             process.env.JWT_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '5d' }
         );
 
-        res.status(200).json({ 
-            message: "Login successful", 
+        res.status(200).json({
+            message: "Login successful",
             token,
-            admin: { email: admin.email } 
+            admin: { email: admin.email }
         });
     } catch (error) {
         console.error("❌ Error logging in admin:", error);
@@ -45,7 +45,7 @@ export const seedAdmin = async (adminData) => {
         // Hash password before creating
         const hashedPassword = await bcrypt.hash(adminData.password, 10);
         const admin = await Admin.create({ ...adminData, password: hashedPassword });
-        
+
         console.log("✅ Admin seeded:", admin.email);
         return admin;
     } catch (error) {

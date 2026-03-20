@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -24,6 +24,15 @@ import { Visibility, VisibilityOff, LockOutlined, AccountTree, CheckCircleOutlin
 const AdminLogin = () => {
     const theme = useTheme();
     const navigate = useNavigate();
+
+    // Check if already logged in
+    useEffect(() => {
+        const token = localStorage.getItem('adminToken');
+        if (token) {
+            navigate('/dashboard');
+        }
+    }, [navigate]);
+
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
