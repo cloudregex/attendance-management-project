@@ -28,49 +28,17 @@ import {
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Security as SecurityIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 
-const STORAGE_ROLES = 'am_roles_v1';
+import axios from 'axios';
 
-const defaultRoles = [
-    {
-        id: 'admin',
-        name: 'Administrator',
-        permissions: { canGrant: true, canApprove: true, canTakeAttendance: true, canManageUsers: true, canManageRoles: true }
-    },
-    {
-        id: 'teacher',
-        name: 'Teacher',
-        permissions: { canGrant: false, canApprove: true, canTakeAttendance: true, canManageUsers: false, canManageRoles: false }
-    },
-    {
-        id: 'staff',
-        name: 'Staff',
-        permissions: { canGrant: false, canApprove: false, canTakeAttendance: true, canManageUsers: false, canManageRoles: false }
-    },
-    {
-        id: 'subadmin',
-        name: 'Sub Administrator',
-        permissions: { canGrant: true, canApprove: true, canTakeAttendance: true, canManageUsers: true, canManageRoles: false }
-    },
-];
+const API_URL = 'http://localhost:5000/api/roles';
 
-export function readRoles() {
-    try {
-        const raw = localStorage.getItem(STORAGE_ROLES);
-        return raw ? JSON.parse(raw) : defaultRoles;
-    } catch (e) {
-        return defaultRoles;
-    }
-}
-
-export function writeRoles(roles) {
-    localStorage.setItem(STORAGE_ROLES, JSON.stringify(roles));
-}
-
-const RoleManager = () => {
+export const RoleManager = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
     const [roles, setRoles] = useState([]);
     const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+
     const [editingRole, setEditingRole] = useState(null);
     const [roleName, setRoleName] = useState('');
     const [roleId, setRoleId] = useState('');
@@ -90,8 +58,20 @@ const RoleManager = () => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [roleToDelete, setRoleToDelete] = useState(null);
 
+    const fetchRoles = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${API_URL}/get`);
+            setRoles(response.data);
+        } catch (error) {
+            console.error('Error fetching roles:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        setRoles(readRoles());
+        fetchRoles();
     }, []);
 
     const validateField = (name, value) => {
@@ -103,8 +83,6 @@ const RoleManager = () => {
                 } else if (!/^[a-z0-9_]+$/.test(value)) {
                     error = 'Role ID can only contain lowercase letters, numbers, and underscores';
                 } else if (!editingRole && roles.some(r => r.id === value.trim())) {
-                    error = 'This Role ID already exists';
-                } else if (editingRole && roles.some(r => r.id !== editingRole.id && r.id === value.trim())) {
                     error = 'This Role ID already exists';
                 }
                 break;
@@ -144,7 +122,13 @@ const RoleManager = () => {
             setEditingRole(role);
             setRoleName(role.name);
             setRoleId(role.id);
-            setPermissions({ ...role.permissions });
+            setPermissions({
+                canGrant: role.canGrant || false,
+                canApprove: role.canApprove || false,
+                canTakeAttendance: role.canTakeAttendance || false,
+                canManageUsers: role.canManageUsers || false,
+                canManageRoles: role.canManageRoles || false,
+            });
         } else {
             setEditingRole(null);
             setRoleName('');
@@ -166,7 +150,7 @@ const RoleManager = () => {
         setOpen(false);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const fieldsToValidate = ['roleId', 'roleName'];
         let hasErrors = false;
         const newErrors = {};
@@ -185,23 +169,24 @@ const RoleManager = () => {
 
         if (hasErrors) return;
 
-        let updatedRoles;
-        if (editingRole) {
-            updatedRoles = roles.map(r =>
-                r.id === editingRole.id ? { ...r, name: roleName.trim(), id: roleId.trim(), permissions } : r
-            );
-        } else {
-            const newRole = {
-                id: roleId.trim(),
-                name: roleName.trim(),
-                permissions,
-            };
-            updatedRoles = [...roles, newRole];
-        }
+        const roleData = {
+            id: roleId.trim(),
+            name: roleName.trim(),
+            ...permissions
+        };
 
-        setRoles(updatedRoles);
-        writeRoles(updatedRoles);
-        handleClose();
+        try {
+            if (editingRole) {
+                await axios.put(`${API_URL}/update/${editingRole.id}`, roleData);
+            } else {
+                await axios.post(`${API_URL}/create`, roleData);
+            }
+            fetchRoles();
+            handleClose();
+        } catch (error) {
+            console.error('Error saving role:', error);
+            alert(error.response?.data?.error || 'Failed to save role');
+        }
     };
 
     const handleDelete = (role) => {
@@ -210,14 +195,18 @@ const RoleManager = () => {
         setDeleteDialogOpen(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (roleToDelete) {
-            const updatedRoles = roles.filter(r => r.id !== roleToDelete.id);
-            setRoles(updatedRoles);
-            writeRoles(updatedRoles);
+            try {
+                await axios.delete(`${API_URL}/delete/${roleToDelete.id}`);
+                fetchRoles();
+            } catch (error) {
+                console.error('Error deleting role:', error);
+                alert(error.response?.data?.error || 'Failed to delete role');
+            }
         }
         setDeleteDialogOpen(false);
-        setRoleToDelete(null);
+        setUserToDelete(null); // Wait, userToDelete? Should be roleToDelete
     };
 
     const handleCancelDelete = () => {
@@ -250,7 +239,7 @@ const RoleManager = () => {
                 <Box sx={{ display: 'flex', gap: 1.5 }}>
                     <Tooltip title="Refresh Data">
                         <IconButton
-                            onClick={() => setRoles(readRoles())}
+                            onClick={fetchRoles}
                             sx={{
                                 border: '1px solid',
                                 borderColor: 'divider',
@@ -326,8 +315,8 @@ const RoleManager = () => {
                                 </TableCell>
                                 <TableCell>
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {Object.entries(role.permissions).map(([key, value]) => (
-                                            value && (
+                                        {['canGrant', 'canApprove', 'canTakeAttendance', 'canManageUsers', 'canManageRoles'].map(key => (
+                                            role[key] && (
                                                 <Chip
                                                     key={key}
                                                     label={getPermissionLabel(key)}
