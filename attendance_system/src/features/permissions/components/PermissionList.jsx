@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Paper,
   Box,
@@ -32,31 +33,15 @@ import {
   FileDownload as FileDownloadIcon,
   ViewColumn as ViewColumnIcon,
 } from '@mui/icons-material';
-import { readRoles } from './RoleManager';
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const STORAGE_USERS = 'am_users_v1';
-const STORAGE_LOGS = 'am_logs_v1';
-
-const defaultUsers = [
-  { id: 1, name: 'Alex Johnson', roleId: 'admin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-  { id: 2, name: 'Sara Parker', roleId: 'teacher', permissions: { canGrant: false, canApprove: true, canTakeAttendance: true } },
-  { id: 3, name: 'Mark Lee', roleId: 'staff', permissions: { canGrant: false, canApprove: false, canTakeAttendance: true } },
-  { id: 4, name: 'Nina Gomez', roleId: 'subadmin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-];
-
-function readUsers() {
-  try {
-    const raw = localStorage.getItem(STORAGE_USERS);
-    return raw ? JSON.parse(raw) : defaultUsers;
-  } catch (e) {
-    return defaultUsers;
-  }
-}
+const API_USERS = 'http://localhost:5000/api/users';
+const API_ROLES = 'http://localhost:5000/api/roles';
 
 const PermissionList = () => {
-  const [users, setUsers] = useState(() => readUsers());
-  const [roles, setRoles] = useState(() => readRoles());
+  const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [snack, setSnack] = useState({ open: false, message: '' });
@@ -71,11 +56,28 @@ const PermissionList = () => {
   const theme = useTheme();
   const mode = theme.palette.mode;
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [usersRes, rolesRes] = await Promise.all([
+        axios.get(`${API_USERS}/get`),
+        axios.get(`${API_ROLES}/get`)
+      ]);
+      setUsers(usersRes.data);
+      setRoles(rolesRes.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setSnack({ open: true, message: 'Failed to fetch data' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setRoles(readRoles());
+    fetchData();
   }, []);
 
-  const refresh = () => setUsers(readUsers());
+  const refresh = fetchData;
 
   const filtered = users
     .filter((u) => u.name.toLowerCase().includes(query.toLowerCase()))
@@ -103,9 +105,9 @@ const PermissionList = () => {
         u.id,
         u.name,
         roles.find(r => r.id === u.roleId)?.name || u.roleId,
-        u.permissions?.canGrant ? 'Yes' : 'No',
-        u.permissions?.canApprove ? 'Yes' : 'No',
-        u.permissions?.canTakeAttendance ? 'Yes' : 'No'
+        (u.role?.canGrant) ? 'Yes' : 'No',
+        (u.role?.canApprove) ? 'Yes' : 'No',
+        (u.role?.canTakeAttendance) ? 'Yes' : 'No'
       ]);
       const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
 
@@ -263,13 +265,13 @@ const PermissionList = () => {
                 <TableCell>
                   <Stack direction="row" spacing={0.5}>
                     <Tooltip title="Can Grant Permissions">
-                      <Chip label="G" size="small" variant={user.permissions?.canGrant ? 'filled' : 'outlined'} color={user.permissions?.canGrant ? 'primary' : 'default'} sx={{ minWidth: 24, padding: 0 }} />
+                      <Chip label="G" size="small" variant={user.role?.canGrant ? 'filled' : 'outlined'} color={user.role?.canGrant ? 'primary' : 'default'} sx={{ minWidth: 24, padding: 0 }} />
                     </Tooltip>
                     <Tooltip title="Can Approve Requests">
-                      <Chip label="A" size="small" variant={user.permissions?.canApprove ? 'filled' : 'outlined'} color={user.permissions?.canApprove ? 'success' : 'default'} sx={{ minWidth: 24 }} />
+                      <Chip label="A" size="small" variant={user.role?.canApprove ? 'filled' : 'outlined'} color={user.role?.canApprove ? 'success' : 'default'} sx={{ minWidth: 24 }} />
                     </Tooltip>
                     <Tooltip title="Can Take Attendance">
-                      <Chip label="T" size="small" variant={user.permissions?.canTakeAttendance ? 'filled' : 'outlined'} color={user.permissions?.canTakeAttendance ? 'secondary' : 'default'} sx={{ minWidth: 24 }} />
+                      <Chip label="T" size="small" variant={user.role?.canTakeAttendance ? 'filled' : 'outlined'} color={user.role?.canTakeAttendance ? 'secondary' : 'default'} sx={{ minWidth: 24 }} />
                     </Tooltip>
                   </Stack>
                 </TableCell>

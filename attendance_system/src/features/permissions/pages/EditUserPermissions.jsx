@@ -6,14 +6,13 @@ import {
     Paper,
     Stack,
     Alert,
-    Chip,
     Grid,
     Checkbox,
     useTheme,
+    CircularProgress
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    Refresh as RefreshIcon,
     Star as StarIcon,
     Groups as GroupsIcon,
     Work as WorkIcon,
@@ -21,65 +20,59 @@ import {
     Check as CheckIcon,
     ArrowBackIosNew as ArrowBackIosNewIcon
 } from '@mui/icons-material';
-import { readRoles } from '../components/RoleManager';
+import axios from 'axios';
 
-const STORAGE_USERS = 'am_users_v1';
-const STORAGE_LOGS = 'am_logs_v1';
-
-const defaultUsers = [
-    { id: 1, name: 'Alex Johnson', roleId: 'admin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-    { id: 2, name: 'Sara Parker', roleId: 'teacher', permissions: { canGrant: false, canApprove: true, canTakeAttendance: true } },
-    { id: 3, name: 'Mark Lee', roleId: 'staff', permissions: { canGrant: false, canApprove: false, canTakeAttendance: true } },
-    { id: 4, name: 'Nina Gomez', roleId: 'subadmin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-];
-
-function readUsers() {
-    try {
-        const raw = localStorage.getItem(STORAGE_USERS);
-        return raw ? JSON.parse(raw) : defaultUsers;
-    } catch (e) {
-        return defaultUsers;
-    }
-}
-
-function writeUsers(users) {
-    localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
-}
-
-function addLog(entry) {
-    try {
-        const raw = localStorage.getItem(STORAGE_LOGS);
-        const logs = raw ? JSON.parse(raw) : [];
-        logs.unshift({ ...entry, time: new Date().toISOString() });
-        localStorage.setItem(STORAGE_LOGS, JSON.stringify(logs.slice(0, 500)));
-    } catch (e) {
-        // noop
-    }
-}
+const API_USERS = 'http://localhost:5000/api/users';
+const API_ROLES = 'http://localhost:5000/api/roles';
 
 const EditUserPermissions = () => {
     const { userId } = useParams();
     const navigate = useNavigate();
     const theme = useTheme();
     const mode = theme.palette.mode;
+
     const [user, setUser] = useState(null);
     const [roles, setRoles] = useState([]);
     const [roleId, setRoleId] = useState('');
     const [permissions, setPermissions] = useState({});
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const users = readUsers();
-        const availableRoles = readRoles();
-        setRoles(availableRoles);
+    const permissionKeys = [
+        'canGrant', 'canApprove', 'canManageUsers', 'canManageRoles',
+        'canTakeAttendance', 'canViewReports', 'canModifyRecords', 'canExportData',
+        'canAccessLogs', 'canManageDepts', 'canViewSchedules', 'canSystemConfig'
+    ];
 
-        const foundUser = users.find((u) => u.id === parseInt(userId));
-        if (foundUser) {
-            setUser(foundUser);
-            setRoleId(foundUser.roleId || '');
-            setPermissions(foundUser.permissions || {});
-        }
-        setLoading(false);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [usersRes, rolesRes] = await Promise.all([
+                    axios.get(`${API_USERS}/get`),
+                    axios.get(`${API_ROLES}/get`)
+                ]);
+
+                const availableRoles = rolesRes.data;
+                setRoles(availableRoles);
+
+                const foundUser = usersRes.data.find((u) => u.id === parseInt(userId));
+                if (foundUser) {
+                    setUser(foundUser);
+                    setRoleId(foundUser.roleId || '');
+
+                    // Construct permissions from user fields (overrides)
+                    const userPerms = {};
+                    permissionKeys.forEach(key => {
+                        userPerms[key] = foundUser[key] !== null ? foundUser[key] : (foundUser.role ? foundUser.role[key] : false);
+                    });
+                    setPermissions(userPerms);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
     }, [userId]);
 
     const handleToggle = (key) => {
@@ -90,23 +83,25 @@ const EditUserPermissions = () => {
         setRoleId(newRoleId);
         const roleObj = roles.find(r => r.id === newRoleId);
         if (roleObj) {
-            setPermissions({ ...roleObj.permissions });
+            const newPerms = {};
+            permissionKeys.forEach(key => {
+                newPerms[key] = roleObj[key] || false;
+            });
+            setPermissions(newPerms);
         }
     };
 
-    const handleSave = () => {
-        const users = readUsers();
-        const updatedUsers = users.map((u) =>
-            u.id === user.id ? { ...u, roleId, permissions } : u
-        );
-        writeUsers(updatedUsers);
-        addLog({
-            actor: 'Admin',
-            action: `Updated permissions for ${user.name}`,
-            targetId: user.id,
-            targetName: user.name,
-        });
-        navigate('/permissions?view=users');
+    const handleSave = async () => {
+        try {
+            await axios.put(`${API_USERS}/update/${user.id}`, {
+                roleId,
+                ...permissions
+            });
+            navigate('/permissions');
+        } catch (error) {
+            console.error('Error saving permissions:', error);
+            alert('Failed to save permissions');
+        }
     };
 
     const RoleCard = ({ role, isSelected, onSelect }) => {
@@ -230,7 +225,11 @@ const EditUserPermissions = () => {
         );
     };
 
-    if (loading) return null;
+    if (loading) return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <CircularProgress />
+        </Box>
+    );
 
     if (!user) {
         return (
@@ -311,10 +310,9 @@ const EditUserPermissions = () => {
             </Box>
 
             <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 } }}>
-                {/* Role Name Display */}
                 <Box sx={{ mb: 4 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary', mb: 1.5, ml: 0.5 }}>
-                        Role Name
+                        User: {user.name}
                     </Typography>
                     <Box sx={{
                         bgcolor: mode === 'dark' ? 'background.paper' : 'white',
@@ -329,14 +327,13 @@ const EditUserPermissions = () => {
                         fontSize: '1.1rem',
                         boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)'
                     }}>
-                        {roles.find(r => r.id === roleId)?.name || 'Custom Role'}
+                        Current Role: {roles.find(r => r.id === roleId)?.name || 'Custom Role'}
                     </Box>
                 </Box>
 
-                {/* Role Selection Grid */}
                 <Box sx={{ mb: 6 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary', mb: 2, ml: 0.5 }}>
-                        Select Role Type
+                        Select Role Type (Resets Permissions to Role Defaults)
                     </Typography>
                     <Grid container spacing={2}>
                         {roles.map((r) => (
@@ -351,22 +348,19 @@ const EditUserPermissions = () => {
                     </Grid>
                 </Box>
 
-                {/* Permissions Section Header */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5, px: 0.5 }}>
                     <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
-                        Select Permission
+                        Custom Permissions
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Checkbox
                             size="small"
                             color="primary"
-                            checked={Object.values(permissions).every(v => v === true)}
+                            checked={permissionKeys.every(k => !!permissions[k])}
                             onChange={(e) => {
                                 const nextVal = e.target.checked;
                                 const updated = {};
-                                Object.keys(permissions).forEach(k => updated[k] = nextVal);
-                                // Also ensure all structure keys are handled if they don't exist in state yet
-                                permissionStructure.forEach(g => g.permissions.forEach(p => updated[p.key] = nextVal));
+                                permissionKeys.forEach(k => updated[k] = nextVal);
                                 setPermissions(updated);
                             }}
                         />
@@ -374,7 +368,6 @@ const EditUserPermissions = () => {
                     </Box>
                 </Box>
 
-                {/* Permissions Grid */}
                 <Grid container spacing={3}>
                     {permissionStructure.map((group, idx) => (
                         <Grid item xs={12} md={4} key={idx}>
@@ -386,7 +379,6 @@ const EditUserPermissions = () => {
                     ))}
                 </Grid>
 
-                {/* Footer Actions */}
                 <Box sx={{
                     mt: 6,
                     display: 'flex',

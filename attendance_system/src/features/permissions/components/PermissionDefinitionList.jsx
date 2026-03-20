@@ -28,6 +28,7 @@ import {
     Checkbox,
     ListItemIcon,
     ListItemText,
+    CircularProgress
 } from '@mui/material';
 import {
     Edit as EditIcon,
@@ -36,28 +37,14 @@ import {
     Search as SearchIcon,
     FileDownload as FileDownloadIcon,
     ViewColumn as ViewColumnIcon,
-    Check as CheckIcon,
 } from '@mui/icons-material';
+import axios from 'axios';
 
-const STORAGE_PERM_DEFS = 'am_permission_definitions_v1';
-
-const defaultPermissionDefinitions = [
-    { id: 1, name: 'inquiry index' },
-    { id: 2, name: 'database backup' },
-    { id: 3, name: 'activity logs' },
-    { id: 4, name: 'teacher details' },
-    { id: 5, name: 'student details' },
-    { id: 6, name: 'user list' },
-    { id: 7, name: 'user delete' },
-    { id: 8, name: 'user create' },
-    { id: 9, name: 'user edit' },
-    { id: 10, name: 'role management' },
-    { id: 11, name: 'financial reports' },
-    { id: 12, name: 'system settings' },
-];
+const API_URL = 'http://localhost:5000/api/permissions/definitions';
 
 const PermissionDefinitionList = () => {
     const [permissions, setPermissions] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [editingPerm, setEditingPerm] = useState(null);
     const [permName, setPermName] = useState('');
@@ -78,20 +65,21 @@ const PermissionDefinitionList = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
 
-    // Load permissions from localStorage
-    useEffect(() => {
-        const raw = localStorage.getItem(STORAGE_PERM_DEFS);
-        if (raw) {
-            setPermissions(JSON.parse(raw));
-        } else {
-            setPermissions(defaultPermissionDefinitions);
-            localStorage.setItem(STORAGE_PERM_DEFS, JSON.stringify(defaultPermissionDefinitions));
+    const fetchPermissions = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${API_URL}/get`);
+            setPermissions(response.data);
+        } catch (error) {
+            console.error('Error fetching permissions:', error);
+        } finally {
+            setLoading(false);
         }
-    }, []);
-
-    const saveToStorage = (data) => {
-        localStorage.setItem(STORAGE_PERM_DEFS, JSON.stringify(data));
     };
+
+    useEffect(() => {
+        fetchPermissions();
+    }, []);
 
     const handleOpen = (perm = null) => {
         if (perm) {
@@ -108,28 +96,37 @@ const PermissionDefinitionList = () => {
         setOpen(false);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!permName.trim()) return;
 
-        let updated;
-        if (editingPerm) {
-            updated = permissions.map(p => p.id === editingPerm.id ? { ...p, name: permName } : p);
-        } else {
-            const nextId = permissions.length > 0 ? Math.max(...permissions.map(p => p.id)) + 1 : 1;
-            updated = [...permissions, { id: nextId, name: permName }];
+        try {
+            if (editingPerm) {
+                await axios.put(`${API_URL}/update/${editingPerm.id}`, { name: permName.trim() });
+            } else {
+                await axios.post(`${API_URL}/create`, { name: permName.trim() });
+            }
+            fetchPermissions();
+            handleClose();
+        } catch (error) {
+            console.error('Error saving permission:', error);
+            alert(error.response?.data?.error || 'Failed to save permission');
         }
-
-        setPermissions(updated);
-        saveToStorage(updated);
-        handleClose();
     };
 
-    const handleDelete = (id) => {
-        if (id <= 9) return; // Protect default permissions
+    const handleDelete = async (id) => {
+        if (id <= 12) {
+            alert('Default permissions cannot be deleted');
+            return;
+        }
+
         if (window.confirm('Are you sure you want to delete this permission?')) {
-            const updated = permissions.filter(p => p.id !== id);
-            setPermissions(updated);
-            saveToStorage(updated);
+            try {
+                await axios.delete(`${API_URL}/delete/${id}`);
+                fetchPermissions();
+            } catch (error) {
+                console.error('Error deleting permission:', error);
+                alert('Failed to delete permission');
+            }
         }
     };
 
@@ -229,7 +226,6 @@ const PermissionDefinitionList = () => {
                         <MenuItem onClick={() => handleExportData('csv')}>Export as CSV</MenuItem>
                         <MenuItem onClick={() => handleExportData('print')} disabled>Print Table</MenuItem>
                     </Menu>
-
                     <Button
                         variant="contained"
                         startIcon={<ViewColumnIcon />}
@@ -319,70 +315,78 @@ const PermissionDefinitionList = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {paginatedPermissions.map((item, index) => (
-                            <TableRow key={item.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                {columns.srNo && (
-                                    <TableCell sx={{ py: 1.5, color: 'text.primary', fontWeight: 600 }}>
-                                        {(page - 1) * rowsPerPage + index + 1}
-                                    </TableCell>
-                                )}
-                                {columns.name && (
-                                    <TableCell sx={{ py: 1.5, color: 'primary.main', fontWeight: 700, textTransform: 'capitalize' }}>
-                                        {item.name}
-                                    </TableCell>
-                                )}
-                                {columns.actions && (
-                                    <TableCell align="right" sx={{ py: 1.5 }}>
-                                        <Stack direction="row" spacing={1} justifyContent="flex-end">
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                                startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
-                                                onClick={() => handleOpen(item)}
-                                                sx={{
-                                                    borderRadius: 2,
-                                                    textTransform: 'none',
-                                                    fontWeight: 600,
-                                                    borderColor: 'divider',
-                                                    color: mode === 'dark' ? 'primary.light' : 'primary.main',
-                                                    '&:hover': {
-                                                        bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
-                                                        borderColor: 'primary.main',
-                                                    }
-                                                }}
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                                startIcon={<DeleteIcon sx={{ fontSize: '1rem !important' }} />}
-                                                onClick={() => handleDelete(item.id)}
-                                                disabled={item.id <= 9}
-                                                sx={{
-                                                    borderRadius: 2,
-                                                    textTransform: 'none',
-                                                    fontWeight: 600,
-                                                    borderColor: 'divider',
-                                                    color: mode === 'dark' ? '#fca5a5' : 'error.main',
-                                                    '&:hover': {
-                                                        bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
-                                                        borderColor: 'error.main',
-                                                    },
-                                                    '&.Mui-disabled': {
-                                                        borderColor: 'divider',
-                                                        opacity: mode === 'dark' ? 0.3 : 0.5
-                                                    }
-                                                }}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </Stack>
-                                    </TableCell>
-                                )}
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                                    <CircularProgress size={24} />
+                                </TableCell>
                             </TableRow>
-                        ))}
-                        {paginatedPermissions.length === 0 && (
+                        ) : (
+                            paginatedPermissions.map((item, index) => (
+                                <TableRow key={item.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                    {columns.srNo && (
+                                        <TableCell sx={{ py: 1.5, color: 'text.primary', fontWeight: 600 }}>
+                                            {(page - 1) * rowsPerPage + index + 1}
+                                        </TableCell>
+                                    )}
+                                    {columns.name && (
+                                        <TableCell sx={{ py: 1.5, color: 'primary.main', fontWeight: 700, textTransform: 'capitalize' }}>
+                                            {item.name}
+                                        </TableCell>
+                                    )}
+                                    {columns.actions && (
+                                        <TableCell align="right" sx={{ py: 1.5 }}>
+                                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
+                                                    onClick={() => handleOpen(item)}
+                                                    sx={{
+                                                        borderRadius: 2,
+                                                        textTransform: 'none',
+                                                        fontWeight: 600,
+                                                        borderColor: 'divider',
+                                                        color: mode === 'dark' ? 'primary.light' : 'primary.main',
+                                                        '&:hover': {
+                                                            bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
+                                                            borderColor: 'primary.main',
+                                                        }
+                                                    }}
+                                                >
+                                                    Edit
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    startIcon={<DeleteIcon sx={{ fontSize: '1rem !important' }} />}
+                                                    onClick={() => handleDelete(item.id)}
+                                                    disabled={item.id <= 12}
+                                                    sx={{
+                                                        borderRadius: 2,
+                                                        textTransform: 'none',
+                                                        fontWeight: 600,
+                                                        borderColor: 'divider',
+                                                        color: mode === 'dark' ? '#fca5a5' : 'error.main',
+                                                        '&:hover': {
+                                                            bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
+                                                            borderColor: 'error.main',
+                                                        },
+                                                        '&.Mui-disabled': {
+                                                            borderColor: 'divider',
+                                                            opacity: mode === 'dark' ? 0.3 : 0.5
+                                                        }
+                                                    }}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </Stack>
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            ))
+                        )}
+                        {!loading && paginatedPermissions.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={Object.values(columns).filter(v => v).length} align="center" sx={{ py: 8 }}>
                                     <Typography color="text.secondary">No permissions found.</Typography>
@@ -418,75 +422,37 @@ const PermissionDefinitionList = () => {
                         Showing {(page - 1) * rowsPerPage + 1} to {Math.min(page * rowsPerPage, totalRecords)} of {totalRecords} results
                     </Typography>
                 </Box>
-
                 <Stack direction="row" spacing={0.5}>
-                    <Button
-                        size="small"
-                        variant="outlined"
-                        disabled={page === 1}
-                        onClick={() => setPage(p => p - 1)}
-                        sx={{ minWidth: 40, borderRadius: 1.5, borderColor: 'divider' }}
-                    >
-                        Prev
-                    </Button>
+                    <Button size="small" variant="outlined" disabled={page === 1} onClick={() => setPage(p => p - 1)} sx={{ minWidth: 40, borderRadius: 1.5, borderColor: 'divider' }}>Prev</Button>
                     {[...Array(Math.ceil(totalRecords / rowsPerPage))].map((_, i) => (
                         <Button
                             key={i}
                             size="small"
                             onClick={() => setPage(i + 1)}
                             sx={{
-                                minWidth: 32,
-                                borderRadius: 1.5,
-                                p: 0,
+                                minWidth: 32, borderRadius: 1.5, p: 0,
                                 bgcolor: page === i + 1 ? 'primary.main' : 'transparent',
                                 color: page === i + 1 ? 'white' : 'text.secondary',
-                                border: '1px solid',
-                                borderColor: page === i + 1 ? 'primary.main' : 'divider',
-                                '&:hover': { bgcolor: page === i + 1 ? 'primary.dark' : 'action.hover' }
+                                border: '1px solid', borderColor: page === i + 1 ? 'primary.main' : 'divider'
                             }}
                         >
                             {i + 1}
                         </Button>
                     ))}
-                    <Button
-                        size="small"
-                        variant="outlined"
-                        disabled={page === Math.ceil(totalRecords / rowsPerPage)}
-                        onClick={() => setPage(p => p + 1)}
-                        sx={{ minWidth: 40, borderRadius: 1.5, borderColor: 'divider' }}
-                    >
-                        Next
-                    </Button>
+                    <Button size="small" variant="outlined" disabled={page === Math.ceil(totalRecords / rowsPerPage)} onClick={() => setPage(p => p + 1)} sx={{ minWidth: 40, borderRadius: 1.5, borderColor: 'divider' }}>Next</Button>
                 </Stack>
             </Box>
 
-            {/* Add/Edit Dialog */}
             <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 3 } }}>
-                <DialogTitle sx={{ fontWeight: 800 }}>
-                    {editingPerm ? 'Edit Permission' : 'Create New Permission'}
-                </DialogTitle>
+                <DialogTitle sx={{ fontWeight: 800 }}>{editingPerm ? 'Edit Permission' : 'Create New Permission'}</DialogTitle>
                 <DialogContent>
                     <Box sx={{ mt: 1 }}>
-                        <TextField
-                            fullWidth
-                            label="Permission Name"
-                            value={permName}
-                            onChange={(e) => setPermName(e.target.value)}
-                            placeholder="e.g. create report"
-                            autoFocus
-                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        />
+                        <TextField fullWidth label="Permission Name" value={permName} onChange={(e) => setPermName(e.target.value)} placeholder="e.g. create report" autoFocus sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{ px: 3, pb: 3 }}>
                     <Button onClick={handleClose} sx={{ textTransform: 'none', fontWeight: 600 }}>Cancel</Button>
-                    <Button
-                        variant="contained"
-                        onClick={handleSave}
-                        sx={{ borderRadius: 2, boxShadow: 'none', textTransform: 'none', fontWeight: 600, px: 3 }}
-                    >
-                        Save Permission
-                    </Button>
+                    <Button variant="contained" onClick={handleSave} sx={{ borderRadius: 2, boxShadow: 'none', textTransform: 'none', fontWeight: 600, px: 3 }}>Save Permission</Button>
                 </DialogActions>
             </Dialog>
         </Box>
