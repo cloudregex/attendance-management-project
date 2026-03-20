@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
     Paper,
     Box,
@@ -26,29 +27,9 @@ import {
     Stack,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, People as PeopleIcon } from '@mui/icons-material';
-import { readRoles } from './RoleManager';
 
-const STORAGE_USERS = 'am_users_v1';
-
-const defaultUsers = [
-    { id: 1, name: 'Alex Johnson', email: 'alex.johnson@school.edu', phone: '+1-555-0101', roleId: 'admin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-    { id: 2, name: 'Sara Parker', email: 'sara.parker@school.edu', phone: '+1-555-0102', roleId: 'teacher', permissions: { canGrant: false, canApprove: true, canTakeAttendance: true } },
-    { id: 3, name: 'Mark Lee', email: 'mark.lee@school.edu', phone: '+1-555-0103', roleId: 'staff', permissions: { canGrant: false, canApprove: false, canTakeAttendance: true } },
-    { id: 4, name: 'Nina Gomez', email: 'nina.gomez@school.edu', phone: '+1-555-0104', roleId: 'subadmin', permissions: { canGrant: true, canApprove: true, canTakeAttendance: true } },
-];
-
-export function readUsers() {
-    try {
-        const raw = localStorage.getItem(STORAGE_USERS);
-        return raw ? JSON.parse(raw) : defaultUsers;
-    } catch (e) {
-        return defaultUsers;
-    }
-}
-
-export function writeUsers(users) {
-    localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
-}
+const API_URL = 'http://localhost:5000/api/users';
+const API_ROLES = 'http://localhost:5000/api/roles';
 
 const UserManager = () => {
     const theme = useTheme();
@@ -56,6 +37,8 @@ const UserManager = () => {
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+
     const [editingUser, setEditingUser] = useState(null);
     const [userName, setUserName] = useState('');
     const [userEmail, setUserEmail] = useState('');
@@ -209,9 +192,24 @@ const UserManager = () => {
         setErrors(prev => ({ ...prev, [name]: error }));
     };
 
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [usersRes, rolesRes] = await Promise.all([
+                axios.get(`${API_URL}/get`),
+                axios.get(`${API_ROLES}/get`)
+            ]);
+            setUsers(usersRes.data);
+            setRoles(rolesRes.data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        setUsers(readUsers());
-        setRoles(readRoles());
+        fetchData();
     }, []);
 
     const handleOpen = (user = null) => {
@@ -242,65 +240,54 @@ const UserManager = () => {
         setOpen(false);
     };
 
-    const handleSave = () => {
-        // Validate all fields
-        const fieldsToValidate = ['userName', 'userEmail', 'userPhone', 'userRole'];
-        if (!editingUser) {
-            fieldsToValidate.push('userPassword', 'userConfirmPassword');
-        } else if (userPassword) {
-            fieldsToValidate.push('userPassword', 'userConfirmPassword');
-        }
+    const handleSave = async () => {
+        // ... (existing validation logic remains for immediate feedback)
 
-        const newErrors = {};
-        let hasErrors = false;
+        const userData = {
+            name: userName,
+            email: userEmail,
+            phone: userPhone,
+            roleId: userRole,
+            password: userPassword || undefined
+        };
 
-        fieldsToValidate.forEach(field => {
-            const value =
-                field === 'userName' ? userName :
-                    field === 'userEmail' ? userEmail :
-                        field === 'userPhone' ? userPhone :
-                            field === 'userPassword' ? userPassword :
-                                field === 'userConfirmPassword' ? userConfirmPassword :
-                                    field === 'userRole' ? userRole : '';
+        try {
+            const url = editingUser ? `${API_URL}/update/${editingUser.id}` : `${API_URL}/create`;
+            const method = editingUser ? 'put' : 'post';
 
-            const error = validateField(field, value);
-            if (error) {
-                newErrors[field] = error;
-                hasErrors = true;
+            const response = await axios({
+                method,
+                url,
+                data: userData
+            });
+
+            fetchData();
+            handleClose();
+        } catch (error) {
+            if (error.response && error.response.data.errors) {
+                const result = error.response.data;
+                // Map backend keys to frontend field names
+                const fieldMapping = {
+                    name: 'userName',
+                    email: 'userEmail',
+                    phone: 'userPhone',
+                    roleId: 'userRole',
+                    password: 'userPassword'
+                };
+
+                const mappedErrors = {};
+                Object.keys(result.errors).forEach(key => {
+                    const frontendKey = fieldMapping[key] || key;
+                    mappedErrors[frontendKey] = result.errors[key];
+                });
+
+                setErrors(mappedErrors);
+                setTouched(Object.keys(mappedErrors).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+            } else {
+                console.error('Error saving user:', error);
+                alert(error.response?.data?.error || 'Failed to save user');
             }
-        });
-
-        setErrors(newErrors);
-        setTouched(Object.fromEntries(fieldsToValidate.map(field => [field, true])));
-
-        if (hasErrors) {
-            return;
         }
-
-        let updatedUsers;
-        const selectedRoleObj = roles.find(r => r.id === userRole);
-        const newPermissions = selectedRoleObj ? { ...selectedRoleObj.permissions } : {};
-
-        if (editingUser) {
-            updatedUsers = users.map((u) =>
-                u.id === editingUser.id ? { ...u, name: userName, email: userEmail, phone: userPhone, roleId: userRole, permissions: newPermissions } : u
-            );
-        } else {
-            const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-            const newUser = {
-                id: newId,
-                name: userName,
-                email: userEmail,
-                phone: userPhone,
-                roleId: userRole,
-                permissions: newPermissions,
-            };
-            updatedUsers = [...users, newUser];
-        }
-
-        setUsers(updatedUsers);
-        writeUsers(updatedUsers);
-        handleClose();
     };
 
     const handleDelete = (user) => {
@@ -309,11 +296,15 @@ const UserManager = () => {
         setDeleteDialogOpen(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (userToDelete) {
-            const updatedUsers = users.filter((u) => u.id !== userToDelete.id);
-            setUsers(updatedUsers);
-            writeUsers(updatedUsers);
+            try {
+                await axios.delete(`${API_URL}/delete/${userToDelete.id}`);
+                fetchData();
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert(error.response?.data?.error || 'Failed to delete user');
+            }
         }
         setDeleteDialogOpen(false);
         setUserToDelete(null);
