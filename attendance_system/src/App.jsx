@@ -14,6 +14,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import SystemAdmin from './features/admin/pages/SystemAdmin';
 
+import AdminProtectedRoute from './shared/components/AdminProtectedRoute';
+
 function App() {
   return (
     <ThemeProviderWrapper>
@@ -28,22 +30,24 @@ function App() {
             <Route
               path="/*"
               element={
-                <Layout>
-                  <Routes>
-                    <Route path="/dashboard" element={<AdminDashboard />} />
-                    <Route path="/departments" element={<DeptDashboard />} />
-                    <Route path="/employees" element={<EmployeesPage />} />
-                    <Route path="/reports" element={<ReportsPage />} />
-                    <Route path="/permissions" element={<PermissionsPage />} />
-                    <Route path="/permissions/edit/:userId" element={<EditUserPermissions />} />
-                    <Route path="/activity-logs" element={<ActivityLogsPage />} />
-                    <Route path="/system-admin" element={<SystemAdmin />} />
-                    <Route path="/settings/*" element={<SettingsPage />} />
+                <AdminProtectedRoute>
+                  <Layout>
+                    <Routes>
+                      <Route path="/dashboard" element={<AdminDashboard />} />
+                      <Route path="/departments" element={<DeptDashboard />} />
+                      <Route path="/employees" element={<EmployeesPage />} />
+                      <Route path="/reports" element={<ReportsPage />} />
+                      <Route path="/permissions" element={<PermissionsPage />} />
+                      <Route path="/permissions/edit/:userId" element={<EditUserPermissions />} />
+                      <Route path="/activity-logs" element={<ActivityLogsPage />} />
+                      <Route path="/system-admin" element={<SystemAdmin />} />
+                      <Route path="/settings/*" element={<SettingsPage />} />
 
-                    {/* Default dashboard route */}
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  </Routes>
-                </Layout>
+                      {/* Default dashboard route */}
+                      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    </Routes>
+                  </Layout>
+                </AdminProtectedRoute>
               }
             />
 
