@@ -28,6 +28,7 @@ import {
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Security as SecurityIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api/roles';
@@ -35,6 +36,7 @@ const API_URL = 'http://localhost:5000/api/roles';
 export const RoleManager = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
+    const navigate = useNavigate();
     const [roles, setRoles] = useState([]);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -335,7 +337,7 @@ export const RoleManager = () => {
                                             variant="outlined"
                                             size="small"
                                             startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
-                                            onClick={() => handleOpen(role)}
+                                            onClick={() => navigate(`/permissions/edit-role/${role.id}`)}
                                             sx={{
                                                 borderRadius: 2,
                                                 textTransform: 'none',

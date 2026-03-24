@@ -200,16 +200,7 @@ const Layout = ({ children }) => {
                             </ListItemIcon>
                             <ListItemText primary="User List" primaryTypographyProps={{ fontSize: '0.85rem' }} />
                         </ListItemButton>
-                        <ListItemButton
-                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
-                            selected={location.search.includes('view=users')}
-                            onClick={() => navigate('/permissions?view=users')}
-                        >
-                            <ListItemIcon sx={{ minWidth: 32 }}>
-                                <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
-                            </ListItemIcon>
-                            <ListItemText primary="Permissions" primaryTypographyProps={{ fontSize: '0.85rem' }} />
-                        </ListItemButton>
+
                         <ListItemButton
                             sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
                             selected={location.search.includes('view=roles')}

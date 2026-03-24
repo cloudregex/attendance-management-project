@@ -8,6 +8,7 @@ import AdminLogin from './features/auth/pages/AdminLogin';
 import { EmployeesPage, ReportsPage } from './shared/pages/Placeholders';
 import SettingsPage from './features/settings/pages/Settings';
 import PermissionsPage from './features/permissions/pages/Permissions';
+import EditRolePermissions from './features/permissions/pages/EditRolePermissions';
 import ActivityLogsPage from './features/activity-logs/pages/ActivityLogs';
 import EditUserPermissions from './features/permissions/pages/EditUserPermissions';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -36,6 +37,7 @@ function App() {
                     <Route path="/reports" element={<ReportsPage />} />
                     <Route path="/permissions" element={<PermissionsPage />} />
                     <Route path="/permissions/edit/:userId" element={<EditUserPermissions />} />
+                    <Route path="/permissions/edit-role/:roleId" element={<EditRolePermissions />} />
                     <Route path="/activity-logs" element={<ActivityLogsPage />} />
                     <Route path="/system-admin" element={<SystemAdmin />} />
                     <Route path="/settings/*" element={<SettingsPage />} />

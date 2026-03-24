@@ -1,19 +1,27 @@
 import 'dotenv/config';
+import Role from './model/role.model.js';
 import Admin from './model/admin.model.js';
 import sequelize from './config/db.js';
 import { seedAdmin } from './controller/admin.controller.js';
+import { seedDefaultRoles } from './services/role.service.js';
 
 const runSeed = async () => {
     try {
         await sequelize.authenticate();
         console.log("✅ Database connected for seeding");
 
+        // Sync and seed Role model first
+        await Role.sync({ alter: true });
+        await seedDefaultRoles();
+
         // Sync model (ensure table exists)
-        await Admin.sync();
+        await Admin.sync({ alter: true });
 
         const adminData = {
+            name: "Super Admin",
             email: "admin@example.com",
-            password: "adminpassword123" 
+            password: "adminpassword123",
+            roleId: "admin"
         };
 
         // Delete existing admin to ensure it's re-created with hashed password

@@ -241,7 +241,30 @@ const UserManager = () => {
     };
 
     const handleSave = async () => {
-        // ... (existing validation logic remains for immediate feedback)
+        // Validate all fields before saving
+        const newTouched = {
+            userName: true,
+            userEmail: true,
+            userPhone: true,
+            userPassword: true,
+            userConfirmPassword: true,
+            userRole: true
+        };
+        setTouched(newTouched);
+
+        const newErrors = {
+            userName: validateField('userName', userName),
+            userEmail: validateField('userEmail', userEmail),
+            userPhone: validateField('userPhone', userPhone),
+            userPassword: validateField('userPassword', userPassword),
+            userConfirmPassword: validateField('userConfirmPassword', userConfirmPassword),
+            userRole: validateField('userRole', userRole),
+        };
+        setErrors(newErrors);
+
+        if (Object.values(newErrors).some(error => error !== '')) {
+            return; // Stop saving if there are validation errors
+        }
 
         const userData = {
             name: userName,
