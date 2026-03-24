@@ -15,10 +15,10 @@ import {
     Paper,
     CssBaseline,
     Container,
-    alpha,
     useTheme,
     CircularProgress
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { Visibility, VisibilityOff, LockOutlined, AccountTree, CheckCircleOutline } from '@mui/icons-material';
 
 const AdminLogin = () => {
@@ -71,6 +71,8 @@ const AdminLogin = () => {
         }
     };
 
+    const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000/api';
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validate();
@@ -78,7 +80,7 @@ const AdminLogin = () => {
             setLoading(true);
             setLoginError(''); // Clear previous login errors
             try {
-                const response = await fetch('http://localhost:5000/api/admin/login', {
+                const response = await fetch(`${API}/admin/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -89,10 +91,10 @@ const AdminLogin = () => {
 
                 const data = await response.json();
 
-                if (response.ok) {
+                if (response.ok && data.admin) {
                     console.log('Login success:', data);
                     localStorage.setItem('adminToken', data.token);
-                    localStorage.setItem('adminEmail', data.admin.email);
+                    localStorage.setItem('adminEmail', data.admin.email || formData.email);
                     setIsSubmitted(true);
                     setLoginError('');
                     setTimeout(() => {

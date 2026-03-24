@@ -18,8 +18,8 @@ import {
     Switch,
     FormControlLabel,
     useTheme,
-    alpha,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
     Close as CloseIcon,
     Person as PersonIcon,
