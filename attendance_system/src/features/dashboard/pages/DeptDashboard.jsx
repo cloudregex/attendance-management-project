@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     Grid,
     Paper,
@@ -15,6 +15,7 @@ import {
     Chip,
     Fade,
     CircularProgress,
+    IconButton,
     useTheme,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
@@ -27,7 +28,11 @@ import {
     NavigateNext as NavigateNextIcon,
     Delete as DeleteIcon,
 } from '@mui/icons-material';
-import { DataGrid } from '@mui/x-data-grid';
+import { 
+    DataGrid, 
+    GridToolbarContainer, 
+    GridToolbarExport 
+} from '@mui/x-data-grid';
 import AddTeacherForm from '../../employees/components/AddTeacherForm';
 import AddStudentForm from '../../students/components/AddStudentForm';
 import { useToast } from '../hooks/useToast.jsx';
@@ -60,11 +65,11 @@ const DeptDashboard = () => {
         try {
             const res = await fetch(`${API}/departments`);
             const data = await res.json();
-            if (res.ok) {
+            if (res.ok && Array.isArray(data)) {
                 const mapped = data.map(d => ({ id: String(d.id), name: d.name }));
                 setDepartments([ALL_DEPT, ...mapped]);
             } else {
-                toast.error(data.message || 'Failed to load departments.', 'Departments');
+                toast.error(data?.message || 'Failed to load departments.', 'Departments');
             }
         } catch {
             toast.error('Could not reach server. Check your connection.', 'Departments');
@@ -77,21 +82,21 @@ const DeptDashboard = () => {
         try {
             const res = await fetch(`${API}/students`);
             const data = await res.json();
-            if (res.ok) {
+            if (res.ok && Array.isArray(data)) {
                 const mapped = data.map(s => ({
-                    id: s.id,
-                    name: [s.first_name, s.middle_name, s.last_name].filter(Boolean).join(' '),
-                    roll: s.roll_number,
+                    id: s.id || Math.random(),
+                    name: [s.first_name, s.middle_name, s.last_name].filter(Boolean).join(' ') || 'Unknown',
+                    roll: s.roll_number || '—',
                     year: s.class_name || s.semester || '—',
                     course: s.course || '—',
                     status: s.status ? 'Active' : 'Inactive',
                     avatar: `${(s.first_name || '?')[0]}${(s.last_name || '?')[0]}`.toUpperCase(),
-                    deptId: String(s.department_id),
+                    deptId: String(s.department_id || ''),
                 }));
                 setStudentsData(mapped);
                 if (!silent) toast.success(`Loaded ${mapped.length} student(s).`, 'Students');
             } else {
-                toast.error(data.message || 'Failed to load students.', 'Students');
+                toast.error(data?.message || 'Failed to load students.', 'Students');
             }
         } catch {
             toast.error('Network error loading students.', 'Students');
@@ -165,6 +170,96 @@ const DeptDashboard = () => {
             toast.error('Network error. Could not delete teacher.', 'Delete Failed');
         }
     }, [fetchTeachers]);
+
+    // ── columns ─────────────────────────────────────────────────────────
+    const studentColumns = useMemo(() => [
+        { 
+            field: 'name', headerName: 'Student Name', flex: 1.5, minWidth: 200,
+            renderCell: (p) => (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, height: '100%' }}>
+                    <Avatar sx={{ 
+                        width: 32, height: 32, fontSize: '0.875rem', 
+                        bgcolor: alpha('#2563EB', 0.1), color: '#2563EB', 
+                        fontWeight: 700 
+                    }}>
+                        {p.row.avatar}
+                    </Avatar>
+                    <Box sx={{ overflow: 'hidden' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, noWrap: true }}>{p.value}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{p.row.roll}</Typography>
+                    </Box>
+                </Box>
+            )
+        },
+        { field: 'course', headerName: 'Course', flex: 1, minWidth: 120 },
+        { field: 'year', headerName: 'Year', flex: 1, minWidth: 120 },
+        { 
+            field: 'status', headerName: 'Status', width: 120,
+            renderCell: (p) => (
+                <Chip 
+                    label={p.value} size="small" 
+                    sx={{ 
+                        borderRadius: 1, fontWeight: 700, 
+                        bgcolor: p.value === 'Active' ? alpha('#10B981', 0.1) : alpha('#F59E0B', 0.1),
+                        color: p.value === 'Active' ? '#059669' : '#D97706',
+                        border: 'none', height: 24, fontSize: '0.65rem'
+                    }} 
+                />
+            )
+        },
+        {
+            field: 'actions', headerName: 'Actions', width: 100, sortable: false,
+            renderCell: (p) => (
+                <IconButton size="small" color="error" onClick={() => handleDeleteStudent(p.id, p.row.name)}>
+                    <DeleteIcon fontSize="small" />
+                </IconButton>
+            )
+        }
+    ], [handleDeleteStudent]);
+
+    const teacherColumns = useMemo(() => [
+        { 
+            field: 'name', headerName: 'Teacher Name', flex: 1.5, minWidth: 200,
+            renderCell: (p) => (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, height: '100%' }}>
+                    <Avatar sx={{ 
+                        width: 32, height: 32, fontSize: '0.875rem', 
+                        bgcolor: alpha('#10B981', 0.1), color: '#10B981', 
+                        fontWeight: 700 
+                    }}>
+                        {p.row.avatar}
+                    </Avatar>
+                    <Box sx={{ overflow: 'hidden' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{p.value}</Typography>
+                        <Typography variant="caption" color="text.secondary">{p.row.designation}</Typography>
+                    </Box>
+                </Box>
+            )
+        },
+        { field: 'email', headerName: 'Email Address', flex: 1.2, minWidth: 180 },
+        { 
+            field: 'status', headerName: 'Status', width: 120,
+            renderCell: (p) => (
+                <Chip 
+                    label={p.value} size="small" 
+                    sx={{ 
+                        borderRadius: 1, fontWeight: 700, 
+                        bgcolor: p.value === 'Active' ? alpha('#10B981', 0.1) : alpha('#F59E0B', 0.1),
+                        color: p.value === 'Active' ? '#059669' : '#D97706',
+                        border: 'none', height: 24, fontSize: '0.65rem'
+                    }} 
+                />
+            )
+        },
+        {
+            field: 'actions', headerName: 'Actions', width: 100, sortable: false,
+            renderCell: (p) => (
+                <IconButton size="small" color="error" onClick={() => handleDeleteTeacher(p.id, p.row.name)}>
+                    <DeleteIcon fontSize="small" />
+                </IconButton>
+            )
+        }
+    ], [handleDeleteTeacher]);
 
     // ── add teacher ─────────────────────────────────────────────────────
     const handleAddTeacher = async (formData) => {
@@ -283,89 +378,6 @@ const DeptDashboard = () => {
         { label: 'Active Teachers', value: filteredTeachers.filter(t => t.status === 'Active').length, icon: <PersonIcon />, color: '#7C3AED' },
     ];
 
-    // ── columns ─────────────────────────────────────────────────────────
-    const studentColumns = [
-        {
-            field: 'avatar', headerName: '', width: 56,
-            renderCell: (params) => (
-                <Avatar sx={{
-                    width: 32, height: 32, mt: '0.65rem',
-                    bgcolor: params.row.status === 'Active' ? 'success.light' : 'error.light',
-                    color: params.row.status === 'Active' ? 'success.contrastText' : 'error.contrastText',
-                    fontSize: '0.75rem', fontWeight: 700,
-                }}>{params.value}</Avatar>
-            ),
-        },
-        { field: 'name',   headerName: 'Name',        flex: 1, minWidth: 150 },
-        {
-            field: 'deptId', headerName: 'Department', width: 160,
-            valueGetter: (value) => departments.find(d => d.id === value)?.name || value,
-        },
-        { field: 'roll',   headerName: 'Roll No.',     width: 120 },
-        { field: 'course', headerName: 'Course',       width: 110 },
-        { field: 'year',   headerName: 'Year / Sem',   width: 110 },
-        {
-            field: 'status', headerName: 'Status', width: 110,
-            renderCell: (p) => (
-                <Chip label={p.value} size="small"
-                    color={p.value === 'Active' ? 'success' : 'error'}
-                    variant="outlined" sx={{ fontWeight: 600 }} />
-            ),
-        },
-        {
-            field: 'actions', headerName: 'Actions', width: 110, sortable: false,
-            renderCell: (p) => (
-                <Button
-                    size="small" color="error" startIcon={<DeleteIcon sx={{ fontSize: 14 }} />}
-                    sx={{ textTransform: 'none', fontSize: '0.75rem' }}
-                    onClick={() => handleDeleteStudent(p.row.id, p.row.name)}
-                >
-                    Delete
-                </Button>
-            ),
-        },
-    ];
-
-    const teacherColumns = [
-        {
-            field: 'avatar', headerName: '', width: 56,
-            renderCell: (params) => (
-                <Avatar sx={{
-                    width: 32, height: 32, mt: '0.65rem',
-                    bgcolor: params.row.status === 'Active' ? 'success.light' : 'warning.light',
-                    color: params.row.status === 'Active' ? 'success.contrastText' : 'warning.contrastText',
-                    fontSize: '0.75rem', fontWeight: 700,
-                }}>{params.value}</Avatar>
-            ),
-        },
-        { field: 'name',        headerName: 'Name',        flex: 1, minWidth: 150 },
-        {
-            field: 'deptId',    headerName: 'Department',  width: 160,
-            valueGetter: (value) => departments.find(d => d.id === value)?.name || value,
-        },
-        { field: 'designation', headerName: 'Designation', flex: 1, minWidth: 140 },
-        { field: 'email',       headerName: 'Email',       flex: 1, minWidth: 180 },
-        {
-            field: 'status', headerName: 'Status', width: 110,
-            renderCell: (p) => (
-                <Chip label={p.value} size="small"
-                    color={p.value === 'Active' ? 'success' : 'warning'}
-                    variant="outlined" sx={{ fontWeight: 600 }} />
-            ),
-        },
-        {
-            field: 'actions', headerName: 'Actions', width: 110, sortable: false,
-            renderCell: (p) => (
-                <Button
-                    size="small" color="error" startIcon={<DeleteIcon sx={{ fontSize: 14 }} />}
-                    sx={{ textTransform: 'none', fontSize: '0.75rem' }}
-                    onClick={() => handleDeleteTeacher(p.row.id, p.row.name)}
-                >
-                    Delete
-                </Button>
-            ),
-        },
-    ];
 
     // ── render ───────────────────────────────────────────────────────────
     return (
@@ -382,18 +394,29 @@ const DeptDashboard = () => {
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', letterSpacing: '-0.02em' }}>
                             {dept.id === 'all' ? 'All Departments' : `${dept.name} Team`}
                         </Typography>
                         <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>
-                            Overview of {dept.id === 'all' ? 'all' : 'your'} department's members.
+                            Managing {dept.id === 'all' ? 'all' : 'your'} department's registered members.
                         </Typography>
                     </Box>
                     <Button
                         variant="contained"
                         startIcon={<AddIcon />}
                         onClick={() => view === 'students' ? setStudentFormOpen(true) : setTeacherFormOpen(true)}
-                        sx={{ borderRadius: 1.5, textTransform: 'none', px: 3, boxShadow: 'none', '&:hover': { boxShadow: '0 4px 12px rgba(19,91,236,0.2)' } }}
+                        sx={{ 
+                            borderRadius: 1.5, 
+                            textTransform: 'none', 
+                            px: 3, py: 1,
+                            boxShadow: 'none',
+                            bgcolor: '#2563EB',
+                            fontWeight: 600,
+                            '&:hover': { 
+                                bgcolor: '#1D4ED8',
+                                boxShadow: '0 4px 12px rgba(37,99,235,0.2)' 
+                            } 
+                        }}
                     >
                         Add {view === 'students' ? 'Student' : 'Teacher'}
                     </Button>
@@ -422,83 +445,76 @@ const DeptDashboard = () => {
                 </ToggleButtonGroup>
             </Box>
 
-            {/* Tables */}
-            <Box sx={{ position: 'relative', height: 480, mb: 3 }}>
-
-                {/* Students grid */}
-                <Fade in={view === 'students'} timeout={400} unmountOnExit>
-                    <Box sx={{ position: 'absolute', inset: 0 }}>
-                        <Paper sx={{ height: '100%', width: '100%', borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
-                            {loadingStudents ? (
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2 }}>
-                                    <CircularProgress size={32} />
-                                    <Typography variant="body2" color="text.secondary">Loading students…</Typography>
-                                </Box>
-                            ) : (
-                                <DataGrid
-                                    rows={filteredStudents}
-                                    columns={studentColumns}
-                                    initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
-                                    pageSizeOptions={[5, 10, 25]}
-                                    disableSelectionOnClick
-                                    sx={{
-                                        border: 'none',
-                                        '& .MuiDataGrid-columnHeaders': { bgcolor: mode === 'dark' ? '#1E293B' : 'grey.50', fontWeight: 600 },
-                                        '& .MuiDataGrid-row:hover': { bgcolor: alpha('#2563EB', 0.04) },
-                                    }}
-                                />
-                            )}
-                        </Paper>
-                    </Box>
-                </Fade>
-
-                {/* Teachers grid */}
-                <Fade in={view === 'teachers'} timeout={400} unmountOnExit>
-                    <Box sx={{ position: 'absolute', inset: 0 }}>
-                        <Paper sx={{ height: '100%', width: '100%', borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
-                            {loadingTeachers ? (
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2 }}>
-                                    <CircularProgress size={32} />
-                                    <Typography variant="body2" color="text.secondary">Loading teachers…</Typography>
-                                </Box>
-                            ) : (
-                                <DataGrid
-                                    rows={filteredTeachers}
-                                    columns={teacherColumns}
-                                    initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
-                                    pageSizeOptions={[5, 10, 25]}
-                                    disableSelectionOnClick
-                                    sx={{
-                                        border: 'none',
-                                        '& .MuiDataGrid-columnHeaders': { bgcolor: mode === 'dark' ? '#1E293B' : 'grey.50', fontWeight: 600 },
-                                        '& .MuiDataGrid-row:hover': { bgcolor: alpha('#2563EB', 0.04) },
-                                    }}
-                                />
-                            )}
-                        </Paper>
-                    </Box>
-                </Fade>
+            {/* Members View (Tabular) */}
+            <Box sx={{ mb: 4 }}>
+                <Paper sx={{ 
+                    height: 520, borderRadius: 2, overflow: 'hidden', 
+                    border: '1px solid', borderColor: mode === 'dark' ? '#334155' : 'grey.100',
+                    bgcolor: mode === 'dark' ? '#1E293B' : '#fff',
+                    boxShadow: 'none'
+                }}>
+                    <DataGrid
+                        rows={view === 'students' ? filteredStudents : filteredTeachers}
+                        columns={view === 'students' ? studentColumns : teacherColumns}
+                        loading={loadingStudents || loadingTeachers}
+                        initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+                        pageSizeOptions={[10, 25, 50]}
+                        disableSelectionOnClick
+                        sx={{
+                            border: 'none',
+                            '& .MuiDataGrid-main': { borderRadius: 2 },
+                            '& .MuiDataGrid-columnHeaders': { 
+                                bgcolor: mode === 'dark' ? '#0F172A' : '#F8FAFC', 
+                                borderBottom: '1px solid',
+                                borderColor: 'divider'
+                            },
+                            '& .MuiDataGrid-cell': {
+                                borderBottom: '1px solid',
+                                borderColor: mode === 'dark' ? alpha('#fff', 0.05) : alpha('#000', 0.03),
+                                display: 'flex',
+                                alignItems: 'center'
+                            },
+                            '& .MuiDataGrid-row:hover': { 
+                                bgcolor: mode === 'dark' ? alpha('#2563EB', 0.05) : alpha('#2563EB', 0.02) 
+                            },
+                        }}
+                    />
+                </Paper>
             </Box>
 
             {/* Stats */}
             <Grid container spacing={3} sx={{ width: '100%', mt: 1 }} alignItems="stretch">
                 {deptStats.map((stat) => (
-                    <Grid item xs={12} md={3} key={stat.label}>
+                    <Grid item xs={12} sm={6} md={3} key={stat.label}>
                         <Paper sx={{
-                            p: 3, borderRadius: 3, border: '1px solid',
+                            p: 2.5, 
+                            borderRadius: 2, // "Little round edge"
+                            border: '1px solid',
                             borderColor: mode === 'dark' ? '#334155' : 'grey.100',
-                            bgcolor: mode === 'dark' ? '#1E293B' : 'background.paper',
-                            boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : 'none',
+                            bgcolor: mode === 'dark' ? '#1E293B' : '#fff',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'translateY(-2px)',
+                                borderColor: stat.color,
+                                bgcolor: mode === 'dark' ? alpha(stat.color, 0.05) : alpha(stat.color, 0.01),
+                            }
                         }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Box sx={{ bgcolor: mode === 'dark' ? alpha(stat.color, 0.2) : `${stat.color}18`, color: stat.color, p: 1.5, borderRadius: '50%', display: 'flex' }}>
+                                <Box sx={{ 
+                                    bgcolor: mode === 'dark' ? alpha(stat.color, 0.2) : alpha(stat.color, 0.1), 
+                                    color: stat.color, 
+                                    p: 1.2, 
+                                    borderRadius: 1.5,
+                                    display: 'flex',
+                                    boxShadow: `0 4px 12px ${alpha(stat.color, 0.2)}`
+                                }}>
                                     {stat.icon}
                                 </Box>
                                 <Box>
-                                    <Typography variant="h5" sx={{ fontWeight: 800, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 800, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', lineHeight: 1 }}>
                                         {stat.value}
                                     </Typography>
-                                    <Typography variant="caption" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary', fontWeight: 500 }}>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                                         {stat.label}
                                     </Typography>
                                 </Box>
@@ -512,8 +528,8 @@ const DeptDashboard = () => {
             <AddTeacherForm open={teacherFormOpen} onClose={() => setTeacherFormOpen(false)} onSubmit={handleAddTeacher} />
             <AddStudentForm open={studentFormOpen} onClose={() => setStudentFormOpen(false)} onAdd={handleAddStudent} />
 
-            {/* Toast notifications */}
-            <ToastSnackbar />
+            {/* Notifications */}
+            <ToastSnackbar sx={{ mb: 4 }} />
         </Box>
     );
 };

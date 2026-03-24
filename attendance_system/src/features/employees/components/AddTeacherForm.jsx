@@ -49,13 +49,12 @@ const qualificationOptions = [
 const steps = ['Teacher Details', 'Address & Security', 'Completed'];
 
 const sectionCard = (mode) => ({
-    borderRadius: 3,
-    p: { xs: 2.5, md: 3.5 },
-    borderColor: mode === 'dark' ? 'rgba(255,255,255,0.1)' : alpha('#000', 0.08),
-    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#fff',
-    boxShadow: mode === 'dark'
-        ? '0 4px 20px rgba(0,0,0,0.3)'
-        : '0 4px 6px -1px rgb(0 0 0 / 0.02)',
+    borderRadius: 2, // "Little round edge"
+    p: { xs: 2.5, md: 3 },
+    borderColor: mode === 'dark' ? '#334155' : alpha('#000', 0.06),
+    bgcolor: mode === 'dark' ? '#1E293B' : '#fff',
+    boxShadow: 'none',
+    border: '1px solid',
 });
 
 const getFieldSx = (mode) => ({
@@ -485,8 +484,7 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
             maxWidth="lg"
             PaperProps={{
                 sx: {
-                    borderRadius: 3,
-                    padding: 0,
+                    borderRadius: 2, // "Little round edge"
                     backgroundImage: 'none',
                     bgcolor: mode === 'dark' ? '#0F172A' : 'background.paper',
                     boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',

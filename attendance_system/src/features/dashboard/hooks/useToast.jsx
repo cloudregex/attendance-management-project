@@ -71,7 +71,7 @@ export function useToast(defaultDuration = 4000) {
         }
     };
 
-    const ToastSnackbar = () => (
+    const ToastSnackbar = ({ sx: extraSx }) => (
         <Snackbar
             open={open}
             autoHideDuration={current?.duration}
@@ -79,23 +79,38 @@ export function useToast(defaultDuration = 4000) {
             TransitionComponent={SlideTransition}
             TransitionProps={{ onExited: handleExited }}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            sx={{ mb: 1 }}
+            sx={{ 
+                mb: 2, 
+                mr: 1,
+                ...extraSx 
+            }}
         >
             <Alert
                 onClose={handleClose}
                 severity={current?.severity || 'info'}
                 variant="filled"
-                elevation={6}
+                elevation={0}
                 sx={{
-                    minWidth: 280,
-                    maxWidth: 420,
-                    borderRadius: 2,
-                    fontWeight: 500,
-                    '& .MuiAlert-message': { width: '100%' },
+                    minWidth: 320,
+                    maxWidth: 450,
+                    borderRadius: 1.5,
+                    fontWeight: 600,
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                    border: '1px solid',
+                    borderColor: current?.severity === 'success' ? 'rgba(255,255,255,0.2)' : 'transparent',
+                    '& .MuiAlert-icon': {
+                        fontSize: '1.5rem',
+                        alignItems: 'center'
+                    },
+                    '& .MuiAlert-message': { 
+                        width: '100%',
+                        fontSize: '0.9rem',
+                        py: 0.5 
+                    },
                 }}
             >
                 {current?.title && (
-                    <AlertTitle sx={{ fontWeight: 700, mb: 0.25 }}>
+                    <AlertTitle sx={{ fontWeight: 800, mb: 0.25, fontSize: '0.95rem' }}>
                         {current.title}
                     </AlertTitle>
                 )}
