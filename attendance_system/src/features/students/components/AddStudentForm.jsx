@@ -28,11 +28,12 @@ const SEMESTERS = ['1', '2', '3', '4', '5', '6', '7', '8'];
 const steps     = ['Student Details', 'Face Capture', 'Completed'];
 
 const cardSx = (mode) => ({
-    borderRadius: 3,
-    p: { xs: 2.5, md: 3.5 },
-    borderColor: mode === 'dark' ? 'rgba(255,255,255,0.1)' : alpha('#000', 0.08),
-    bgcolor:     mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#fff',
-    boxShadow:   mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 6px -1px rgb(0 0 0 / 0.02)',
+    borderRadius: 2, // "Little round edge"
+    p: { xs: 2.5, md: 3 },
+    borderColor: mode === 'dark' ? '#334155' : alpha('#000', 0.06),
+    bgcolor:     mode === 'dark' ? '#1E293B' : '#fff',
+    boxShadow:   'none',
+    border: '1px solid',
 });
 
 const fieldSx = (mode) => ({
@@ -323,29 +324,31 @@ const AddStudentForm = ({ open, onClose, onAdd }) => {
                     <Grid item xs={12} sm={4}>
                         <TextField fullWidth size="medium" label="Pincode" name="pincode"
                             value={formData.pincode} onChange={handleChange}
-                            error={!!errors.pincode} helperText={errors.pincode || '6-digit'}
+                            error={!!errors.pincode} helperText={errors.pincode || ' '}
                             placeholder="411001" sx={fieldSx(mode)} />
                     </Grid>
                 </Grid>
             </Card>
 
-            {/* ── Academic Details ── */}
+            {/* ── Academic Details (Refined 2-column layout) ── */}
             <Card variant="outlined" sx={cardSx(mode)}>
                 <SectionHeader color="success.main" label="Academic Details" />
                 <Grid container spacing={3}>
+                    {/* Primary Academic IDs */}
                     <Grid item xs={12} sm={6}>
                         <TextField fullWidth size="medium" label="Roll Number *" name="roll_number"
                             value={formData.roll_number} onChange={handleChange}
-                            error={!!errors.roll_number} helperText={errors.roll_number || 'University assigned'}
-                            sx={fieldSx(mode)} />
+                            error={!!errors.roll_number} helperText={errors.roll_number || ' '}
+                            InputLabelProps={{ shrink: true }} sx={fieldSx(mode)} />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <TextField fullWidth size="medium" label="Admission Year" name="admission_year"
                             value={formData.admission_year} onChange={handleChange}
-                            placeholder={new Date().getFullYear().toString()} sx={fieldSx(mode)} />
+                            placeholder={new Date().getFullYear().toString()} 
+                            InputLabelProps={{ shrink: true }} sx={fieldSx(mode)} />
                     </Grid>
 
-                    {/* Department — loaded from API, submits ID */}
+                    {/* Department & Course */}
                     <Grid item xs={12} sm={6}>
                         <Autocomplete
                             options={departments}
@@ -353,15 +356,14 @@ const AddStudentForm = ({ open, onClose, onAdd }) => {
                             isOptionEqualToValue={(o, v) => o.id === v.id}
                             value={departments.find(d => d.id === formData.department_id) || null}
                             onChange={(_, v) => handleChange({ target: { name: 'department_id', value: v ? v.id : '' } })}
-                            noOptionsText={departments.length === 0 ? 'No departments found — add one first' : 'No match'}
+                            noOptionsText={departments.length === 0 ? 'No departments found' : 'No match'}
                             renderInput={(params) => (
                                 <TextField {...params} size="medium" label="Department *"
                                     error={!!errors.department_id} helperText={errors.department_id || ' '}
-                                    sx={fieldSx(mode)} />
+                                    InputLabelProps={{ shrink: true }} sx={fieldSx(mode)} />
                             )}
                         />
                     </Grid>
-
                     <Grid item xs={12} sm={6}>
                         <Autocomplete
                             options={COURSES}
@@ -369,17 +371,21 @@ const AddStudentForm = ({ open, onClose, onAdd }) => {
                             onChange={(_, v) => handleChange({ target: { name: 'course', value: v || '' } })}
                             renderInput={(params) => (
                                 <TextField {...params} size="medium" label="Course *"
-                                    error={!!errors.course} helperText={errors.course || ' '} sx={fieldSx(mode)} />
+                                    error={!!errors.course} helperText={errors.course || ' '} 
+                                    InputLabelProps={{ shrink: true }} sx={fieldSx(mode)} />
                             )}
                         />
                     </Grid>
+
+                    {/* Class & Semester */}
                     <Grid item xs={12} sm={6}>
                         <Autocomplete
                             options={CLASSES}
                             value={formData.className || null}
                             onChange={(_, v) => handleChange({ target: { name: 'className', value: v || '' } })}
                             renderInput={(params) => (
-                                <TextField {...params} size="medium" label="Class / Year" sx={fieldSx(mode)} />
+                                <TextField {...params} size="medium" label="Class / Year" 
+                                    InputLabelProps={{ shrink: true }} sx={fieldSx(mode)} />
                             )}
                         />
                     </Grid>
@@ -389,7 +395,8 @@ const AddStudentForm = ({ open, onClose, onAdd }) => {
                             value={formData.semester || null}
                             onChange={(_, v) => handleChange({ target: { name: 'semester', value: v || '' } })}
                             renderInput={(params) => (
-                                <TextField {...params} size="medium" label="Semester" sx={fieldSx(mode)} />
+                                <TextField {...params} size="medium" label="Semester" 
+                                    InputLabelProps={{ shrink: true }} sx={fieldSx(mode)} />
                             )}
                         />
                     </Grid>
@@ -418,7 +425,7 @@ const AddStudentForm = ({ open, onClose, onAdd }) => {
                                 sx={{
                                     border: '2px dashed',
                                     borderColor: faceData[key] ? 'success.main' : mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
-                                    borderRadius: 3, p: 3,
+                                    borderRadius: 2, p: 3,
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5,
                                     cursor: 'pointer', transition: 'all 0.2s',
                                     bgcolor: faceData[key] ? alpha('#2e7d32', 0.06) : 'transparent',
@@ -463,21 +470,54 @@ const AddStudentForm = ({ open, onClose, onAdd }) => {
 
     // ── Completed step ────────────────────────────────────────────
     const renderStep3 = () => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8, gap: 3 }}>
-            <Box sx={{ width: 80, height: 80, borderRadius: '50%', bgcolor: alpha('#2e7d32', 0.12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CheckCircleIcon sx={{ fontSize: 48, color: 'success.main' }} />
+        <Box sx={{ 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', 
+            justifyContent: 'center', py: 6, gap: 4, textAlign: 'center' 
+        }}>
+            <Box sx={{ 
+                width: 100, height: 100, borderRadius: '50%', 
+                bgcolor: alpha('#10B981', 0.1), display: 'flex', 
+                alignItems: 'center', justifyContent: 'center',
+                animation: 'scaleIn 0.5s ease-out'
+            }}>
+                <CheckCircleIcon sx={{ fontSize: 60, color: '#10B981' }} />
             </Box>
-            <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h5" fontWeight={700} mb={1}>Student Registered!</Typography>
-                <Typography variant="body2" color="text.secondary">
-                    <strong>{formData.first_name} {formData.last_name}</strong> — Roll: <strong>{formData.roll_number}</strong>
+            
+            <Box>
+                <Typography variant="h4" fontWeight={800} gutterBottom sx={{ color: mode === 'dark' ? '#F8FAFC' : '#1E293B' }}>
+                    Registration Successful!
                 </Typography>
-                {faceData.face_embedding && (
-                    <Typography variant="caption" color="success.main" display="block" mt={1}>
-                        ✓ Face embedding generated successfully.
-                    </Typography>
-                )}
+                <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400, mx: 'auto', mb: 4 }}>
+                    The student has been successfully enrolled and face data has been securely processed.
+                </Typography>
+
+                <Paper variant="outlined" sx={{ 
+                    p: 3, borderRadius: 2, bgcolor: mode === 'dark' ? alpha('#fff', 0.02) : alpha('#000', 0.01),
+                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, minWidth: 350,
+                    borderColor: mode === 'dark' ? '#334155' : 'divider'
+                }}>
+                    <Box sx={{ textAlign: 'left' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>Student Name</Typography>
+                        <Typography variant="body2" fontWeight={700}>{formData.first_name} {formData.last_name}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'left' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>Roll Number</Typography>
+                        <Typography variant="body2" fontWeight={700}>{formData.roll_number}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'left' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>Database ID</Typography>
+                        <Typography variant="body2" fontWeight={700} sx={{ color: 'primary.main' }}>#{formData.student_id || 'Generating...'}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'left' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>Biometrics</Typography>
+                        <Typography variant="body2" fontWeight={700} sx={{ color: '#10B981' }}>✓ Active</Typography>
+                    </Box>
+                </Paper>
             </Box>
+
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 2 }}>
+                You can now see this student in the department dashboard table.
+            </Typography>
         </Box>
     );
 
@@ -501,7 +541,7 @@ const AddStudentForm = ({ open, onClose, onAdd }) => {
 
     return (
         <Dialog open={open} onClose={activeStep === 2 ? onClose : undefined} fullWidth maxWidth="lg"
-            PaperProps={{ sx: { borderRadius: 3, backgroundImage: 'none', bgcolor: mode === 'dark' ? '#0F172A' : 'background.paper', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', minHeight: 600 } }}>
+            PaperProps={{ sx: { borderRadius: 2, backgroundImage: 'none', bgcolor: mode === 'dark' ? '#0F172A' : 'background.paper', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', minHeight: 600 } }}>
 
             <DialogTitle sx={{ m: 0, p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid', borderColor: mode === 'dark' ? '#334155' : 'divider' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
