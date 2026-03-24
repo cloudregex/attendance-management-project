@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -30,10 +30,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 
-const departmentOptions = [
-    'Computer Science', 'Electronics', 'Mechanical',
-    'Civil', 'Applied Sciences', 'Management',
-];
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const subjectOptions = [
     'Mathematics', 'Physics', 'Chemistry', 'English', 'Computer Science',
@@ -78,8 +75,8 @@ const emptyForm = () => ({
     email: '',
     mobile: '',
     employee_id: '',
-    department_id: '',
-    department_name: '',
+    department_id: '',   // integer FK — submitted to API
+    designation: '',
     subjects: [],
     classes: [],
     qualification: '',
@@ -102,6 +99,17 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState(emptyForm());
     const [errors, setErrors] = useState({});
+    const [departments, setDepartments] = useState([]);  // loaded from API
+
+    // Load departments from backend
+    useEffect(() => {
+        fetch(`${API}/departments`)
+            .then(r => r.json())
+            .then(data => {
+                if (Array.isArray(data)) setDepartments(data.map(d => ({ id: d.id, name: d.name })));
+            })
+            .catch(() => {});
+    }, []);
 
     // Reset on close
     React.useEffect(() => {
@@ -152,8 +160,8 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
             e.employee_id = 'Employee ID seems too short';
         }
 
-        if (!formData.department_name) {
-            e.department_name = 'Please select a department';
+        if (!formData.department_id) {
+            e.department_id = 'Please select a department';
         }
 
         if (formData.date_of_birth) {
@@ -212,10 +220,7 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
                 if (onSubmit) {
                     const payload = {
                         ...formData,
-                        name: formData.teacher_name,
-                        status: formData.status ? 'Active' : 'Inactive',
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
+                        // department_id is already an integer from the dropdown
                     };
                     onSubmit(payload);
                 }
@@ -339,13 +344,16 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
                             sx={getFieldSx(mode)}
                         />
                         <Autocomplete
-                            options={departmentOptions}
-                            value={formData.department_name || null}
-                            onChange={(_, v) => handleAutoChange('department_name', v || '')}
+                            options={departments}
+                            getOptionLabel={(o) => o.name}
+                            isOptionEqualToValue={(o, v) => o.id === v.id}
+                            value={departments.find(d => d.id === formData.department_id) || null}
+                            onChange={(_, v) => handleAutoChange('department_id', v ? v.id : '')}
+                            noOptionsText={departments.length === 0 ? 'No departments found — add one first' : 'No match'}
                             renderInput={(params) => (
                                 <TextField
                                     {...params} label="Department *"
-                                    error={!!errors.department_name} helperText={errors.department_name}
+                                    error={!!errors.department_id} helperText={errors.department_id}
                                     sx={getFieldSx(mode)}
                                 />
                             )}
@@ -438,9 +446,9 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
                 <Typography variant="body2" color="text.secondary">
                     <strong>{formData.teacher_name}</strong> ({formData.employee_id}) has been registered.
                 </Typography>
-                {formData.department_name && (
+                {formData.department_id && (
                     <Typography variant="body2" color="text.secondary" mt={0.5}>
-                        Department: {formData.department_name}
+                        Department: {departments.find(d => d.id === formData.department_id)?.name || `ID ${formData.department_id}`}
                     </Typography>
                 )}
             </Box>
