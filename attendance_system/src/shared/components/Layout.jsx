@@ -15,10 +15,9 @@ import {
     Avatar,
     Badge,
     InputBase,
-    alpha,
-    styled,
     useTheme,
 } from '@mui/material';
+import { alpha, styled } from '@mui/material/styles';
 import {
     Menu as MenuIcon,
     Dashboard as DashboardIcon,

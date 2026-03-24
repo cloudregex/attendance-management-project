@@ -4,9 +4,9 @@ import {
     Typography,
     Box,
     Button,
-    alpha,
     useTheme,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
     TrendingUp as TrendingUpIcon,
     Business as BusinessIcon,

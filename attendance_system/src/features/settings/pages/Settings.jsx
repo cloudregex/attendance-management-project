@@ -16,11 +16,11 @@ import {
     IconButton,
     Tabs,
     Tab,
-    alpha,
     useTheme,
     Card,
     CardContent,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useColorMode } from '../../../shared/components/ThemeContext';
 import {

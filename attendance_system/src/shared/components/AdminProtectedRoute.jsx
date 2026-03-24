@@ -6,6 +6,8 @@ const AdminProtectedRoute = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const location = useLocation();
 
+    const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000/api';
+
     useEffect(() => {
         const verifyToken = async () => {
             const token = localStorage.getItem('adminToken');
@@ -17,7 +19,7 @@ const AdminProtectedRoute = ({ children }) => {
             }
 
             try {
-                const response = await fetch('http://localhost:5000/api/admin/me', {
+                const response = await fetch(`${API}/admin/me`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

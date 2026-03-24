@@ -5,9 +5,9 @@ import {
     Paper,
     Button,
     IconButton,
-    alpha,
     useTheme,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
     Security,
     ExitToApp,
