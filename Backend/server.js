@@ -6,13 +6,19 @@ import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import roleRoutes from './routes/role.routes.js';
 import permissionRoutes from './routes/permission.routes.js';
+import activityRoutes from './routes/activity.routes.js';
 
 // Models
 import Admin from './model/admin.model.js';
 import Role from './model/role.model.js';
 import Permission from './model/permission.model.js';
+import ActivityLog from './model/activityLog.model.js';
 import usermodel from './model/user.model.js';
 import { DataTypes } from 'sequelize';
+
+// Define Associations
+Role.belongsToMany(Permission, { through: 'RolePermissions', as: 'permissions' });
+Permission.belongsToMany(Role, { through: 'RolePermissions', as: 'roles' });
 
 // Services
 import { seedDefaultRoles } from './services/role.service.js';
@@ -28,6 +34,7 @@ app.use(express.json());
 app.use("/api/users", adminRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions/definitions", permissionRoutes);
+app.use("/api/activity-logs", activityRoutes);
 app.use("/api/old-users", userRoutes);
 app.use("/api/admin", adminRoutes);
 
@@ -50,6 +57,9 @@ const syncDB = async () => {
     await Role.sync({ alter: true });
     await seedDefaultRoles();
     console.log("✅ Roles synced and seeded");
+
+    await ActivityLog.sync({ alter: true });
+    console.log("✅ ActivityLog synced");
 
     await sequelize.sync({ alter: true });
     console.log("✅ All models synced");

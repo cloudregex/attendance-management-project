@@ -16,6 +16,7 @@ import { ArrowBackIosNew as ArrowBackIosNewIcon } from '@mui/icons-material';
 import axios from 'axios';
 
 const API_ROLES = 'http://localhost:5000/api/roles';
+const API_PERMISSIONS = 'http://localhost:5000/api/permissions/definitions';
 
 const EditRolePermissions = () => {
     const { roleId } = useParams();
@@ -24,32 +25,35 @@ const EditRolePermissions = () => {
     const mode = theme.palette.mode;
 
     const [role, setRole] = useState(null);
-    const [permissions, setPermissions] = useState({});
+    const [permissions, setPermissions] = useState({}); // Stores { permissionId: boolean }
+    const [permissionsList, setPermissionsList] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const permissionKeys = [
-        'canGrant', 'canApprove', 'canManageUsers', 'canManageRoles',
-        'canTakeAttendance', 'canViewReports', 'canModifyRecords', 'canExportData',
-        'canAccessLogs', 'canManageDepts', 'canViewSchedules', 'canSystemConfig'
-    ];
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const rolesRes = await axios.get(`${API_ROLES}/get`);
-                const foundRole = rolesRes.data.find((r) => r.id === roleId);
+                const token = localStorage.getItem('adminToken');
+                if (!token) return;
+                const [rolesRes, permsRes] = await Promise.all([
+                    axios.get(`${API_ROLES}/get`, { headers: { Authorization: `Bearer ${token}` } }),
+                    axios.get(`${API_PERMISSIONS}/get`, { headers: { Authorization: `Bearer ${token}` } })
+                ]);
 
+                setPermissionsList(permsRes.data);
+
+                const foundRole = rolesRes.data.find((r) => r.id === roleId);
                 if (foundRole) {
                     setRole(foundRole);
-                    // Construct permissions directly from the role definition
                     const rolePerms = {};
-                    permissionKeys.forEach(key => {
-                        rolePerms[key] = foundRole[key] || false;
-                    });
+                    if (foundRole.permissions) {
+                        foundRole.permissions.forEach(p => {
+                            rolePerms[p.id] = true;
+                        });
+                    }
                     setPermissions(rolePerms);
                 }
             } catch (error) {
-                console.error('Error fetching role:', error);
+                console.error('Error fetching role or permissions:', error);
             } finally {
                 setLoading(false);
             }
@@ -63,9 +67,19 @@ const EditRolePermissions = () => {
 
     const handleSave = async () => {
         try {
+            // Convert boolean map back to an array of IDs
+            const selectedPermissionIds = Object.keys(permissions).filter(id => permissions[id]).map(Number);
+
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                alert('Session expired. Please log in again.');
+                return;
+            }
             await axios.put(`${API_ROLES}/update/${role.id}`, {
                 name: role.name,
-                ...permissions
+                permissions: selectedPermissionIds
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             navigate('/permissions?view=roles');
         } catch (error) {
@@ -75,13 +89,13 @@ const EditRolePermissions = () => {
     };
 
     const PermissionGroupCard = ({ title, groupPerms }) => {
-        const allSelected = groupPerms.every(p => !!permissions[p.key]);
+        const allSelected = groupPerms.every(p => !!permissions[p.id]);
 
         const toggleAll = () => {
             const nextVal = !allSelected;
             setPermissions(prev => {
                 const updated = { ...prev };
-                groupPerms.forEach(p => updated[p.key] = nextVal);
+                groupPerms.forEach(p => updated[p.id] = nextVal);
                 return updated;
             });
         };
@@ -122,16 +136,16 @@ const EditRolePermissions = () => {
                 <Box sx={{ p: 2, flex: 1, bgcolor: mode === 'dark' ? 'background.default' : 'white' }}>
                     <Stack spacing={1}>
                         {groupPerms.map((p) => (
-                            <Box key={p.key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box key={p.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Checkbox
                                     size="small"
-                                    checked={!!permissions[p.key]}
-                                    onChange={() => handleToggle(p.key)}
+                                    checked={!!permissions[p.id]}
+                                    onChange={() => handleToggle(p.id)}
                                     color="success"
                                     sx={{ p: 0.5 }}
                                 />
-                                <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.85rem' }}>
-                                    {p.label}
+                                <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.85rem', textTransform: 'capitalize' }}>
+                                    {p.name}
                                 </Typography>
                             </Box>
                         ))}
@@ -160,31 +174,8 @@ const EditRolePermissions = () => {
 
     const permissionStructure = [
         {
-            title: "Administrative Permissions",
-            permissions: [
-                { key: 'canGrant', label: 'Grant Permissions' },
-                { key: 'canApprove', label: 'Approve Requests' },
-                { key: 'canManageUsers', label: 'User Create/Edit/Delete' },
-                { key: 'canManageRoles', label: 'Role Create/Edit/Delete' }
-            ]
-        },
-        {
-            title: "Attendance Permissions",
-            permissions: [
-                { key: 'canTakeAttendance', label: 'Take Attendance' },
-                { key: 'canViewReports', label: 'View Attendance Reports' },
-                { key: 'canModifyRecords', label: 'Modify Attendance Records' },
-                { key: 'canExportData', label: 'Export Attendance Data' }
-            ]
-        },
-        {
-            title: "System Permissions",
-            permissions: [
-                { key: 'canAccessLogs', label: 'View Activity Logs' },
-                { key: 'canManageDepts', label: 'Manage Departments' },
-                { key: 'canViewSchedules', label: 'View Class Schedules' },
-                { key: 'canSystemConfig', label: 'System Configuration' }
-            ]
+            title: "Dynamic Permissions",
+            permissions: permissionsList
         }
     ];
 
@@ -254,11 +245,11 @@ const EditRolePermissions = () => {
                         <Checkbox
                             size="small"
                             color="primary"
-                            checked={permissionKeys.every(k => !!permissions[k])}
+                            checked={permissionsList.length > 0 && permissionsList.every(p => !!permissions[p.id])}
                             onChange={(e) => {
                                 const nextVal = e.target.checked;
                                 const updated = {};
-                                permissionKeys.forEach(k => updated[k] = nextVal);
+                                permissionsList.forEach(p => updated[p.id] = nextVal);
                                 setPermissions(updated);
                             }}
                         />

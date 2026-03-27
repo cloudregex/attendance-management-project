@@ -68,7 +68,11 @@ const PermissionDefinitionList = () => {
     const fetchPermissions = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${API_URL}/get`);
+            const token = localStorage.getItem('adminToken');
+            if (!token) return;
+            const response = await axios.get(`${API_URL}/get`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setPermissions(response.data);
         } catch (error) {
             console.error('Error fetching permissions:', error);
@@ -100,10 +104,17 @@ const PermissionDefinitionList = () => {
         if (!permName.trim()) return;
 
         try {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                alert('Session expired. Please log in again.');
+                return;
+            }
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+
             if (editingPerm) {
-                await axios.put(`${API_URL}/update/${editingPerm.id}`, { name: permName.trim() });
+                await axios.put(`${API_URL}/update/${editingPerm.id}`, { name: permName.trim() }, config);
             } else {
-                await axios.post(`${API_URL}/create`, { name: permName.trim() });
+                await axios.post(`${API_URL}/create`, { name: permName.trim() }, config);
             }
             fetchPermissions();
             handleClose();
@@ -121,7 +132,14 @@ const PermissionDefinitionList = () => {
 
         if (window.confirm('Are you sure you want to delete this permission?')) {
             try {
-                await axios.delete(`${API_URL}/delete/${id}`);
+                const token = localStorage.getItem('adminToken');
+                if (!token) {
+                    alert('Session expired. Please log in again.');
+                    return;
+                }
+                await axios.delete(`${API_URL}/delete/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 fetchPermissions();
             } catch (error) {
                 console.error('Error deleting permission:', error);

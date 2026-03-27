@@ -195,9 +195,16 @@ const UserManager = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                console.warn('No admin token found, redirecting to login...');
+                // You might want to navigate to login here: navigate('/login');
+                return;
+            }
+            const config = { headers: { Authorization: `Bearer ${token}` } };
             const [usersRes, rolesRes] = await Promise.all([
-                axios.get(`${API_URL}/get`),
-                axios.get(`${API_ROLES}/get`)
+                axios.get(`${API_URL}/get`, config),
+                axios.get(`${API_ROLES}/get`, config)
             ]);
             setUsers(usersRes.data);
             setRoles(rolesRes.data);
@@ -278,10 +285,16 @@ const UserManager = () => {
             const url = editingUser ? `${API_URL}/update/${editingUser.id}` : `${API_URL}/create`;
             const method = editingUser ? 'put' : 'post';
 
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                alert('Session expired. Please log in again.');
+                return;
+            }
             const response = await axios({
                 method,
                 url,
-                data: userData
+                data: userData,
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             fetchData();
@@ -322,7 +335,14 @@ const UserManager = () => {
     const handleConfirmDelete = async () => {
         if (userToDelete) {
             try {
-                await axios.delete(`${API_URL}/delete/${userToDelete.id}`);
+                const token = localStorage.getItem('adminToken');
+                if (!token) {
+                    alert('Session expired. Please log in again.');
+                    return;
+                }
+                await axios.delete(`${API_URL}/delete/${userToDelete.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 fetchData();
             } catch (error) {
                 console.error('Error deleting user:', error);
@@ -349,6 +369,7 @@ const UserManager = () => {
         if (roleId === 'subadmin') return 'warning';
         return 'default';
     };
+
 
     return (
         <Box>
