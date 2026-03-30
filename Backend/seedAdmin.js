@@ -1,32 +1,35 @@
 import 'dotenv/config';
-import Admin from './model/admin.model.js';
+import bcrypt from 'bcryptjs';
 import sequelize from './config/db.js';
-import { seedAdmin } from './controller/admin.controller.js';
+import Admin from './model/admin.model.js';
 
-const runSeed = async () => {
+async function seedAdmin() {
     try {
         await sequelize.authenticate();
-        console.log("✅ Database connected for seeding");
-
-        // Sync model (ensure table exists)
         await Admin.sync();
 
-        const adminData = {
-            email: "admin@example.com",
-            password: "adminpassword123" 
-        };
+        const hashedPassword = await bcrypt.hash('admin123', 10);
+        
+        const [admin, created] = await Admin.findOrCreate({
+            where: { email: 'admin@attendancepro.com' },
+            defaults: {
+                username: 'admin',
+                password: hashedPassword,
+                full_name: 'Alex Johnson',
+                role: 'admin'
+            }
+        });
 
-        // Delete existing admin to ensure it's re-created with hashed password
-        await Admin.destroy({ where: { email: adminData.email } });
-        console.log("ℹ️ Deleted existing admin for re-seeding");
-
-        await seedAdmin(adminData);
-        console.log("🚀 Seeding completed successfully (Password is now hashed)");
+        if (created) {
+            console.log('✅ Admin account created: admin@attendancepro.com / admin123');
+        } else {
+            console.log('ℹ️ Admin account already exists.');
+        }
         process.exit(0);
     } catch (error) {
-        console.error("❌ Seeding failed:", error);
+        console.error('❌ Admin seed failed:', error);
         process.exit(1);
     }
-};
+}
 
-runSeed();
+seedAdmin();

@@ -16,8 +16,6 @@ import {
     Badge,
     Popover,
     InputBase,
-    alpha,
-    styled,
     useTheme,
     Menu,
     MenuItem,
@@ -28,6 +26,7 @@ import {
     DialogActions,
     Button,
 } from '@mui/material';
+import { alpha, styled } from '@mui/material/styles';
 import {
     Menu as MenuIcon,
     Dashboard as DashboardIcon,
