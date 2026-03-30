@@ -14,8 +14,17 @@ import {
     ListItemText,
     Avatar,
     Badge,
+    Popover,
     InputBase,
     useTheme,
+    Menu,
+    MenuItem,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
+    Button,
 } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import {
@@ -34,9 +43,52 @@ import {
     RadioButtonUnchecked,
     AdminPanelSettings,
     Logout,
+    DarkMode,
+    LightMode,
+    MoreHoriz,
+    DeleteOutline,
+    ReportProblem,
 } from '@mui/icons-material';
+
+const mockNotifications = [
+    {
+        id: 1,
+        user: 'Jolyon Wagg',
+        action: 'and 1 other friend have birthdays today.',
+        time: '2 hours ago',
+        avatar: 'J',
+        iconColor: '#1976d2',
+    },
+    {
+        id: 2,
+        user: 'Captain Haddock',
+        action: 'commented on your recent update.',
+        time: '5 hours ago',
+        avatar: 'C',
+        iconColor: '#2e7d32',
+    },
+    {
+        id: 3,
+        user: 'Tintin',
+        action: 'mentioned you in a discussion.',
+        time: '1 day ago',
+        avatar: 'T',
+        iconColor: '#ed6c02',
+    },
+    {
+        id: 4,
+        user: 'Professor Calculus',
+        action: 'uploaded a new document.',
+        time: '2 days ago',
+        avatar: 'P',
+        iconColor: '#9c27b0',
+    }
+];
+import { useColorMode } from './ThemeContext';
 import { Collapse } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+// const [anchorEl, setAnchorEl] = React.useState(null);
+// const open = Boolean(anchorEl);
 
 const drawerWidth = 260;
 
@@ -82,9 +134,46 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const Layout = ({ children }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [permissionsOpen, setPermissionsOpen] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [notifAnchor, setNotifAnchor] = React.useState(null);
+    const notifOpen = Boolean(notifAnchor);
+    const [notifications, setNotifications] = useState(mockNotifications);
+    const [actionMenuAnchor, setActionMenuAnchor] = useState(null);
+    const [selectedNotifId, setSelectedNotifId] = useState(null);
+
+    const handleActionMenuOpen = (event, id) => {
+        setActionMenuAnchor(event.currentTarget);
+        setSelectedNotifId(id);
+    };
+
+    const handleActionMenuClose = () => {
+        setActionMenuAnchor(null);
+        setSelectedNotifId(null);
+    };
+
+    const handleRemoveNotification = () => {
+        setNotifications((prev) => prev.filter((n) => n.id !== selectedNotifId));
+        handleActionMenuClose();
+    };
+
+    const handleReportIssue = () => {
+        console.log(`Report issue for notification ${selectedNotifId}`);
+        handleActionMenuClose();
+    };
+
+    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
+    const colorMode = useColorMode();
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -308,22 +397,180 @@ const Layout = ({ children }) => {
                     <Box sx={{ flexGrow: 1 }} />
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <IconButton color="inherit">
-                            <Badge badgeContent={4} color="error">
+                        <IconButton color="inherit" >
+                            <Badge badgeContent={4} color="error" onClick={(e) => setNotifAnchor(e.currentTarget)}>
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                    {localStorage.getItem('adminEmail') || 'Admin'}
+                        <Popover
+                            open={notifOpen}
+                            anchorEl={notifAnchor}
+                            onClose={() => setNotifAnchor(null)}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "right"
+                            }}
+                            transformOrigin={{
+                                vertical: "top",
+                                horizontal: "right"
+                            }}
+                            PaperProps={{
+                                sx: {
+                                    width: { xs: '100%', sm: 360 },
+                                    borderRadius: '12px',
+                                    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+                                    mt: 1.5,
+                                    overflow: 'hidden'
+                                }
+                            }}
+                        >
+                            <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                    Notifications
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">Main Admin</Typography>
                             </Box>
-                            <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}>A</Avatar>
-                            <IconButton color="error" onClick={handleLogout} title="Logout">
-                                <Logout />
+                            
+                            <Box sx={{ px: 2, pb: 1 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+                                    Today
+                                </Typography>
+                            </Box>
+
+                            <List sx={{ p: 0, maxHeight: 400, overflowY: 'auto' }}>
+                                {notifications.map((notif, index) => (
+                                    <React.Fragment key={notif.id}>
+                                        <ListItem 
+                                            disablePadding
+                                            sx={{
+                                                px: 2,
+                                                py: 1.5,
+                                                display: 'flex',
+                                                alignItems: 'flex-start',
+                                                gap: 2,
+                                                cursor: 'pointer',
+                                                transition: 'background-color 0.2s',
+                                                '&:hover': {
+                                                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)'
+                                                }
+                                            }}
+                                        >
+                                            <Avatar sx={{ bgcolor: notif.iconColor, width: 48, height: 48 }}>
+                                                {notif.avatar}
+                                            </Avatar>
+                                            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                                <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.3, mb: 0.5 }}>
+                                                    <Box component="span" sx={{ fontWeight: 'bold' }}>{notif.user}</Box> {notif.action}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                                                    {notif.time}
+                                                </Typography>
+                                            </Box>
+                                            <IconButton 
+                                                size="small" 
+                                                sx={{ color: 'text.secondary' }}
+                                                onClick={(e) => handleActionMenuOpen(e, notif.id)}
+                                            >
+                                                <MoreHoriz />
+                                            </IconButton>
+                                        </ListItem>
+                                        {index < notifications.length - 1 && <Divider component="li" />}
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                            <Divider />
+                            <Box sx={{ p: 1, textAlign: 'center' }}>
+                                <Button size="small" sx={{ textTransform: 'none', fontWeight: 600 }}>
+                                    Load more notifications
+                                </Button>
+                            </Box>
+                        </Popover>
+
+                        {/* Dropdown Menu for Individual Notification Actions */}
+                        <Menu
+                            anchorEl={actionMenuAnchor}
+                            open={Boolean(actionMenuAnchor)}
+                            onClose={handleActionMenuClose}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            PaperProps={{
+                                elevation: 3,
+                                sx: { minWidth: 150, borderRadius: 2, mt: 0.5 }
+                            }}
+                        >
+                            <MenuItem onClick={handleRemoveNotification} sx={{ color: 'error.main' }}>
+                                <ListItemIcon sx={{ color: 'inherit' }}>
+                                    <DeleteOutline fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="body2">Remove notification</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleReportIssue}>
+                                <ListItemIcon>
+                                    <ReportProblem fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="body2">Report issue</Typography>
+                            </MenuItem>
+                        </Menu>
+                        <IconButton color="inherit" onClick={colorMode.toggleColorMode}>
+                            {theme.palette.mode === 'dark' ? <LightMode /> : <DarkMode />}
+                        </IconButton>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+                                <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}>
+                                    {(localStorage.getItem('adminEmail') || 'A').charAt(0).toUpperCase()}
+                                </Avatar>
                             </IconButton>
+                            <Menu
+                                anchorEl={anchorEl}
+                                id="account-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={handleMenuClose}
+                                PaperProps={{
+                                    elevation: 0,
+                                    sx: {
+                                        overflow: 'visible',
+                                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                        mt: 1.5,
+                                        minWidth: 150,
+                                        '& .MuiAvatar-root': {
+                                            width: 32,
+                                            height: 32,
+                                            ml: -0.5,
+                                            mr: 1,
+                                        },
+                                    },
+                                }}
+                                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                            >
+                                <Box sx={{ px: 2, py: 1 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                        {localStorage.getItem('adminEmail') || 'Admin'}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">Main Admin</Typography>
+                                </Box>
+                                <Divider />
+                                <MenuItem onClick={() => { handleMenuClose(); navigate('/settings'); }}>
+                                    <ListItemIcon>
+                                        <SettingsIcon fontSize="small" />
+                                    </ListItemIcon>
+                                    Settings
+                                </MenuItem>
+                                <MenuItem
+                                    onClick={() => { handleMenuClose(); setLogoutDialogOpen(true); }}
+                                    sx={{ color: 'error.main' }}
+                                >
+                                    <ListItemIcon sx={{ color: 'inherit' }}>
+                                        <Logout fontSize="small" />
+                                    </ListItemIcon>
+                                    Logout
+                                </MenuItem>
+                            </Menu>
                         </Box>
                     </Box>
                 </Toolbar>
@@ -371,6 +618,33 @@ const Layout = ({ children }) => {
             >
                 {children}
             </Box>
+
+
+
+            {/* Logout Confirmation Dialog */}
+            <Dialog
+                open={logoutDialogOpen}
+                onClose={() => setLogoutDialogOpen(false)}
+                aria-labelledby="logout-dialog-title"
+                aria-describedby="logout-dialog-description"
+            >
+                <DialogTitle id="logout-dialog-title">
+                    {"Confirm Logout"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="logout-dialog-description">
+                        Are you sure you want to log out of your session?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setLogoutDialogOpen(false)} color="inherit">
+                        Cancel
+                    </Button>
+                    <Button onClick={() => { setLogoutDialogOpen(false); handleLogout(); }} color="error" variant="contained" autoFocus>
+                        Logout
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
