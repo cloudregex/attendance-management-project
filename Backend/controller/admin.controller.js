@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Admin from '../model/admin.model.js';
+import Role from '../model/role.model.js';
 import {
     getUsersService,
     createUserService,
@@ -12,7 +13,10 @@ import { logActivity } from '../services/activity.service.js';
 export const loginAdmin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const admin = await Admin.findOne({ where: { email } });
+        const admin = await Admin.findOne({
+            where: { email },
+            include: [{ model: Role, as: 'role' }]
+        });
 
         if (!admin) {
             return res.status(404).json({ message: "Admin not found" });
@@ -24,7 +28,7 @@ export const loginAdmin = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: admin.id, email: admin.email, role: 'admin' },
+            { id: admin.id, email: admin.email, roleId: admin.roleId },
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
@@ -32,7 +36,11 @@ export const loginAdmin = async (req, res) => {
         res.status(200).json({
             message: "Login successful",
             token,
-            admin: { email: admin.email }
+            admin: {
+                email: admin.email,
+                roleId: admin.roleId,
+                role: admin.role
+            }
         });
     } catch (error) {
         console.error("❌ Error logging in admin:", error);

@@ -87,6 +87,18 @@ const Layout = ({ children }) => {
     const location = useLocation();
     const theme = useTheme();
 
+    const adminEmail = localStorage.getItem('adminEmail') || 'Admin';
+    const adminRole = localStorage.getItem('adminRole') || 'admin';
+    const permissionsStr = localStorage.getItem('adminPermissions');
+    const adminPermissions = permissionsStr ? JSON.parse(permissionsStr) : {};
+
+    const hasPermission = (flag) => {
+        if (!flag) return true;
+        if (adminPermissions[flag] === true) return true;
+        if (adminRole === 'admin') return true;
+        return false;
+    };
+
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
@@ -101,14 +113,19 @@ const Layout = ({ children }) => {
         navigate('/login');
     };
 
-    const menuItems = [
+    const topMenuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-        { text: 'Departments', icon: <BusinessIcon />, path: '/departments' },
-        { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs' },
-        { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports' },
+        { text: 'Departments', icon: <BusinessIcon />, path: '/departments', permission: 'canManageDepts' },
+        { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs', permission: 'canAccessLogs' }
+    ].filter(item => hasPermission(item.permission));
+
+    const bottomMenuItems = [
+        { text: 'Attendance Reports', icon: <DescriptionIcon />, path: '/reports', permission: 'canViewReports' },
         { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
-        { text: 'System AI', icon: <AdminPanelSettings />, path: '/system-admin' },
-    ];
+        { text: 'System AI', icon: <AdminPanelSettings />, path: '/system-admin', permission: 'canSystemConfig' }
+    ].filter(item => hasPermission(item.permission));
+
+    const showUserManagement = hasPermission('canManageUsers') || hasPermission('canManageRoles');
 
     const drawer = (
         <div>
@@ -134,7 +151,7 @@ const Layout = ({ children }) => {
             </Box>
             <Divider />
             <List>
-                {menuItems.slice(0, 3).map((item) => (
+                {topMenuItems.map((item) => (
                     <ListItem key={item.text} disablePadding>
                         <ListItemButton
                             onClick={() => navigate(item.path)}
@@ -164,67 +181,71 @@ const Layout = ({ children }) => {
                 ))}
 
                 {/* Collapsible Permissions Menu */}
-                <ListItem disablePadding>
-                    <ListItemButton
-                        onClick={handlePermissionsClick}
-                        selected={location.pathname.startsWith('/permissions')}
-                        sx={{
-                            mx: 1,
-                            borderRadius: 1,
-                            mb: 0.5,
-                            '&.Mui-selected': {
-                                bgcolor: location.pathname.startsWith('/permissions') ? 'rgba(19, 91, 236, 0.08)' : 'transparent',
-                                color: 'primary.main',
-                                '& .MuiListItemIcon-root': {
-                                    color: 'primary.main',
-                                },
-                            },
-                        }}
-                    >
-                        <ListItemIcon sx={{ minWidth: 40, color: location.pathname.startsWith('/permissions') ? 'primary.main' : 'inherit' }}>
-                            <SecurityIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="User Management" primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />
-                        {permissionsOpen ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>
-                </ListItem>
-                <Collapse in={permissionsOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                        <ListItemButton
-                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
-                            selected={location.pathname === '/permissions' && (!location.search || location.search.includes('view=manage_users'))}
-                            onClick={() => navigate('/permissions?view=manage_users')}
-                        >
-                            <ListItemIcon sx={{ minWidth: 32 }}>
-                                <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
-                            </ListItemIcon>
-                            <ListItemText primary="User List" primaryTypographyProps={{ fontSize: '0.85rem' }} />
-                        </ListItemButton>
+                {showUserManagement && (
+                    <React.Fragment>
+                        <ListItem disablePadding>
+                            <ListItemButton
+                                onClick={handlePermissionsClick}
+                                selected={location.pathname.startsWith('/permissions')}
+                                sx={{
+                                    mx: 1,
+                                    borderRadius: 1,
+                                    mb: 0.5,
+                                    '&.Mui-selected': {
+                                        bgcolor: location.pathname.startsWith('/permissions') ? 'rgba(19, 91, 236, 0.08)' : 'transparent',
+                                        color: 'primary.main',
+                                        '& .MuiListItemIcon-root': {
+                                            color: 'primary.main',
+                                        },
+                                    },
+                                }}
+                            >
+                                <ListItemIcon sx={{ minWidth: 40, color: location.pathname.startsWith('/permissions') ? 'primary.main' : 'inherit' }}>
+                                    <SecurityIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="User Management" primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />
+                                {permissionsOpen ? <ExpandLess /> : <ExpandMore />}
+                            </ListItemButton>
+                        </ListItem>
+                        <Collapse in={permissionsOpen} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                                <ListItemButton
+                                    sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
+                                    selected={location.pathname === '/permissions' && (!location.search || location.search.includes('view=manage_users'))}
+                                    onClick={() => navigate('/permissions?view=manage_users')}
+                                >
+                                    <ListItemIcon sx={{ minWidth: 32 }}>
+                                        <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
+                                    </ListItemIcon>
+                                    <ListItemText primary="User List" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                                </ListItemButton>
 
-                        <ListItemButton
-                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
-                            selected={location.search.includes('view=roles')}
-                            onClick={() => navigate('/permissions?view=roles')}
-                        >
-                            <ListItemIcon sx={{ minWidth: 32 }}>
-                                <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
-                            </ListItemIcon>
-                            <ListItemText primary="Role Management" primaryTypographyProps={{ fontSize: '0.85rem' }} />
-                        </ListItemButton>
-                        <ListItemButton
-                            sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0 }}
-                            selected={location.search.includes('view=definitions')}
-                            onClick={() => navigate('/permissions?view=definitions')}
-                        >
-                            <ListItemIcon sx={{ minWidth: 32 }}>
-                                <RadioButtonUnchecked sx={{ fontSize: '0.7rem' }} />
-                            </ListItemIcon>
-                            <ListItemText primary="Permission List" primaryTypographyProps={{ fontSize: '0.85rem' }} />
-                        </ListItemButton>
-                    </List>
-                </Collapse>
+                                <ListItemButton
+                                    sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0.5 }}
+                                    selected={location.search.includes('view=roles')}
+                                    onClick={() => navigate('/permissions?view=roles')}
+                                >
+                                    <ListItemIcon sx={{ minWidth: 32 }}>
+                                        <RadioButtonUnchecked sx={{ fontSize: '0.8rem' }} />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Role Management" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                                </ListItemButton>
+                                <ListItemButton
+                                    sx={{ pl: 4, mx: 1, borderRadius: 1, mb: 0 }}
+                                    selected={location.search.includes('view=definitions')}
+                                    onClick={() => navigate('/permissions?view=definitions')}
+                                >
+                                    <ListItemIcon sx={{ minWidth: 32 }}>
+                                        <RadioButtonUnchecked sx={{ fontSize: '0.7rem' }} />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Permission List" primaryTypographyProps={{ fontSize: '0.85rem' }} />
+                                </ListItemButton>
+                            </List>
+                        </Collapse>
+                    </React.Fragment>
+                )}
 
-                {menuItems.slice(3).map((item) => (
+                {bottomMenuItems.map((item) => (
                     <ListItem key={item.text} disablePadding>
                         <ListItemButton
                             onClick={() => navigate(item.path)}
@@ -308,9 +329,11 @@ const Layout = ({ children }) => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                    {localStorage.getItem('adminEmail') || 'Admin'}
+                                    {adminEmail}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">Main Admin</Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                                    {adminRole}
+                                </Typography>
                             </Box>
                             <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}>A</Avatar>
                             <IconButton color="error" onClick={handleLogout} title="Logout">
