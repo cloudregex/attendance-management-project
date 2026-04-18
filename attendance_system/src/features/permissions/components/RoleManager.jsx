@@ -29,10 +29,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Security as SecurityIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api/roles';
-const API_PERMISSIONS_URL = 'http://localhost:5000/api/permissions/definitions';
+import axiosInstance from '../../../utils/axiosInstance';
 
 export const RoleManager = () => {
     const theme = useTheme();
@@ -59,11 +56,7 @@ export const RoleManager = () => {
     const fetchRoles = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            if (!token) return;
-            const response = await axios.get(`${API_URL}/get`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await axiosInstance.get(`/roles/get`);
             setRoles(response.data);
         } catch (error) {
             console.error('Error fetching roles:', error);
@@ -74,11 +67,7 @@ export const RoleManager = () => {
 
     const fetchPermissionsList = async () => {
         try {
-            const token = localStorage.getItem('adminToken');
-            if (!token) return;
-            const response = await axios.get(`${API_PERMISSIONS_URL}/get`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await axiosInstance.get(`/permissions/definitions/get`);
             setPermissionsList(response.data);
         } catch (error) {
             console.error('Error fetching permissions list:', error);
@@ -180,17 +169,10 @@ export const RoleManager = () => {
         };
 
         try {
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                alert('Session expired. Please log in again.');
-                return;
-            }
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-
             if (editingRole) {
-                await axios.put(`${API_URL}/update/${editingRole.id}`, roleData, config);
+                await axiosInstance.put(`/roles/update/${editingRole.id}`, roleData);
             } else {
-                await axios.post(`${API_URL}/create`, roleData, config);
+                await axiosInstance.post(`/roles/create`, roleData);
             }
             fetchRoles();
             handleClose();
@@ -209,14 +191,7 @@ export const RoleManager = () => {
     const handleConfirmDelete = async () => {
         if (roleToDelete) {
             try {
-                const token = localStorage.getItem('adminToken');
-                if (!token) {
-                    alert('Session expired. Please log in again.');
-                    return;
-                }
-                await axios.delete(`${API_URL}/delete/${roleToDelete.id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await axiosInstance.delete(`/roles/delete/${roleToDelete.id}`);
                 fetchRoles();
             } catch (error) {
                 console.error('Error deleting role:', error);
@@ -224,7 +199,7 @@ export const RoleManager = () => {
             }
         }
         setDeleteDialogOpen(false);
-        setUserToDelete(null); // Wait, userToDelete? Should be roleToDelete
+        setRoleToDelete(null);
     };
 
     const handleCancelDelete = () => {

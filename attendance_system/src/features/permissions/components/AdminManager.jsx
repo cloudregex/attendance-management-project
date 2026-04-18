@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInstance';
 import {
     Paper,
     Box,
@@ -27,9 +27,6 @@ import {
     Stack,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, People as PeopleIcon } from '@mui/icons-material';
-
-const API_URL = 'http://localhost:5000/api/users';
-const API_ROLES = 'http://localhost:5000/api/roles';
 
 const UserManager = () => {
     const theme = useTheme();
@@ -195,16 +192,9 @@ const UserManager = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                console.warn('No admin token found, redirecting to login...');
-                // You might want to navigate to login here: navigate('/login');
-                return;
-            }
-            const config = { headers: { Authorization: `Bearer ${token}` } };
             const [usersRes, rolesRes] = await Promise.all([
-                axios.get(`${API_URL}/get`, config),
-                axios.get(`${API_ROLES}/get`, config)
+                axiosInstance.get('/users/get'),
+                axiosInstance.get('/roles/get')
             ]);
             setUsers(usersRes.data);
             setRoles(rolesRes.data);
@@ -282,19 +272,13 @@ const UserManager = () => {
         };
 
         try {
-            const url = editingUser ? `${API_URL}/update/${editingUser.id}` : `${API_URL}/create`;
+            const url = editingUser ? `/users/update/${editingUser.id}` : `/users/create`;
             const method = editingUser ? 'put' : 'post';
 
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                alert('Session expired. Please log in again.');
-                return;
-            }
-            const response = await axios({
+            const response = await axiosInstance({
                 method,
                 url,
-                data: userData,
-                headers: { Authorization: `Bearer ${token}` }
+                data: userData
             });
 
             fetchData();
@@ -335,14 +319,7 @@ const UserManager = () => {
     const handleConfirmDelete = async () => {
         if (userToDelete) {
             try {
-                const token = localStorage.getItem('adminToken');
-                if (!token) {
-                    alert('Session expired. Please log in again.');
-                    return;
-                }
-                await axios.delete(`${API_URL}/delete/${userToDelete.id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await axiosInstance.delete(`/users/delete/${userToDelete.id}`);
                 fetchData();
             } catch (error) {
                 console.error('Error deleting user:', error);

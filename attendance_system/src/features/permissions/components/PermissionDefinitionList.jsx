@@ -28,7 +28,8 @@ import {
     Checkbox,
     ListItemIcon,
     ListItemText,
-    CircularProgress
+    CircularProgress,
+    Alert
 } from '@mui/material';
 import {
     Edit as EditIcon,
@@ -38,9 +39,7 @@ import {
     FileDownload as FileDownloadIcon,
     ViewColumn as ViewColumnIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api/permissions/definitions';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const PermissionDefinitionList = () => {
     const [permissions, setPermissions] = useState([]);
@@ -68,11 +67,7 @@ const PermissionDefinitionList = () => {
     const fetchPermissions = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            if (!token) return;
-            const response = await axios.get(`${API_URL}/get`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await axiosInstance.get(`/permissions/definitions/get`);
             setPermissions(response.data);
         } catch (error) {
             console.error('Error fetching permissions:', error);
@@ -104,17 +99,10 @@ const PermissionDefinitionList = () => {
         if (!permName.trim()) return;
 
         try {
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                alert('Session expired. Please log in again.');
-                return;
-            }
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-
             if (editingPerm) {
-                await axios.put(`${API_URL}/update/${editingPerm.id}`, { name: permName.trim() }, config);
+                await axiosInstance.put(`/permissions/definitions/update/${editingPerm.id}`, { name: permName.trim() });
             } else {
-                await axios.post(`${API_URL}/create`, { name: permName.trim() }, config);
+                await axiosInstance.post(`/permissions/definitions/create`, { name: permName.trim() });
             }
             fetchPermissions();
             handleClose();
@@ -132,14 +120,7 @@ const PermissionDefinitionList = () => {
 
         if (window.confirm('Are you sure you want to delete this permission?')) {
             try {
-                const token = localStorage.getItem('adminToken');
-                if (!token) {
-                    alert('Session expired. Please log in again.');
-                    return;
-                }
-                await axios.delete(`${API_URL}/delete/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await axiosInstance.delete(`/permissions/definitions/delete/${id}`);
                 fetchPermissions();
             } catch (error) {
                 console.error('Error deleting permission:', error);
@@ -207,16 +188,25 @@ const PermissionDefinitionList = () => {
                     startIcon={<AddIcon />}
                     onClick={() => handleOpen()}
                     sx={{
-                        textTransform: 'none',
                         borderRadius: 2,
+                        textTransform: 'none',
+                        px: 3,
                         boxShadow: 'none',
                         fontWeight: 600,
-                        px: 3
+                        bgcolor: mode === 'dark' ? 'primary.main' : '#4484f4',
+                        '&:hover': {
+                            bgcolor: mode === 'dark' ? 'primary.dark' : '#3374e3',
+                            boxShadow: '0 4px 12px rgba(68, 132, 244, 0.2)'
+                        }
                     }}
                 >
                     Create Permission
                 </Button>
             </Box>
+
+            <Alert severity="info" sx={{ mb: 3, borderRadius: 2, border: '1px solid', borderColor: mode === 'dark' ? 'rgba(56, 189, 248, 0.2)' : 'info.light' }}>
+                Manage granular system permissions here. These permission definitions can be assigned to different roles to control access.
+            </Alert>
 
             {/* Filter Bar */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -308,8 +298,9 @@ const PermissionDefinitionList = () => {
                     borderRadius: 3,
                     border: '1px solid',
                     borderColor: 'divider',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                    overflow: 'hidden'
+                    boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.05)',
+                    overflow: 'hidden',
+                    bgcolor: mode === 'dark' ? '#1E293B' : 'white',
                 }}
             >
                 <Table>
@@ -461,7 +452,19 @@ const PermissionDefinitionList = () => {
                 </Stack>
             </Box>
 
-            <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 3 } }}>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                fullWidth
+                maxWidth="xs"
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: mode === 'dark' ? '#1E293B' : 'white',
+                        backgroundImage: 'none'
+                    }
+                }}
+            >
                 <DialogTitle sx={{ fontWeight: 800 }}>{editingPerm ? 'Edit Permission' : 'Create New Permission'}</DialogTitle>
                 <DialogContent>
                     <Box sx={{ mt: 1 }}>
