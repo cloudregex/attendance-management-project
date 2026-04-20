@@ -21,6 +21,23 @@ import {
 const SystemAdmin = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
+    const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'info' });
+    const [checkingStatus, setCheckingStatus] = React.useState(false);
+
+    const handleCheckStatus = () => {
+        setCheckingStatus(true);
+        // Simulate an API check for the training engine status
+        setTimeout(() => {
+            setCheckingStatus(false);
+            setSnackbar({
+                open: true,
+                message: 'System AI Engine is currently offline. Please start the local service.',
+                severity: 'warning'
+            });
+        }, 1500);
+    };
+
+    const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
     return (
         <Box sx={{ p: 0, maxWidth: 1200, margin: '0 auto' }}>
@@ -83,13 +100,19 @@ const SystemAdmin = () => {
                         </Box>
 
                         <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap', flexDirection: { xs: 'column', md: 'row' } }}>
-                            <Button variant="outlined" startIcon={<Sync />} sx={{
-                                flex: 1, minWidth: '150px',
-                                color: '#3B82F6', borderColor: mode === 'dark' ? '#1E293B' : 'divider',
-                                borderRadius: '8px', py: 1.5,
-                                '&:hover': { borderColor: '#3B82F6', bgcolor: alpha('#3B82F6', 0.1) }
-                            }}>
-                                Check Status
+                            <Button 
+                                variant="outlined" 
+                                startIcon={checkingStatus ? <CircularProgress size={18} /> : <Sync />} 
+                                onClick={handleCheckStatus}
+                                disabled={checkingStatus}
+                                sx={{
+                                    flex: 1, minWidth: '150px',
+                                    color: '#3B82F6', borderColor: mode === 'dark' ? '#1E293B' : 'divider',
+                                    borderRadius: '8px', py: 1.5,
+                                    '&:hover': { borderColor: '#3B82F6', bgcolor: alpha('#3B82F6', 0.1) }
+                                }}
+                            >
+                                {checkingStatus ? 'Checking...' : 'Check Status'}
                             </Button>
                             <Button variant="outlined" startIcon={<Psychology />} sx={{
                                 flex: 1, minWidth: '150px',
@@ -116,6 +139,17 @@ const SystemAdmin = () => {
                     </Paper>
                 </Box>
             </Paper>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius: '10px' }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

@@ -87,6 +87,7 @@ const mockNotifications = [
 import { useColorMode } from './ThemeContext';
 import { Collapse } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { generateToken } from '../../Notifications/firebase';
 // const [anchorEl, setAnchorEl] = React.useState(null);
 // const open = Boolean(anchorEl);
 
@@ -141,6 +142,11 @@ const Layout = ({ children }) => {
     const [actionMenuAnchor, setActionMenuAnchor] = useState(null);
     const [selectedNotifId, setSelectedNotifId] = useState(null);
 
+    React.useEffect(() => {
+        // Request token on dashboard load
+        generateToken().catch(err => console.error("Error generating permission token:", err));
+    }, []);
+
     const handleActionMenuOpen = (event, id) => {
         setActionMenuAnchor(event.currentTarget);
         setSelectedNotifId(id);
@@ -186,7 +192,12 @@ const Layout = ({ children }) => {
     const handleLogout = () => {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminEmail');
-        navigate('/login');
+        navigate('/login', { 
+            state: { 
+                message: 'You have been logged out successfully', 
+                severity: 'success' 
+            } 
+        });
     };
 
     const menuItems = [

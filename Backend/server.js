@@ -8,6 +8,7 @@ import './model/admin.model.js';
 import './model/department.model.js';
 import './model/student.model.js';
 import './model/teacher.model.js';
+import './model/notificationToken.model.js';
 
 // ── Routes ────────────────────────────────────────────────────────────────
 import userRoutes from './routes/user.routes.js';
@@ -15,6 +16,7 @@ import adminRoutes from './routes/admin.routes.js';
 import studentRoutes from './routes/student.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
 import departmentRoutes from './routes/department.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -33,6 +35,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/departments', departmentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // General health route
 app.get('/', (req, res) => {
@@ -43,7 +46,7 @@ app.get('/', (req, res) => {
 sequelize.authenticate()
   .then(() => {
     console.log('✅ Database connected successfully');
-    return sequelize.sync({ alter: true }); // creates/updates tables, preserves data
+    return sequelize.sync(); // sync without alter to avoid index limit issues
   })
   .then(() => {
     console.log('✅ All models synced');

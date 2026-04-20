@@ -13,10 +13,16 @@ import EditUserPermissions from './features/permissions/pages/EditUserPermission
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import SystemAdmin from './features/admin/pages/SystemAdmin';
+import { generateToken } from './Notifications/firebase';
+import React, { useEffect } from 'react';
 
 import AdminProtectedRoute from './shared/components/AdminProtectedRoute';
 
 function App() {
+  useEffect(() => {
+    generateToken();
+  }, []);
+
   return (
     <ThemeProviderWrapper>
       <CssBaseline />
