@@ -9,14 +9,11 @@ async function seedAdmin() {
         await Admin.sync();
 
         const hashedPassword = await bcrypt.hash('admin123', 10);
-        
+
         const [admin, created] = await Admin.findOrCreate({
             where: { email: 'admin@attendancepro.com' },
             defaults: {
-                username: 'admin',
-                password: hashedPassword,
-                full_name: 'Alex Johnson',
-                role: 'admin'
+                password: hashedPassword
             }
         });
 

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import sequelize from './config/db.js';
 
 // ── Import models so Sequelize knows about them before sync ───────────────
@@ -28,6 +29,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control'],
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 // ── Route mounting ─────────────────────────────────────────────────────────
 app.use('/api/users', userRoutes);

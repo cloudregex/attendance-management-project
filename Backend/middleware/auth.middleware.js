@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
+import redisClient from '../config/redis.js';
 
 // General middleware for any authenticated user
-export const verifyToken = (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -9,7 +10,13 @@ export const verifyToken = (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
-        
+
+        // 1. Check Redis Blacklist
+        const isBlacklisted = await redisClient.get(`bl_${token}`);
+        if (isBlacklisted) {
+            return res.status(401).json({ message: "Token has been revoked. Please login again." });
+        }
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded; // Attach general user payload
         next();
@@ -19,7 +26,7 @@ export const verifyToken = (req, res, next) => {
     }
 };
 
-export const verifyAdmin = (req, res, next) => {
+export const verifyAdmin = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -27,9 +34,15 @@ export const verifyAdmin = (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
-        
+
+        // 1. Check Redis Blacklist
+        const isBlacklisted = await redisClient.get(`bl_${token}`);
+        if (isBlacklisted) {
+            return res.status(401).json({ message: "Token has been revoked. Please login again." });
+        }
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         if (decoded.role !== 'admin') {
             return res.status(403).json({ message: "Access denied. Not an admin." });
         }

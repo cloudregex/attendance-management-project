@@ -112,7 +112,7 @@ const AdminLogin = () => {
 
                 if (response.ok && data.admin) {
                     console.log('Login success:', data);
-                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminToken', data.accessToken);
                     localStorage.setItem('adminEmail', data.admin.email || formData.email);
                     setIsSubmitted(true);
                     setLoginError('');
