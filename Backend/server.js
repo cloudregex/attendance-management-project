@@ -12,12 +12,29 @@ import './model/teacher.model.js';
 // ── Routes ────────────────────────────────────────────────────────────────
 import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.routes.js';
-import studentRoutes from './routes/student.routes.js';
-import teacherRoutes from './routes/teacher.routes.js';
-import departmentRoutes from './routes/department.routes.js';
+import roleRoutes from './routes/role.routes.js';
+import permissionRoutes from './routes/permission.routes.js';
+import activityRoutes from './routes/activity.routes.js';
+
+// Models
+import Admin from './model/admin.model.js';
+import Role from './model/role.model.js';
+import Permission from './model/permission.model.js';
+import ActivityLog from './model/activityLog.model.js';
+import usermodel from './model/user.model.js';
+import { DataTypes } from 'sequelize';
+
+// Define Associations
+Role.belongsToMany(Permission, { through: 'RolePermissions', as: 'permissions' });
+Permission.belongsToMany(Role, { through: 'RolePermissions', as: 'roles' });
+
+// Services
+import { seedDefaultRoles } from './services/role.service.js';
+import { seedDefaultPermissions } from './services/permission.service.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const User = usermodel(sequelize, DataTypes);
 
 // ── Middleware ─────────────────────────────────────────────────────────────
 app.use(cors({
@@ -26,32 +43,50 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control'],
 }));
 app.use(express.json());
+app.use("/api/users", adminRoutes);
+app.use("/api/roles", roleRoutes);
+app.use("/api/permissions/definitions", permissionRoutes);
+app.use("/api/activity-logs", activityRoutes);
+app.use("/api/old-users", userRoutes);
+app.use("/api/admin", adminRoutes);
 
-// ── Route mounting ─────────────────────────────────────────────────────────
-app.use('/api/users', userRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/students', studentRoutes);
-app.use('/api/teachers', teacherRoutes);
-app.use('/api/departments', departmentRoutes);
+// ✅ Correct DB connection check
+sequelize.authenticate()
+  .then(() => console.log("✅ Database connected successfully"))
+  .catch((e) => console.log("❌ DB Error:", e));
 
-// General health route
+// Routes
 app.get('/', (req, res) => {
   res.send('Attendance Management System API is running...');
 });
 
-// ── DB connect → sync → start server ──────────────────────────────────────
-sequelize.authenticate()
-  .then(() => {
-    console.log('✅ Database connected successfully');
-    return sequelize.sync({ alter: true }); // creates/updates tables, preserves data
-  })
-  .then(() => {
-    console.log('✅ All models synced');
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+// Sync Database function
+const syncDB = async () => {
+  try {
+    console.log("🔄 Starting DB Sync...");
+
+    // Sync and seed Roles first to satisfy foreign key constraints for other models
+    await Role.sync({ alter: true });
+    await seedDefaultRoles();
+    console.log("✅ Roles synced and seeded");
+
+    await ActivityLog.sync({ alter: true });
+    console.log("✅ ActivityLog synced");
+
+    await sequelize.sync({ alter: true });
+    console.log("✅ All models synced");
+
+    await seedDefaultPermissions();
+    console.log("✅ Default data seeded");
+
+    app.listen(PORT, () => {
+      console.log(`✅ Server is running on port ${PORT}`);
+      console.log(`Health check: http://localhost:${PORT}/api/health`);
+      console.log(`DB test: http://localhost:${PORT}/api/db-test`);
     });
-  })
-  .catch((e) => {
-    console.error('❌ DB Error:', e);
-    process.exit(1);
-  });
+  } catch (error) {
+    console.error("❌ DB Sync Error:", error);
+  }
+};
+
+syncDB();

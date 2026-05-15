@@ -1,30 +1,32 @@
 import 'dotenv/config';
-import bcrypt from 'bcryptjs';
-import sequelize from './config/db.js';
+import Role from './model/role.model.js';
 import Admin from './model/admin.model.js';
+import sequelize from './config/db.js';
+import { seedAdmin as createAdminInDb } from './controller/admin.controller.js';
+import { seedDefaultRoles } from './services/role.service.js';
 
-async function seedAdmin() {
+async function runSeed() {
     try {
         await sequelize.authenticate();
-        await Admin.sync();
+        console.log("✅ Database connected for seeding");
 
-        const hashedPassword = await bcrypt.hash('admin123', 10);
+        // Sync and seed Role model first
+        await Role.sync({ alter: true });
+        await seedDefaultRoles();
+
+        // Sync model (ensure table exists)
+        await Admin.sync({ alter: true });
+
+        const adminData = {
+            name: "Super Admin",
+            email: "admin@example.com",
+            password: "adminpassword123",
+            roleId: "admin"
+        };
+
+        await createAdminInDb(adminData);
         
-        const [admin, created] = await Admin.findOrCreate({
-            where: { email: 'admin@attendancepro.com' },
-            defaults: {
-                username: 'admin',
-                password: hashedPassword,
-                full_name: 'Alex Johnson',
-                role: 'admin'
-            }
-        });
-
-        if (created) {
-            console.log('✅ Admin account created: admin@attendancepro.com / admin123');
-        } else {
-            console.log('ℹ️ Admin account already exists.');
-        }
+        console.log('✅ Admin seeding process finished');
         process.exit(0);
     } catch (error) {
         console.error('❌ Admin seed failed:', error);
@@ -32,4 +34,4 @@ async function seedAdmin() {
     }
 }
 
-seedAdmin();
+runSeed();

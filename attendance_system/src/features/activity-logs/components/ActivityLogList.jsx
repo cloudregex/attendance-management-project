@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Paper,
   Box,
@@ -10,47 +11,62 @@ import {
   TableBody,
   Button,
   useTheme,
+  CircularProgress,
+  Chip,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 
-const STORAGE_LOGS = 'am_logs_v1';
 
-function readLogs() {
-  try {
-    const raw = localStorage.getItem(STORAGE_LOGS);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
-}
-
-function clearLogs() {
-  localStorage.removeItem(STORAGE_LOGS);
-}
+const API_LOGS = 'http://localhost:5000/api/activity-logs';
 
 const ActivityLogList = () => {
   const theme = useTheme();
   const mode = theme.palette.mode;
 
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.get(`${API_LOGS}/get`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setLogs(response.data);
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setLogs(readLogs());
+    fetchLogs();
   }, []);
 
-  const refresh = () => setLogs(readLogs());
-
-  const handleClear = () => {
-    clearLogs();
-    setLogs([]);
+  const getActionColor = (action) => {
+    if (action.includes('CREATE')) return 'success';
+    if (action.includes('UPDATE')) return 'info';
+    if (action.includes('DELETE')) return 'error';
+    return 'default';
   };
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Activity Logs</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>
+          System Activity Logs
+        </Typography>
         <Box>
-          <Button onClick={refresh} sx={{ mr: 1, fontWeight: 600 }}>Refresh</Button>
-          <Button color="error" variant="outlined" onClick={handleClear} sx={{ fontWeight: 600 }}>Clear Logs</Button>
+          <Button
+            variant="contained"
+            onClick={fetchLogs}
+            sx={{ fontWeight: 600, borderRadius: '8px' }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} /> : 'Refresh'}
+          </Button>
         </Box>
       </Box>
 
@@ -96,8 +112,8 @@ const ActivityLogList = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Box sx={{ 
-                px: 1.5, py: 0.5, borderRadius: 1, 
+              <Box sx={{
+                px: 1.5, py: 0.5, borderRadius: 1,
                 bgcolor: mode === 'dark' ? alpha('#fff', 0.02) : 'grey.50',
                 border: '1px solid', borderColor: 'divider'
               }}>

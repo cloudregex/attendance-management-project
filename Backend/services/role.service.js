@@ -1,17 +1,36 @@
 import Role from '../model/role.model.js';
+import Permission from '../model/permission.model.js';
 
 export const getAllRolesService = () => {
-    return Role.findAll();
+    return Role.findAll({
+        include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }]
+    });
 };
 
-export const createRoleService = (data) => {
-    return Role.create(data);
+export const createRoleService = async (data) => {
+    const { permissions, ...roleData } = data;
+    const role = await Role.create(roleData);
+    if (permissions && Array.isArray(permissions)) {
+        await role.setPermissions(permissions);
+    }
+    return await Role.findByPk(role.id, {
+        include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }]
+    });
 };
 
 export const updateRoleService = async (id, data) => {
     const role = await Role.findByPk(id);
     if (!role) return null;
-    return role.update(data);
+
+    const { permissions, ...roleData } = data;
+    await role.update(roleData);
+
+    if (permissions !== undefined && Array.isArray(permissions)) {
+        await role.setPermissions(permissions);
+    }
+    return await Role.findByPk(role.id, {
+        include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }]
+    });
 };
 
 export const deleteRoleService = async (id) => {

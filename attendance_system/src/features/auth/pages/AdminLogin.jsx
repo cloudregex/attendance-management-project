@@ -94,7 +94,9 @@ const AdminLogin = () => {
                 if (response.ok && data.admin) {
                     console.log('Login success:', data);
                     localStorage.setItem('adminToken', data.token);
-                    localStorage.setItem('adminEmail', data.admin.email || formData.email);
+                    localStorage.setItem('adminEmail', data.admin.email);
+                    localStorage.setItem('adminRole', data.admin.roleId || 'admin');
+                    localStorage.setItem('adminPermissions', JSON.stringify(data.admin.role || {}));
                     setIsSubmitted(true);
                     setLoginError('');
                     setTimeout(() => {
