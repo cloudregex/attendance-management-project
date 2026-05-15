@@ -414,13 +414,31 @@ const Layout = ({ children }) => {
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                    {adminEmail}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
-                                    {adminRole}
+                        <Popover
+                            open={notifOpen}
+                            anchorEl={notifAnchor}
+                            onClose={() => setNotifAnchor(null)}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "right"
+                            }}
+                            transformOrigin={{
+                                vertical: "top",
+                                horizontal: "right"
+                            }}
+                            PaperProps={{
+                                sx: {
+                                    width: { xs: '100%', sm: 360 },
+                                    borderRadius: '12px',
+                                    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+                                    mt: 1.5,
+                                    overflow: 'hidden'
+                                }
+                            }}
+                        >
+                            <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                    Notifications
                                 </Typography>
                             </Box>
 
@@ -514,6 +532,14 @@ const Layout = ({ children }) => {
                             {theme.palette.mode === 'dark' ? <LightMode /> : <DarkMode />}
                         </IconButton>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    {adminEmail}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                                    {adminRole}
+                                </Typography>
+                            </Box>
                             <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
                                 <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}>
                                     {(localStorage.getItem('adminEmail') || 'A').charAt(0).toUpperCase()}
