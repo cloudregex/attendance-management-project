@@ -88,6 +88,7 @@ const emptyForm = () => ({
     pincode: '',
     status: true,
     password: '',
+    confirm_password: '',
 });
 
 const AddTeacherForm = ({ open, onClose, onSubmit }) => {
@@ -194,6 +195,12 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
             e.password = 'Password must contain at least one letter and one number';
         }
 
+        if (!formData.confirm_password.trim()) {
+            e.confirm_password = 'Confirm password is required';
+        } else if (formData.password !== formData.confirm_password) {
+            e.confirm_password = 'Passwords do not match';
+        }
+
         if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
             e.pincode = 'Pincode must be exactly 6 digits';
         }
@@ -217,10 +224,7 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
                 setLoading(false);
                 setActiveStep(2);
                 if (onSubmit) {
-                    const payload = {
-                        ...formData,
-                        // department_id is already an integer from the dropdown
-                    };
+                    const { confirm_password, ...payload } = formData;
                     onSubmit(payload);
                 }
             }, 1200);
@@ -240,144 +244,35 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
             {/* Personal Details */}
             <Card variant="outlined" sx={sectionCard(mode)}>
                 <SectionHeader color="primary.main" label="Personal Details" />
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3 }}>
-                    <TextField
-                        fullWidth label="Full Name *" name="teacher_name"
-                        value={formData.teacher_name} onChange={handleChange}
-                        error={!!errors.teacher_name} helperText={errors.teacher_name || 'Legal full name'}
-                        placeholder="e.g. Ramesh Kumar"
-                        InputLabelProps={{ shrink: !!formData.teacher_name }}
-                        sx={getFieldSx(mode)}
-                    />
-                    <Autocomplete
-                        options={['Male', 'Female', 'Other']}
-                        value={formData.gender || null}
-                        onChange={(_, v) => handleAutoChange('gender', v || '')}
-                        renderInput={(params) => (
-                            <TextField {...params} label="Gender" name="gender" sx={getFieldSx(mode)} />
-                        )}
-                    />
-                    <DatePicker
-                        label="Date of Birth"
-                        value={formData.date_of_birth ? dayjs(formData.date_of_birth) : null}
-                        onChange={(newValue) => handleChange({ target: { name: 'date_of_birth', value: newValue ? newValue.format('YYYY-MM-DD') : '' } })}
-                        slotProps={{
-                            textField: {
-                                fullWidth: true,
-                                error: !!errors.date_of_birth,
-                                helperText: errors.date_of_birth,
-                                sx: getFieldSx(mode)
-                            }
-                        }}
-                    />
-                    <Autocomplete
-                        options={qualificationOptions}
-                        value={formData.qualification || null}
-                        onChange={(_, v) => handleAutoChange('qualification', v || '')}
-                        renderInput={(params) => (
-                            <TextField {...params} label="Qualification" sx={getFieldSx(mode)} />
-                        )}
-                    />
-                    <DatePicker
-                        label="Joining Date"
-                        value={formData.joining_date ? dayjs(formData.joining_date) : null}
-                        onChange={(newValue) => handleChange({ target: { name: 'joining_date', value: newValue ? newValue.format('YYYY-MM-DD') : '' } })}
-                        slotProps={{
-                            textField: {
-                                fullWidth: true,
-                                error: !!errors.joining_date,
-                                helperText: errors.joining_date,
-                                sx: getFieldSx(mode)
-                            }
-                        }}
-                    />
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                name="status"
-                                checked={formData.status}
-                                onChange={handleChange}
-                                color="success"
-                            />
-                        }
-                        label={formData.status ? 'Active' : 'Inactive'}
-                        sx={{ mt: 1 }}
-                    />
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+                    <TextField fullWidth label="Full Name *" name="teacher_name" value={formData.teacher_name} onChange={handleChange} error={!!errors.teacher_name} helperText={errors.teacher_name || 'Legal full name'} InputLabelProps={{ shrink: !!formData.teacher_name }} sx={getFieldSx(mode)} />
+                    <Autocomplete options={['Male', 'Female', 'Other']} value={formData.gender || null} onChange={(_, v) => handleAutoChange('gender', v || '')} renderInput={(params) => <TextField {...params} label="Gender" name="gender" sx={getFieldSx(mode)} />} />
+                    <DatePicker label="Date of Birth" value={formData.date_of_birth ? dayjs(formData.date_of_birth) : null} onChange={(newValue) => handleChange({ target: { name: 'date_of_birth', value: newValue ? newValue.format('YYYY-MM-DD') : '' } })} slotProps={{ textField: { fullWidth: true, error: !!errors.date_of_birth, helperText: errors.date_of_birth, sx: getFieldSx(mode) } }} />
+                    <Autocomplete options={qualificationOptions} value={formData.qualification || null} onChange={(_, v) => handleAutoChange('qualification', v || '')} renderInput={(params) => <TextField {...params} label="Qualification" sx={getFieldSx(mode)} />} />
+                    <DatePicker label="Joining Date" value={formData.joining_date ? dayjs(formData.joining_date) : null} onChange={(newValue) => handleChange({ target: { name: 'joining_date', value: newValue ? newValue.format('YYYY-MM-DD') : '' } })} slotProps={{ textField: { fullWidth: true, error: !!errors.joining_date, helperText: errors.joining_date, sx: getFieldSx(mode) } }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', pl: 1 }}>
+                        <FormControlLabel control={<Switch name="status" checked={formData.status} onChange={handleChange} color="success" />} label={formData.status ? 'Active' : 'Inactive'} />
+                    </Box>
                 </Box>
             </Card>
 
             {/* Contact Details */}
             <Card variant="outlined" sx={sectionCard(mode)}>
                 <SectionHeader color="secondary.main" label="Contact Information" />
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
-                    <TextField
-                        fullWidth label="Email Address *" type="email" name="email"
-                        value={formData.email} onChange={handleChange}
-                        error={!!errors.email} helperText={errors.email || ' '}
-                        placeholder="teacher@school.edu"
-                        InputLabelProps={{ shrink: !!formData.email }}
-                        sx={getFieldSx(mode)}
-                    />
-                    <TextField
-                        fullWidth label="Mobile Number" name="mobile"
-                        value={formData.mobile} onChange={handleChange}
-                        error={!!errors.mobile} helperText={errors.mobile || '10-digit mobile number'}
-                        placeholder="9876543210"
-                        InputLabelProps={{ shrink: !!formData.mobile }}
-                        sx={getFieldSx(mode)}
-                    />
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+                    <TextField fullWidth label="Email Address *" type="email" name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ' '} InputLabelProps={{ shrink: !!formData.email }} sx={getFieldSx(mode)} />
+                    <TextField fullWidth label="Mobile Number" name="mobile" value={formData.mobile} onChange={handleChange} error={!!errors.mobile} helperText={errors.mobile || '10-digit mobile number'} InputLabelProps={{ shrink: !!formData.mobile }} sx={getFieldSx(mode)} />
                 </Box>
             </Card>
 
             {/* Professional Details */}
             <Card variant="outlined" sx={sectionCard(mode)}>
                 <SectionHeader color="success.main" label="Professional Details" />
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
-                        <TextField
-                            fullWidth label="Employee ID *" name="employee_id"
-                            value={formData.employee_id} onChange={handleChange}
-                            error={!!errors.employee_id} helperText={errors.employee_id || 'Unique teacher identifier'}
-                            placeholder="e.g. EMP-001"
-                            InputLabelProps={{ shrink: !!formData.employee_id }}
-                            sx={getFieldSx(mode)}
-                        />
-                        <Autocomplete
-                            options={departments}
-                            getOptionLabel={(o) => o.name}
-                            isOptionEqualToValue={(o, v) => o.id === v.id}
-                            value={departments.find(d => d.id === formData.department_id) || null}
-                            onChange={(_, v) => handleAutoChange('department_id', v ? v.id : '')}
-                            noOptionsText={departments.length === 0 ? 'No departments found — add one first' : 'No match'}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params} label="Department *"
-                                    error={!!errors.department_id} helperText={errors.department_id}
-                                    sx={getFieldSx(mode)}
-                                />
-                            )}
-                        />
-                    </Box>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
-                        <Autocomplete
-                            multiple
-                            options={subjectOptions}
-                            value={formData.subjects}
-                            onChange={(_, v) => handleAutoChange('subjects', v)}
-                            renderInput={(params) => (
-                                <TextField {...params} label="Subjects Taught" sx={getFieldSx(mode)} />
-                            )}
-                        />
-                        <Autocomplete
-                            multiple
-                            options={classOptions}
-                            value={formData.classes}
-                            onChange={(_, v) => handleAutoChange('classes', v)}
-                            renderInput={(params) => (
-                                <TextField {...params} label="Classes Handled" sx={getFieldSx(mode)} />
-                            )}
-                        />
-                    </Box>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+                    <TextField fullWidth label="Employee ID *" name="employee_id" value={formData.employee_id} onChange={handleChange} error={!!errors.employee_id} helperText={errors.employee_id || 'Unique teacher identifier'} InputLabelProps={{ shrink: !!formData.employee_id }} sx={getFieldSx(mode)} />
+                    <Autocomplete options={departments} getOptionLabel={(o) => o.name} isOptionEqualToValue={(o, v) => o.id === v.id} value={departments.find(d => d.id === formData.department_id) || null} onChange={(_, v) => handleAutoChange('department_id', v ? v.id : '')} noOptionsText={departments.length === 0 ? 'No departments found' : 'No match'} renderInput={(params) => <TextField {...params} label="Department *" error={!!errors.department_id} helperText={errors.department_id} sx={getFieldSx(mode)} />} />
+                    <Autocomplete multiple options={subjectOptions} value={formData.subjects} onChange={(_, v) => handleAutoChange('subjects', v)} renderInput={(params) => <TextField {...params} label="Subjects Taught" sx={getFieldSx(mode)} />} />
+                    <Autocomplete multiple options={classOptions} value={formData.classes} onChange={(_, v) => handleAutoChange('classes', v)} renderInput={(params) => <TextField {...params} label="Classes Handled" sx={getFieldSx(mode)} />} />
                 </Box>
             </Card>
         </Box>
@@ -389,43 +284,20 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
             {/* Address */}
             <Card variant="outlined" sx={sectionCard(mode)}>
                 <SectionHeader color="warning.main" label="Address" />
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    <TextField
-                        fullWidth label="Full Address" name="address"
-                        value={formData.address} onChange={handleChange}
-                        multiline rows={2} sx={getFieldSx(mode)}
-                    />
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 3 }}>
-                        <TextField
-                            fullWidth label="City" name="city"
-                            value={formData.city} onChange={handleChange}
-                            sx={getFieldSx(mode)}
-                        />
-                        <TextField
-                            fullWidth label="State" name="state"
-                            value={formData.state} onChange={handleChange}
-                            sx={getFieldSx(mode)}
-                        />
-                        <TextField
-                            fullWidth label="Pincode" name="pincode"
-                            value={formData.pincode} onChange={handleChange}
-                            error={!!errors.pincode} helperText={errors.pincode || '6-digit pincode'}
-                            sx={getFieldSx(mode)}
-                        />
-                    </Box>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+                    <TextField fullWidth label="Full Address" name="address" value={formData.address} onChange={handleChange} multiline rows={2} sx={{ ...getFieldSx(mode), gridColumn: { md: 'span 2' } }} />
+                    <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleChange} sx={getFieldSx(mode)} />
+                    <TextField fullWidth label="State" name="state" value={formData.state} onChange={handleChange} sx={getFieldSx(mode)} />
+                    <TextField fullWidth label="Pincode" name="pincode" value={formData.pincode} onChange={handleChange} error={!!errors.pincode} helperText={errors.pincode || '6-digit pincode'} sx={getFieldSx(mode)} />
                 </Box>
             </Card>
 
             {/* Security */}
             <Card variant="outlined" sx={sectionCard(mode)}>
                 <SectionHeader color="error.main" label="Login & Security" />
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
-                    <TextField
-                        fullWidth label="Login Password *" type="password" name="password"
-                        value={formData.password} onChange={handleChange}
-                        error={!!errors.password} helperText={errors.password || 'Min 8 chars with letters and numbers'}
-                        sx={getFieldSx(mode)}
-                    />
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+                    <TextField fullWidth label="Login Password *" type="password" name="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password || 'Min 8 chars'} sx={getFieldSx(mode)} />
+                    <TextField fullWidth label="Confirm Password *" type="password" name="confirm_password" value={formData.confirm_password} onChange={handleChange} error={!!errors.confirm_password} helperText={errors.confirm_password || ' '} sx={getFieldSx(mode)} />
                 </Box>
             </Card>
         </Box>

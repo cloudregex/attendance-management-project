@@ -230,8 +230,12 @@ const DeptDashboard = () => {
                         {p.row.avatar}
                     </Avatar>
                     <Box sx={{ overflow: 'hidden' }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{p.value}</Typography>
-                        <Typography variant="caption" color="text.secondary">{p.row.designation}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, noWrap: true }}>{p.value}</Typography>
+                        {p.row.designation && p.row.designation !== '—' && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', noWrap: true }}>
+                                {p.row.designation}
+                            </Typography>
+                        )}
                     </Box>
                 </Box>
             )
