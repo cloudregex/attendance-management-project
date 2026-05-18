@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../utils/api';
 import {
     Box,
     Drawer,
@@ -189,15 +190,22 @@ const Layout = ({ children }) => {
         setPermissionsOpen(!permissionsOpen);
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminEmail');
-        navigate('/login', { 
-            state: { 
-                message: 'You have been logged out successfully', 
-                severity: 'success' 
-            } 
-        });
+    const handleLogout = async () => {
+        try {
+            // Call the backend logout to blacklist the token in Redis
+            await api.post('/admin/logout');
+        } catch (error) {
+            console.error('Logout API failed:', error);
+        } finally {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminEmail');
+            navigate('/login', {
+                state: {
+                    message: 'You have been logged out successfully',
+                    severity: 'success'
+                }
+            });
+        }
     };
 
     const menuItems = [
@@ -440,7 +448,7 @@ const Layout = ({ children }) => {
                                     Notifications
                                 </Typography>
                             </Box>
-                            
+
                             <Box sx={{ px: 2, pb: 1 }}>
                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                                     Today
@@ -450,7 +458,7 @@ const Layout = ({ children }) => {
                             <List sx={{ p: 0, maxHeight: 400, overflowY: 'auto' }}>
                                 {notifications.map((notif, index) => (
                                     <React.Fragment key={notif.id}>
-                                        <ListItem 
+                                        <ListItem
                                             disablePadding
                                             sx={{
                                                 px: 2,
@@ -476,8 +484,8 @@ const Layout = ({ children }) => {
                                                     {notif.time}
                                                 </Typography>
                                             </Box>
-                                            <IconButton 
-                                                size="small" 
+                                            <IconButton
+                                                size="small"
                                                 sx={{ color: 'text.secondary' }}
                                                 onClick={(e) => handleActionMenuOpen(e, notif.id)}
                                             >

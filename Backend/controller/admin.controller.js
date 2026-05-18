@@ -123,11 +123,13 @@ export const refreshAdminToken = async (req, res) => {
 
 export const logoutAdmin = async (req, res) => {
     try {
+        console.log("🔓 Logout requested...");
         const refreshToken = req.cookies.adminRefreshToken;
         const authHeader = req.headers.authorization;
 
         // 1. Clear refresh token from DB
         if (refreshToken) {
+            console.log("  - Clearing refresh token from DB");
             const decoded = verifyRefreshToken(refreshToken);
             if (decoded) {
                 const adminUser = await Admin.findByPk(decoded.id);
@@ -141,15 +143,19 @@ export const logoutAdmin = async (req, res) => {
         // 2. Blacklist current access token in Redis
         if (authHeader && authHeader.startsWith('Bearer ')) {
             const token = authHeader.split(' ')[1];
+            console.log("  - Blacklisting access token in Redis");
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 const expiry = decoded.exp - Math.floor(Date.now() / 1000);
                 if (expiry > 0) {
                     await redisClient.setEx(`bl_${token}`, expiry, 'true');
+                    console.log(`  - ✅ Token blacklisted in Redis for ${expiry} seconds`);
                 }
             } catch (err) {
-                // Token might be already expired, which is fine
+                console.log("  - ⚠️ Blacklisting failed or token expired:", err.message);
             }
+        } else {
+            console.log("  - ⚠️ No Bearer token found in headers for blacklisting");
         }
 
         // 3. Clear cookie
