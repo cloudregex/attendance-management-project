@@ -1,36 +1,48 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import {getMessaging , getToken } from "firebase/messaging";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getMessaging, getToken } from "firebase/messaging";
+import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCjH-Ypd3zB9DwxNGnxsDY3fFlhJgA_7t4",
-  authDomain: "fir-d63db.firebaseapp.com",
-  projectId: "fir-d63db",
-  storageBucket: "fir-d63db.firebasestorage.app",
-  messagingSenderId: "1873747514",
-  appId: "1:1873747514:web:e8fb546d694d91bc2b5f03",
-  measurementId: "G-FED652HSVM"
+  apiKey: "AIzaSyC9M1XKvxbQqnZhQDLZjOaOiSZ7Muha6ow",
+  authDomain: "attendance-system-9c61a.firebaseapp.com",
+  projectId: "attendance-system-9c61a",
+  storageBucket: "attendance-system-9c61a.firebasestorage.app",
+  messagingSenderId: "209978249160",
+  appId: "1:209978249160:web:7db92126e0b39a00e3bafd",
+  measurementId: "G-HMKNZ2B27Y"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const messaging = getMessaging(app);
 //Grant the notification permission 
-export const generateToken  =  async () =>{
-    const permission  = await Notification.requestPermission();
-    console.log(permission);
+export const generateToken = async () => {
+  const permission = await Notification.requestPermission();
+  console.log(permission);
 
-    //here we have taken the messaging instance and in options{ vapid_key }
+  //here we have taken the messaging instance and in options{ vapid_key }
 
-    if(permission == "granted")
-    {
-    const token = await getToken(messaging ,{
-        vapidKey:"BFm7YsjI5S8yUm9rHHNgKmQmRHCa7J2-lD0kOM-NrwlUbfzLxSpybYgbgAun6IAJUaxZUpYG6ZyA0HVVkyejIBk",
-    } );
-    console.log(token);
+  if (permission == "granted") {
+    const token = await getToken(messaging, {
+      vapidKey: "BOrNMbyPo704LA_60EllLlO01V0vty7VVXaybEfuwMWRBeDduYP5wT4Hy598AZNKyzek6EmOccEaKv3tpofTTKs",
+    });
+    console.log('FCM Token:', token);
+
+    // Send token to backend
+    if (token) {
+      try {
+        await fetch('http://localhost:5000/api/notifications/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        console.log('Token saved to backend');
+      } catch (err) {
+        console.error('Failed to save token to backend:', err);
+      }
     }
+  }
 }

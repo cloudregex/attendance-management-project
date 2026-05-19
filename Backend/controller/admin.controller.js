@@ -1,35 +1,169 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Admin from '../model/admin.model.js';
+import NotificationToken from '../model/notificationToken.model.js';
+import firebaseAdmin from '../config/firebase.js';
+import {
+    generateAccessToken,
+    generateRefreshToken,
+    verifyRefreshToken,
+    hashToken
+} from '../utils/token.service.js';
+import redisClient from '../config/redis.js';
+
+// Isolated, non-blocking notification service for the Admin module
+const sendAdminNotificationService = async (title, body) => {
+    try {
+        const tokensResult = await NotificationToken.findAll();
+        const tokens = tokensResult.map(t => t.token);
+
+        if (tokens.length === 0) {
+            console.log("ℹ️ No admin notification tokens found in database.");
+            return;
+        }
+
+        const payload = {
+            notification: { title, body },
+            tokens
+        };
+
+        const response = await firebaseAdmin.messaging().sendEachForMulticast(payload);
+        console.log(`✅ Admin Multi-Notification: Success(${response.successCount}), Failure(${response.failureCount})`);
+    } catch (error) {
+        console.error("❌ Isolated Admin Notification Error:", error.message);
+    }
+};
 
 export const loginAdmin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const admin = await Admin.findOne({ where: { email } });
+        const adminUser = await Admin.findOne({ where: { email } });
 
-        if (!admin) {
+        if (!adminUser) {
             return res.status(404).json({ message: "Admin not found" });
         }
 
-        const isMatch = await bcrypt.compare(password, admin.password);
+        const isMatch = await bcrypt.compare(password, adminUser.password);
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const token = jwt.sign(
-            { id: admin.id, email: admin.email, role: 'admin' },
-            process.env.JWT_SECRET,
-            { expiresIn: '5d' }
+        // Generate Tokens
+        const accessToken = generateAccessToken(adminUser);
+        const refreshToken = generateRefreshToken(adminUser);
+
+        // Store hashed refresh token in DB
+        adminUser.refreshToken = hashToken(refreshToken);
+        await adminUser.save();
+
+        // Security Alert
+        sendAdminNotificationService(
+            'Admin Security Alert',
+            `Login detected for account: ${adminUser.email}`
         );
+
+        // Set Refresh Token in Secure HTTP-only cookie
+        res.cookie('adminRefreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
 
         res.status(200).json({
             message: "Login successful",
-            token,
-            admin: { email: admin.email }
+            accessToken,
+            admin: { email: adminUser.email }
         });
     } catch (error) {
         console.error("❌ Error logging in admin:", error);
         res.status(500).json({ error: error.message });
+    }
+};
+
+export const refreshAdminToken = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.adminRefreshToken;
+        if (!refreshToken) {
+            return res.status(401).json({ message: "Refresh token missing" });
+        }
+
+        const decoded = verifyRefreshToken(refreshToken);
+        if (!decoded) {
+            return res.status(401).json({ message: "Invalid or expired refresh token" });
+        }
+
+        const adminUser = await Admin.findByPk(decoded.id);
+        if (!adminUser || adminUser.refreshToken !== hashToken(refreshToken)) {
+            return res.status(403).json({ message: "Refresh token mismatch or user deleted" });
+        }
+
+        // Token Rotation: Generate new set
+        const newAccessToken = generateAccessToken(adminUser);
+        const newRefreshToken = generateRefreshToken(adminUser);
+
+        // Update DB
+        adminUser.refreshToken = hashToken(newRefreshToken);
+        await adminUser.save();
+
+        // Set New Cookie
+        res.cookie('adminRefreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(200).json({ accessToken: newAccessToken });
+    } catch (error) {
+        console.error("❌ Error refreshing admin token:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const logoutAdmin = async (req, res) => {
+    try {
+        console.log("🔓 Logout requested...");
+        const refreshToken = req.cookies.adminRefreshToken;
+        const authHeader = req.headers.authorization;
+
+        // 1. Clear refresh token from DB
+        if (refreshToken) {
+            console.log("  - Clearing refresh token from DB");
+            const decoded = verifyRefreshToken(refreshToken);
+            if (decoded) {
+                const adminUser = await Admin.findByPk(decoded.id);
+                if (adminUser) {
+                    adminUser.refreshToken = null;
+                    await adminUser.save();
+                }
+            }
+        }
+
+        // 2. Blacklist current access token in Redis
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
+            console.log("  - Blacklisting access token in Redis");
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const expiry = decoded.exp - Math.floor(Date.now() / 1000);
+                if (expiry > 0) {
+                    await redisClient.setEx(`bl_${token}`, expiry, 'true');
+                    console.log(`  - ✅ Token blacklisted in Redis for ${expiry} seconds`);
+                }
+            } catch (err) {
+                console.log("  - ⚠️ Blacklisting failed or token expired:", err.message);
+            }
+        } else {
+            console.log("  - ⚠️ No Bearer token found in headers for blacklisting");
+        }
+
+        // 3. Clear cookie
+        res.clearCookie('adminRefreshToken');
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        console.error("❌ Logout Error:", error);
+        res.status(500).json({ error: "Logout failed" });
     }
 };
 
