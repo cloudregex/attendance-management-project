@@ -8,6 +8,7 @@ import AdminLogin from './features/auth/pages/AdminLogin';
 import { EmployeesPage, ReportsPage } from './shared/pages/Placeholders';
 import SettingsPage from './features/settings/pages/Settings';
 import PermissionsPage from './features/permissions/pages/Permissions';
+import EditRolePermissions from './features/permissions/pages/EditRolePermissions';
 import ActivityLogsPage from './features/activity-logs/pages/ActivityLogs';
 import EditUserPermissions from './features/permissions/pages/EditUserPermissions';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -16,7 +17,21 @@ import SystemAdmin from './features/admin/pages/SystemAdmin';
 import { generateToken } from './Notifications/firebase';
 import React, { useEffect } from 'react';
 
-import AdminProtectedRoute from './shared/components/AdminProtectedRoute';
+const ProtectedRoute = ({ children, requiredPermission }) => {
+  const token = localStorage.getItem('adminToken');
+  if (!token) return <Navigate to="/login" replace />;
+
+  const adminRole = localStorage.getItem('adminRole');
+  if (adminRole === 'admin') return children;
+
+  const permissionsStr = localStorage.getItem('adminPermissions');
+  const adminPermissions = permissionsStr ? JSON.parse(permissionsStr) : {};
+
+  if (requiredPermission && !adminPermissions[requiredPermission]) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+};
 
 function App() {
   useEffect(() => {
@@ -36,24 +51,25 @@ function App() {
             <Route
               path="/*"
               element={
-                <AdminProtectedRoute>
+                <ProtectedRoute>
                   <Layout>
                     <Routes>
                       <Route path="/dashboard" element={<AdminDashboard />} />
-                      <Route path="/departments" element={<DeptDashboard />} />
-                      <Route path="/employees" element={<EmployeesPage />} />
-                      <Route path="/reports" element={<ReportsPage />} />
-                      <Route path="/permissions" element={<PermissionsPage />} />
-                      <Route path="/permissions/edit/:userId" element={<EditUserPermissions />} />
-                      <Route path="/activity-logs" element={<ActivityLogsPage />} />
-                      <Route path="/system-admin" element={<SystemAdmin />} />
+                      <Route path="/departments" element={<ProtectedRoute requiredPermission="canManageDepts"><DeptDashboard /></ProtectedRoute>} />
+                      <Route path="/employees" element={<ProtectedRoute requiredPermission="canManageUsers"><EmployeesPage /></ProtectedRoute>} />
+                      <Route path="/reports" element={<ProtectedRoute requiredPermission="canViewReports"><ReportsPage /></ProtectedRoute>} />
+                      <Route path="/permissions" element={<ProtectedRoute requiredPermission="canManageUsers"><PermissionsPage /></ProtectedRoute>} />
+                      <Route path="/permissions/edit/:userId" element={<ProtectedRoute requiredPermission="canManageUsers"><EditUserPermissions /></ProtectedRoute>} />
+                      <Route path="/permissions/edit-role/:roleId" element={<ProtectedRoute requiredPermission="canManageRoles"><EditRolePermissions /></ProtectedRoute>} />
+                      <Route path="/activity-logs" element={<ProtectedRoute requiredPermission="canAccessLogs"><ActivityLogsPage /></ProtectedRoute>} />
+                      <Route path="/system-admin" element={<ProtectedRoute requiredPermission="canSystemConfig"><SystemAdmin /></ProtectedRoute>} />
                       <Route path="/settings/*" element={<SettingsPage />} />
 
                       {/* Default dashboard route */}
                       <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
                   </Layout>
-                </AdminProtectedRoute>
+                </ProtectedRoute>
               }
             />
 

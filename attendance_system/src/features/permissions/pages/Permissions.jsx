@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, ToggleButtonGroup, ToggleButton, Paper, useTheme } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
-import PermissionList from '../components/PermissionList';
 import PermissionDefinitionList from '../components/PermissionDefinitionList';
-import UserManager from '../components/UserManager';
+import UserManager from '../components/AdminManager';
 import RoleManager from '../components/RoleManager';
 import { People as PeopleIcon, List as ListIcon, Security as SecurityIcon } from '@mui/icons-material';
 
@@ -13,7 +12,7 @@ const PermissionsPage = () => {
   const [searchParams] = useSearchParams();
   const [view, setView] = useState(() => {
     const v = searchParams.get('view');
-    if (v === 'roles' || v === 'definitions' || v === 'users') return v;
+    if (v === 'roles' || v === 'definitions') return v;
     return 'manage_users';
   });
 
@@ -23,8 +22,6 @@ const PermissionsPage = () => {
       setView('roles');
     } else if (currentView === 'definitions') {
       setView('definitions');
-    } else if (currentView === 'users') {
-      setView('users');
     } else {
       setView('manage_users');
     }
@@ -32,14 +29,12 @@ const PermissionsPage = () => {
 
   const getTitle = () => {
     if (view === 'manage_users') return 'User Management';
-    if (view === 'users') return 'User Role Permission';
     if (view === 'roles') return 'Role Management';
     return 'Permission Definition List';
   };
 
   const getSubtitle = () => {
     if (view === 'manage_users') return 'Add, edit, and manage system users.';
-    if (view === 'users') return 'Manage granular permissions for system users.';
     if (view === 'roles') return 'Define system roles and their default permission sets.';
     return 'Define and manage permissions that can be assigned to roles and users.';
   };
@@ -110,10 +105,6 @@ const PermissionsPage = () => {
               <PeopleIcon sx={{ mr: 1, fontSize: '1.1rem' }} />
               User List
             </ToggleButton>
-            <ToggleButton value="users">
-              <PeopleIcon sx={{ mr: 1, fontSize: '1.1rem' }} />
-              Permissions
-            </ToggleButton>
             <ToggleButton value="roles">
               <SecurityIcon sx={{ mr: 1, fontSize: '1.1rem' }} />
               Roles
@@ -128,7 +119,6 @@ const PermissionsPage = () => {
 
       <Box sx={{ animation: 'fadeIn 0.5s ease-in-out' }}>
         {view === 'manage_users' && <UserManager />}
-        {view === 'users' && <PermissionList />}
         {view === 'roles' && <RoleManager />}
         {view === 'definitions' && <PermissionDefinitionList />}
       </Box>

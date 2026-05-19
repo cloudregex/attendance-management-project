@@ -10,6 +10,14 @@ import {
     hashToken
 } from '../utils/token.service.js';
 import redisClient from '../config/redis.js';
+import Role from '../model/role.model.js';
+import {
+    getUsersService,
+    createUserService,
+    updateUserService,
+    deleteUserService
+} from '../services/admin.service.js';
+import { logActivity } from '../services/activity.service.js';
 
 // Isolated, non-blocking notification service for the Admin module
 const sendAdminNotificationService = async (title, body) => {
@@ -37,7 +45,10 @@ const sendAdminNotificationService = async (title, body) => {
 export const loginAdmin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const adminUser = await Admin.findOne({ where: { email } });
+        const adminUser = await Admin.findOne({
+            where: { email },
+            include: [{ model: Role, as: 'role' }]
+        });
 
         if (!adminUser) {
             return res.status(404).json({ message: "Admin not found" });
@@ -49,8 +60,14 @@ export const loginAdmin = async (req, res) => {
         }
 
         // Generate Tokens
+        // (If generateAccessToken requires role info, ensure it reads from adminUser.role)
         const accessToken = generateAccessToken(adminUser);
         const refreshToken = generateRefreshToken(adminUser);
+        const token = jwt.sign(
+            { id: adminUser.id, email: adminUser.email, roleId: adminUser.roleId },
+            process.env.JWT_SECRET,
+            { expiresIn: '5d' }
+        );
 
         // Store hashed refresh token in DB
         adminUser.refreshToken = hashToken(refreshToken);
@@ -72,8 +89,13 @@ export const loginAdmin = async (req, res) => {
 
         res.status(200).json({
             message: "Login successful",
-            accessToken,
-            admin: { email: adminUser.email }
+            accessToken: accessToken || token, // Ensure backwards compatibility
+            token: token || accessToken,
+            admin: {
+                email: adminUser.email,
+                roleId: adminUser.roleId,
+                role: adminUser.role
+            }
         });
     } catch (error) {
         console.error("❌ Error logging in admin:", error);
@@ -121,6 +143,14 @@ export const refreshAdminToken = async (req, res) => {
     }
 };
 
+export const getUsers = async (req, res) => {
+    try {
+        const users = await getUsersService();
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 export const logoutAdmin = async (req, res) => {
     try {
         console.log("🔓 Logout requested...");
@@ -164,6 +194,47 @@ export const logoutAdmin = async (req, res) => {
     } catch (error) {
         console.error("❌ Logout Error:", error);
         res.status(500).json({ error: "Logout failed" });
+    }
+};
+
+export const createUser = async (req, res) => {
+    try {
+        const user = await createUserService(req.body);
+
+        // Log Activity
+        await logActivity(req.user?.id, 'CREATE_USER', 'User', user.id, { email: user.email, name: user.name });
+
+        res.status(201).json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const updateUser = async (req, res) => {
+    try {
+        const user = await updateUserService(req.params.id, req.body);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Log Activity
+        await logActivity(req.user?.id, 'UPDATE_USER', 'User', user.id, { name: user.name });
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const deleteUser = async (req, res) => {
+    try {
+        const result = await deleteUserService(req.params.id);
+        if (!result) return res.status(404).json({ message: "User not found" });
+
+        // Log Activity
+        await logActivity(req.user?.id, 'DELETE_USER', 'User', req.params.id);
+
+        res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 

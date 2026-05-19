@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInstance';
 import {
     Paper,
     Box,
@@ -27,9 +27,6 @@ import {
     Stack,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, People as PeopleIcon } from '@mui/icons-material';
-
-const API_URL = 'http://localhost:5000/api/users';
-const API_ROLES = 'http://localhost:5000/api/roles';
 
 const UserManager = () => {
     const theme = useTheme();
@@ -196,8 +193,8 @@ const UserManager = () => {
         setLoading(true);
         try {
             const [usersRes, rolesRes] = await Promise.all([
-                axios.get(`${API_URL}/get`),
-                axios.get(`${API_ROLES}/get`)
+                axiosInstance.get('/users/get'),
+                axiosInstance.get('/roles/get')
             ]);
             setUsers(usersRes.data);
             setRoles(rolesRes.data);
@@ -241,7 +238,30 @@ const UserManager = () => {
     };
 
     const handleSave = async () => {
-        // ... (existing validation logic remains for immediate feedback)
+        // Validate all fields before saving
+        const newTouched = {
+            userName: true,
+            userEmail: true,
+            userPhone: true,
+            userPassword: true,
+            userConfirmPassword: true,
+            userRole: true
+        };
+        setTouched(newTouched);
+
+        const newErrors = {
+            userName: validateField('userName', userName),
+            userEmail: validateField('userEmail', userEmail),
+            userPhone: validateField('userPhone', userPhone),
+            userPassword: validateField('userPassword', userPassword),
+            userConfirmPassword: validateField('userConfirmPassword', userConfirmPassword),
+            userRole: validateField('userRole', userRole),
+        };
+        setErrors(newErrors);
+
+        if (Object.values(newErrors).some(error => error !== '')) {
+            return; // Stop saving if there are validation errors
+        }
 
         const userData = {
             name: userName,
@@ -252,10 +272,10 @@ const UserManager = () => {
         };
 
         try {
-            const url = editingUser ? `${API_URL}/update/${editingUser.id}` : `${API_URL}/create`;
+            const url = editingUser ? `/users/update/${editingUser.id}` : `/users/create`;
             const method = editingUser ? 'put' : 'post';
 
-            const response = await axios({
+            const response = await axiosInstance({
                 method,
                 url,
                 data: userData
@@ -299,7 +319,7 @@ const UserManager = () => {
     const handleConfirmDelete = async () => {
         if (userToDelete) {
             try {
-                await axios.delete(`${API_URL}/delete/${userToDelete.id}`);
+                await axiosInstance.delete(`/users/delete/${userToDelete.id}`);
                 fetchData();
             } catch (error) {
                 console.error('Error deleting user:', error);
@@ -326,6 +346,7 @@ const UserManager = () => {
         if (roleId === 'subadmin') return 'warning';
         return 'default';
     };
+
 
     return (
         <Box>

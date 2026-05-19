@@ -28,13 +28,13 @@ import {
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Security as SecurityIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api/roles';
+import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../../utils/axiosInstance';
 
 export const RoleManager = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
+    const navigate = useNavigate();
     const [roles, setRoles] = useState([]);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -42,13 +42,8 @@ export const RoleManager = () => {
     const [editingRole, setEditingRole] = useState(null);
     const [roleName, setRoleName] = useState('');
     const [roleId, setRoleId] = useState('');
-    const [permissions, setPermissions] = useState({
-        canGrant: false,
-        canApprove: false,
-        canTakeAttendance: false,
-        canManageUsers: false,
-        canManageRoles: false,
-    });
+    const [permissions, setPermissions] = useState([]);
+    const [permissionsList, setPermissionsList] = useState([]);
 
     // Validation states
     const [errors, setErrors] = useState({});
@@ -61,7 +56,7 @@ export const RoleManager = () => {
     const fetchRoles = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${API_URL}/get`);
+            const response = await axiosInstance.get(`/roles/get`);
             setRoles(response.data);
         } catch (error) {
             console.error('Error fetching roles:', error);
@@ -70,8 +65,18 @@ export const RoleManager = () => {
         }
     };
 
+    const fetchPermissionsList = async () => {
+        try {
+            const response = await axiosInstance.get(`/permissions/definitions/get`);
+            setPermissionsList(response.data);
+        } catch (error) {
+            console.error('Error fetching permissions list:', error);
+        }
+    };
+
     useEffect(() => {
         fetchRoles();
+        fetchPermissionsList();
     }, []);
 
     const validateField = (name, value) => {
@@ -122,24 +127,12 @@ export const RoleManager = () => {
             setEditingRole(role);
             setRoleName(role.name);
             setRoleId(role.id);
-            setPermissions({
-                canGrant: role.canGrant || false,
-                canApprove: role.canApprove || false,
-                canTakeAttendance: role.canTakeAttendance || false,
-                canManageUsers: role.canManageUsers || false,
-                canManageRoles: role.canManageRoles || false,
-            });
+            setPermissions(role.permissions ? role.permissions.map(p => p.id) : []);
         } else {
             setEditingRole(null);
             setRoleName('');
             setRoleId('');
-            setPermissions({
-                canGrant: false,
-                canApprove: false,
-                canTakeAttendance: false,
-                canManageUsers: false,
-                canManageRoles: false,
-            });
+            setPermissions([]);
         }
         setErrors({});
         setTouched({});
@@ -172,14 +165,14 @@ export const RoleManager = () => {
         const roleData = {
             id: roleId.trim(),
             name: roleName.trim(),
-            ...permissions
+            permissions
         };
 
         try {
             if (editingRole) {
-                await axios.put(`${API_URL}/update/${editingRole.id}`, roleData);
+                await axiosInstance.put(`/roles/update/${editingRole.id}`, roleData);
             } else {
-                await axios.post(`${API_URL}/create`, roleData);
+                await axiosInstance.post(`/roles/create`, roleData);
             }
             fetchRoles();
             handleClose();
@@ -198,7 +191,7 @@ export const RoleManager = () => {
     const handleConfirmDelete = async () => {
         if (roleToDelete) {
             try {
-                await axios.delete(`${API_URL}/delete/${roleToDelete.id}`);
+                await axiosInstance.delete(`/roles/delete/${roleToDelete.id}`);
                 fetchRoles();
             } catch (error) {
                 console.error('Error deleting role:', error);
@@ -206,23 +199,12 @@ export const RoleManager = () => {
             }
         }
         setDeleteDialogOpen(false);
-        setUserToDelete(null); // Wait, userToDelete? Should be roleToDelete
+        setRoleToDelete(null);
     };
 
     const handleCancelDelete = () => {
         setDeleteDialogOpen(false);
         setRoleToDelete(null);
-    };
-
-    const getPermissionLabel = (key) => {
-        const labels = {
-            canGrant: 'Grant Permissions',
-            canApprove: 'Approve Requests',
-            canTakeAttendance: 'Take Attendance',
-            canManageUsers: 'Manage Users',
-            canManageRoles: 'Manage Roles',
-        };
-        return labels[key] || key;
     };
 
     return (
@@ -315,17 +297,15 @@ export const RoleManager = () => {
                                 </TableCell>
                                 <TableCell>
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {['canGrant', 'canApprove', 'canTakeAttendance', 'canManageUsers', 'canManageRoles'].map(key => (
-                                            role[key] && (
-                                                <Chip
-                                                    key={key}
-                                                    label={getPermissionLabel(key)}
-                                                    size="small"
-                                                    color="primary"
-                                                    variant="outlined"
-                                                    sx={{ fontSize: '0.7rem' }}
-                                                />
-                                            )
+                                        {role.permissions && role.permissions.map(perm => (
+                                            <Chip
+                                                key={perm.id}
+                                                label={perm.name}
+                                                size="small"
+                                                color="primary"
+                                                variant="outlined"
+                                                sx={{ fontSize: '0.7rem', textTransform: 'capitalize' }}
+                                            />
                                         ))}
                                     </Box>
                                 </TableCell>
@@ -335,7 +315,7 @@ export const RoleManager = () => {
                                             variant="outlined"
                                             size="small"
                                             startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
-                                            onClick={() => handleOpen(role)}
+                                            onClick={() => navigate(`/permissions/edit-role/${role.id}`)}
                                             sx={{
                                                 borderRadius: 2,
                                                 textTransform: 'none',
@@ -431,17 +411,20 @@ export const RoleManager = () => {
                         </Typography>
 
                         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
-                            {Object.entries(permissions).map(([key, value]) => (
-                                <FormControl key={key} component="fieldset" variant="standard">
+                            {permissionsList.map((perm) => (
+                                <FormControl key={perm.id} component="fieldset" variant="standard">
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <input
                                             type="checkbox"
-                                            checked={value}
-                                            onChange={(e) => setPermissions(prev => ({ ...prev, [key]: e.target.checked }))}
+                                            checked={permissions.includes(perm.id)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) setPermissions(prev => [...prev, perm.id]);
+                                                else setPermissions(prev => prev.filter(id => id !== perm.id));
+                                            }}
                                             style={{ transform: 'scale(1.2)' }}
                                         />
-                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                            {getPermissionLabel(key)}
+                                        <Typography variant="body2" sx={{ fontWeight: 500, textTransform: 'capitalize' }}>
+                                            {perm.name}
                                         </Typography>
                                     </Box>
                                 </FormControl>

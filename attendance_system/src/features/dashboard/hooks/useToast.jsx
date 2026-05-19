@@ -4,6 +4,7 @@ import {
     Alert,
     AlertTitle,
     Slide,
+    Box,
 } from '@mui/material';
 
 /**
@@ -71,7 +72,7 @@ export function useToast(defaultDuration = 4000) {
         }
     };
 
-    const ToastSnackbar = ({ sx: extraSx }) => (
+    const toastSnackbarElement = (
         <Snackbar
             open={open}
             autoHideDuration={current?.duration}
@@ -79,11 +80,7 @@ export function useToast(defaultDuration = 4000) {
             TransitionComponent={SlideTransition}
             TransitionProps={{ onExited: handleExited }}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            sx={{ 
-                mb: 2, 
-                mr: 1,
-                ...extraSx 
-            }}
+            sx={{ mb: 2, mr: 1 }}
         >
             <Alert
                 onClose={handleClose}
@@ -118,6 +115,16 @@ export function useToast(defaultDuration = 4000) {
             </Alert>
         </Snackbar>
     );
+
+    // Provide a stable component wrapper for backwards compatibility
+    // Using a ref to hold the element prevents unmounting issues
+    const ToastSnackbar = useCallback(({ sx: extraSx }) => {
+        return (
+            <Box sx={extraSx}>
+                {toastSnackbarElement}
+            </Box>
+        );
+    }, [toastSnackbarElement]);
 
     return { toast, ToastSnackbar };
 }
