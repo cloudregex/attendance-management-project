@@ -22,11 +22,10 @@ const Admin = sequelize.define("Admin", {
     type: DataTypes.STRING,
     allowNull: false
   },
-<<<<<<< HEAD
   refreshToken: {
     type: DataTypes.STRING,
     allowNull: true
-=======
+  },
   roleId: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -35,7 +34,6 @@ const Admin = sequelize.define("Admin", {
       model: Role,
       key: 'id'
     }
->>>>>>> 08366d9a71e3be6c8248abfa9aaa72eb0aef4017
   }
 });
 

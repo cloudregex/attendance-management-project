@@ -20,7 +20,6 @@ import activityRoutes from './routes/activity.routes.js';
 import departmentRoutes from './routes/department.routes.js';
 import studentRoutes from './routes/student.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
-import departmentRoutes from './routes/department.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 
 // Models
