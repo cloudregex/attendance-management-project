@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Paper,
     Typography,
     Box,
     Button,
     useTheme,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Snackbar,
+    Alert,
+    CircularProgress,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
@@ -13,7 +21,9 @@ import {
     School as SchoolIcon,
     Person as PersonIcon,
     Badge as BadgeIcon,
+    Campaign as CampaignIcon,
 } from '@mui/icons-material';
+import api from '../../../shared/utils/api';
 
 const stats = [
     { label: 'Total Departments', value: '12', icon: <BusinessIcon />, color: '#9c27b0', trend: '+1' },
@@ -34,6 +44,59 @@ const AdminDashboard = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
 
+    const [openModal, setOpenModal] = useState(false);
+    const [broadcastData, setBroadcastData] = useState({ title: '', body: '' });
+    const [loading, setLoading] = useState(false);
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+    const handleOpenModal = () => setOpenModal(true);
+    const handleCloseModal = () => {
+        setOpenModal(false);
+        setBroadcastData({ title: '', body: '' });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setBroadcastData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSendBroadcast = async () => {
+        if (!broadcastData.title || !broadcastData.body) {
+            setSnackbar({ open: true, message: 'Please fill in both title and message', severity: 'warning' });
+            return;
+        }
+
+        const payload = {
+            title: broadcastData.title,
+            body: broadcastData.body
+        };
+
+        console.log('[Dashboard] Sending Broadcast Data:', payload);
+        setLoading(true);
+        try {
+            const response = await api.post('/notifications/send', payload);
+            const result = await response.json();
+
+            if (response.ok) {
+                setSnackbar({ 
+                    open: true, 
+                    message: `Broadcast sent successfully! (Success: ${result.successCount}, Failed: ${result.failureCount})`, 
+                    severity: result.failureCount > 0 ? 'warning' : 'success' 
+                });
+                handleCloseModal();
+            } else {
+                setSnackbar({ open: true, message: result.message || 'Failed to send broadcast', severity: 'error' });
+            }
+        } catch (error) {
+            console.error('[Dashboard] Broadcast Error:', error);
+            setSnackbar({ open: true, message: 'An error occurred while sending the broadcast', severity: 'error' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCloseSnackbar = () => setSnackbar(prev => ({ ...prev, open: false }));
+
     return (
         <Box sx={{ width: '100%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
@@ -42,7 +105,22 @@ const AdminDashboard = () => {
                     <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Here's what's happening with attendance today.</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Button variant="contained" startIcon={<TrendingUpIcon />}>
+                    <Button 
+                        variant="contained" 
+                        startIcon={<CampaignIcon />}
+                        onClick={handleOpenModal}
+                        sx={{ 
+                            bgcolor: '#f59e0b', 
+                            '&:hover': { bgcolor: '#d97706' },
+                            fontWeight: 600,
+                            borderRadius: '10px',
+                            textTransform: 'none',
+                            px: 3
+                        }}
+                    >
+                        Broadcast
+                    </Button>
+                    <Button variant="contained" startIcon={<TrendingUpIcon />} sx={{ borderRadius: '10px', textTransform: 'none', px: 3 }}>
                         Export Report
                     </Button>
                 </Box>
@@ -181,6 +259,99 @@ const AdminDashboard = () => {
                     </Paper>
                 </Box>
             </Box>
+
+            {/* Broadcast Modal */}
+            <Dialog 
+                open={openModal} 
+                onClose={handleCloseModal}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: '16px',
+                        padding: 1,
+                        bgcolor: mode === 'dark' ? '#1E293B' : '#FFFFFF',
+                        backgroundImage: 'none'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ fontWeight: 700, fontSize: '1.5rem', pb: 1 }}>
+                    Send Notification
+                </DialogTitle>
+                <DialogContent>
+                    <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <TextField
+                            label="Title"
+                            name="title"
+                            value={broadcastData.title}
+                            onChange={handleInputChange}
+                            fullWidth
+                            variant="outlined"
+                            placeholder="Enter notification title..."
+                            autoComplete="off"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '10px',
+                                }
+                            }}
+                        />
+                        <TextField
+                            label="Message"
+                            name="body"
+                            value={broadcastData.body}
+                            onChange={handleInputChange}
+                            fullWidth
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            placeholder="Enter your message here..."
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '10px',
+                                }
+                            }}
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 0 }}>
+                    <Button 
+                        onClick={handleCloseModal} 
+                        sx={{ 
+                            color: 'text.secondary', 
+                            fontWeight: 600,
+                            borderRadius: '10px',
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleSendBroadcast} 
+                        variant="contained"
+                        disabled={loading}
+                        sx={{ 
+                            bgcolor: '#f59e0b', 
+                            '&:hover': { bgcolor: '#d97706' },
+                            fontWeight: 600,
+                            borderRadius: '10px',
+                            minWidth: '100px'
+                        }}
+                    >
+                        {loading ? <CircularProgress size={24} color="inherit" /> : 'Send'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar for alerts */}
+            <Snackbar 
+                open={snackbar.open} 
+                autoHideDuration={6000} 
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius: '10px' }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

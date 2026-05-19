@@ -14,6 +14,8 @@ import EditUserPermissions from './features/permissions/pages/EditUserPermission
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import SystemAdmin from './features/admin/pages/SystemAdmin';
+import { generateToken } from './Notifications/firebase';
+import React, { useEffect } from 'react';
 
 const ProtectedRoute = ({ children, requiredPermission }) => {
   const token = localStorage.getItem('adminToken');
@@ -32,6 +34,10 @@ const ProtectedRoute = ({ children, requiredPermission }) => {
 };
 
 function App() {
+  useEffect(() => {
+    generateToken();
+  }, []);
+
   return (
     <ThemeProviderWrapper>
       <CssBaseline />

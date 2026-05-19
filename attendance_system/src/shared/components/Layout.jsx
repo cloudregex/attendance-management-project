@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../utils/api';
 import {
     Box,
     Drawer,
@@ -87,6 +88,7 @@ const mockNotifications = [
 import { useColorMode } from './ThemeContext';
 import { Collapse } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { generateToken } from '../../Notifications/firebase';
 // const [anchorEl, setAnchorEl] = React.useState(null);
 // const open = Boolean(anchorEl);
 
@@ -140,6 +142,11 @@ const Layout = ({ children }) => {
     const [notifications, setNotifications] = useState(mockNotifications);
     const [actionMenuAnchor, setActionMenuAnchor] = useState(null);
     const [selectedNotifId, setSelectedNotifId] = useState(null);
+
+    React.useEffect(() => {
+        // Request token on dashboard load
+        generateToken().catch(err => console.error("Error generating permission token:", err));
+    }, []);
 
     const handleActionMenuOpen = (event, id) => {
         setActionMenuAnchor(event.currentTarget);
@@ -195,10 +202,22 @@ const Layout = ({ children }) => {
         setPermissionsOpen(!permissionsOpen);
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminEmail');
-        navigate('/login');
+    const handleLogout = async () => {
+        try {
+            // Call the backend logout to blacklist the token in Redis
+            await api.post('/admin/logout');
+        } catch (error) {
+            console.error('Logout API failed:', error);
+        } finally {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminEmail');
+            navigate('/login', {
+                state: {
+                    message: 'You have been logged out successfully',
+                    severity: 'success'
+                }
+            });
+        }
     };
 
     const topMenuItems = [

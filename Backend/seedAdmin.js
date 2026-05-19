@@ -4,28 +4,37 @@ import Admin from './model/admin.model.js';
 import sequelize from './config/db.js';
 import { seedAdmin as createAdminInDb } from './controller/admin.controller.js';
 import { seedDefaultRoles } from './services/role.service.js';
+import bcrypt from 'bcryptjs';
 
 async function runSeed() {
     try {
         await sequelize.authenticate();
         console.log("✅ Database connected for seeding");
 
+        const hashedPassword = await bcrypt.hash('adminpassword123', 10);
+
         // Sync and seed Role model first
-        await Role.sync({ alter: true });
+        await Role.sync();
         await seedDefaultRoles();
 
         // Sync model (ensure table exists)
-        await Admin.sync({ alter: true });
+        await Admin.sync();
 
-        const adminData = {
-            name: "Super Admin",
-            email: "admin@example.com",
-            password: "adminpassword123",
-            roleId: "admin"
-        };
+        const [admin, created] = await Admin.findOrCreate({
+            where: { email: 'admin@example.com' },
+            defaults: {
+                name: 'Super Admin',
+                password: hashedPassword,
+                roleId: 'admin'
+            }
+        });
 
-        await createAdminInDb(adminData);
-        
+        if (created) {
+            console.log('✅ Admin account created: admin@example.com / adminpassword123');
+        } else {
+            console.log('ℹ️ Admin account already exists.');
+        }
+
         console.log('✅ Admin seeding process finished');
         process.exit(0);
     } catch (error) {
