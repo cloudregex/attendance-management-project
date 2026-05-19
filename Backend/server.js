@@ -15,6 +15,9 @@ import adminRoutes from './routes/admin.routes.js';
 import roleRoutes from './routes/role.routes.js';
 import permissionRoutes from './routes/permission.routes.js';
 import activityRoutes from './routes/activity.routes.js';
+import departmentRoutes from './routes/department.routes.js';
+import studentRoutes from './routes/student.routes.js';
+import teacherRoutes from './routes/teacher.routes.js';
 
 // Models
 import Admin from './model/admin.model.js';
@@ -49,6 +52,9 @@ app.use("/api/permissions/definitions", permissionRoutes);
 app.use("/api/activity-logs", activityRoutes);
 app.use("/api/old-users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/departments", departmentRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/teachers", teacherRoutes);
 
 // ✅ Correct DB connection check
 sequelize.authenticate()
@@ -66,14 +72,14 @@ const syncDB = async () => {
     console.log("🔄 Starting DB Sync...");
 
     // Sync and seed Roles first to satisfy foreign key constraints for other models
-    await Role.sync({ alter: true });
+    await Role.sync();
     await seedDefaultRoles();
     console.log("✅ Roles synced and seeded");
 
-    await ActivityLog.sync({ alter: true });
+    await ActivityLog.sync();
     console.log("✅ ActivityLog synced");
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log("✅ All models synced");
 
     await seedDefaultPermissions();
