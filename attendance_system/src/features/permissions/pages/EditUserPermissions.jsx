@@ -20,10 +20,13 @@ import {
     Check as CheckIcon,
     ArrowBackIosNew as ArrowBackIosNewIcon
 } from '@mui/icons-material';
-import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInstance';
 
-const API_USERS = 'http://localhost:5000/api/users';
-const API_ROLES = 'http://localhost:5000/api/roles';
+const permissionKeys = [
+    'canGrant', 'canApprove', 'canManageUsers', 'canManageRoles',
+    'canTakeAttendance', 'canViewReports', 'canModifyRecords', 'canExportData',
+    'canAccessLogs', 'canManageDepts', 'canViewSchedules', 'canSystemConfig'
+];
 
 const EditUserPermissions = () => {
     const { userId } = useParams();
@@ -37,18 +40,12 @@ const EditUserPermissions = () => {
     const [permissions, setPermissions] = useState({});
     const [loading, setLoading] = useState(true);
 
-    const permissionKeys = [
-        'canGrant', 'canApprove', 'canManageUsers', 'canManageRoles',
-        'canTakeAttendance', 'canViewReports', 'canModifyRecords', 'canExportData',
-        'canAccessLogs', 'canManageDepts', 'canViewSchedules', 'canSystemConfig'
-    ];
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [usersRes, rolesRes] = await Promise.all([
-                    axios.get(`${API_USERS}/get`),
-                    axios.get(`${API_ROLES}/get`)
+                    axiosInstance.get('/users/get'),
+                    axiosInstance.get('/roles/get')
                 ]);
 
                 const availableRoles = rolesRes.data;
@@ -93,7 +90,7 @@ const EditUserPermissions = () => {
 
     const handleSave = async () => {
         try {
-            await axios.put(`${API_USERS}/update/${user.id}`, {
+            await axiosInstance.put(`/users/update/${user.id}`, {
                 roleId,
                 ...permissions
             });

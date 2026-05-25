@@ -34,6 +34,8 @@ import {
     People as PeopleIcon,
     Description as DescriptionIcon,
     Settings as SettingsIcon,
+    MenuBook as MenuBookIcon,
+    EventNote as EventNoteIcon,
     Search as SearchIcon,
     Notifications as NotificationsIcon,
     Security as SecurityIcon,
@@ -179,11 +181,29 @@ const Layout = ({ children }) => {
     const adminRole = localStorage.getItem('adminRole') || 'admin';
     const permissionsStr = localStorage.getItem('adminPermissions');
     const adminPermissions = permissionsStr ? JSON.parse(permissionsStr) : {};
+    const permissionAliases = {
+        canGrant: ['grant permissions'],
+        canApprove: ['approve requests'],
+        canManageUsers: ['user list', 'user create', 'user edit', 'user delete', 'user management'],
+        canManageRoles: ['role management'],
+        canTakeAttendance: ['take attendance'],
+        canViewReports: ['attendance reports', 'financial reports', 'view reports'],
+        canModifyRecords: ['modify attendance records'],
+        canExportData: ['export attendance data', 'database backup'],
+        canAccessLogs: ['activity logs'],
+        canManageDepts: ['department management'],
+        canViewSchedules: ['class schedules', 'view schedules'],
+        canSystemConfig: ['system settings', 'system configuration']
+    };
 
     const hasPermission = (flag) => {
         if (!flag) return true;
         if (adminPermissions[flag] === true) return true;
         if (adminRole === 'admin') return true;
+        const aliases = permissionAliases[flag] || [];
+        if (adminPermissions.permissions?.some((permission) => aliases.includes(permission.name?.toLowerCase()))) {
+            return true;
+        }
         return false;
     };
 
@@ -204,6 +224,8 @@ const Layout = ({ children }) => {
     const topMenuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
         { text: 'Departments', icon: <BusinessIcon />, path: '/departments', permission: 'canManageDepts' },
+        { text: 'Academics', icon: <MenuBookIcon />, path: '/academics', permission: 'canManageDepts' },
+        { text: 'Timetable', icon: <EventNoteIcon />, path: '/timetable', permission: 'canManageDepts' },
         { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs', permission: 'canAccessLogs' }
     ].filter(item => hasPermission(item.permission));
 

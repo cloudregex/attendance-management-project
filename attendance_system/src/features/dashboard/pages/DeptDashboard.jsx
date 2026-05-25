@@ -334,6 +334,7 @@ const DeptDashboard = () => {
                 state: formData.state || null,
                 pincode: formData.pincode || null,
                 roll_number: formData.roll_number,
+                password: formData.password,
                 department_id: matchedDept ? Number(matchedDept.id) : Number(formData.department_id) || null,
                 course: formData.course || null,
                 className: formData.className || null,

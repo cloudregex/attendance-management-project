@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Admin from '../model/admin.model.js';
 import Role from '../model/role.model.js';
+import Permission from '../model/permission.model.js';
 import {
     getUsersService,
     createUserService,
@@ -15,7 +16,11 @@ export const loginAdmin = async (req, res) => {
         const { email, password } = req.body;
         const admin = await Admin.findOne({
             where: { email },
-            include: [{ model: Role, as: 'role' }]
+            include: [{
+                model: Role,
+                as: 'role',
+                include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }]
+            }]
         });
 
         if (!admin) {

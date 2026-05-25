@@ -13,10 +13,7 @@ import {
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowBackIosNew as ArrowBackIosNewIcon } from '@mui/icons-material';
-import axios from 'axios';
-
-const API_ROLES = 'http://localhost:5000/api/roles';
-const API_PERMISSIONS = 'http://localhost:5000/api/permissions/definitions';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const EditRolePermissions = () => {
     const { roleId } = useParams();
@@ -32,11 +29,9 @@ const EditRolePermissions = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem('adminToken');
-                if (!token) return;
                 const [rolesRes, permsRes] = await Promise.all([
-                    axios.get(`${API_ROLES}/get`, { headers: { Authorization: `Bearer ${token}` } }),
-                    axios.get(`${API_PERMISSIONS}/get`, { headers: { Authorization: `Bearer ${token}` } })
+                    axiosInstance.get('/roles/get'),
+                    axiosInstance.get('/permissions/definitions/get')
                 ]);
 
                 setPermissionsList(permsRes.data);
@@ -70,16 +65,9 @@ const EditRolePermissions = () => {
             // Convert boolean map back to an array of IDs
             const selectedPermissionIds = Object.keys(permissions).filter(id => permissions[id]).map(Number);
 
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                alert('Session expired. Please log in again.');
-                return;
-            }
-            await axios.put(`${API_ROLES}/update/${role.id}`, {
+            await axiosInstance.put(`/roles/update/${role.id}`, {
                 name: role.name,
                 permissions: selectedPermissionIds
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
             navigate('/permissions?view=roles');
         } catch (error) {

@@ -11,11 +11,11 @@ async function runSeed() {
         console.log("✅ Database connected for seeding");
 
         // Sync and seed Role model first
-        await Role.sync({ alter: true });
+        await Role.sync();
         await seedDefaultRoles();
 
         // Sync model (ensure table exists)
-        await Admin.sync({ alter: true });
+        await Admin.sync();
 
         const adminData = {
             name: "Super Admin",

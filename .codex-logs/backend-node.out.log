@@ -1,0 +1,69 @@
+🔄 Starting DB Sync...
+Executing (default): SELECT 1+1 AS result
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Roles' AND TABLE_SCHEMA = 'Attendance_System'
+✅ Database connected successfully
+Executing (default): SHOW FULL COLUMNS FROM `Roles`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'Roles' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `canGrant` `canGrant` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canApprove` `canApprove` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canTakeAttendance` `canTakeAttendance` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageUsers` `canManageUsers` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageRoles` `canManageRoles` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `updatedAt` `updatedAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `canViewReports` `canViewReports` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canModifyRecords` `canModifyRecords` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canExportData` `canExportData` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canAccessLogs` `canAccessLogs` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageDepts` `canManageDepts` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canViewSchedules` `canViewSchedules` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canSystemConfig` `canSystemConfig` TINYINT(1) DEFAULT false;
+Executing (default): SHOW INDEX FROM `Roles`
+Executing (f59a483b-0958-4dcb-ab26-a4176d6b4fd1): START TRANSACTION;
+Executing (f59a483b-0958-4dcb-ab26-a4176d6b4fd1): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'admin';
+Executing (f59a483b-0958-4dcb-ab26-a4176d6b4fd1): COMMIT;
+Executing (80cf4259-df02-4c2e-aa0c-b7d09672fe96): START TRANSACTION;
+Executing (80cf4259-df02-4c2e-aa0c-b7d09672fe96): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'teacher';
+Executing (80cf4259-df02-4c2e-aa0c-b7d09672fe96): COMMIT;
+Executing (b5f8d259-2583-4a02-ac3f-8bb50e9ea7a8): START TRANSACTION;
+Executing (b5f8d259-2583-4a02-ac3f-8bb50e9ea7a8): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'staff';
+Executing (b5f8d259-2583-4a02-ac3f-8bb50e9ea7a8): COMMIT;
+Executing (6cdb3e1a-f7e3-4dba-87fe-7f9de416ba3d): START TRANSACTION;
+Executing (6cdb3e1a-f7e3-4dba-87fe-7f9de416ba3d): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'subadmin';
+Executing (6cdb3e1a-f7e3-4dba-87fe-7f9de416ba3d): COMMIT;
+✅ Roles synced and seeded
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'ActivityLogs' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `ActivityLogs`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'ActivityLogs' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `adminId` `adminId` INTEGER;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `action` `action` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `entityType` `entityType` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `entityId` `entityId` VARCHAR(255);
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `details` `details` JSON;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `ActivityLogs`
+✅ ActivityLog synced
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Roles' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `Roles`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'Roles' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `canGrant` `canGrant` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canApprove` `canApprove` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canTakeAttendance` `canTakeAttendance` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageUsers` `canManageUsers` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageRoles` `canManageRoles` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `updatedAt` `updatedAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `canViewReports` `canViewReports` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canModifyRecords` `canModifyRecords` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canExportData` `canExportData` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canAccessLogs` `canAccessLogs` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageDepts` `canManageDepts` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canViewSchedules` `canViewSchedules` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canSystemConfig` `canSystemConfig` TINYINT(1) DEFAULT false;
+Executing (default): SHOW INDEX FROM `Roles`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Admins' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `Admins`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'Admins' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `Admins` CHANGE `email` `email` VARCHAR(255) NOT NULL UNIQUE;

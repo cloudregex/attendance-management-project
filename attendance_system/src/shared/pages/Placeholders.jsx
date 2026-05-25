@@ -24,5 +24,4 @@ const PlaceholderPage = ({ title }) => {
 };
 
 export const EmployeesPage = () => <PlaceholderPage title="Employees" />;
-export const ReportsPage = () => <PlaceholderPage title="Attendance Reports" />;
 export const SettingsPage = () => <PlaceholderPage title="Settings" />;

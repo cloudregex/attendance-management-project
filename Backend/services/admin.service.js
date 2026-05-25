@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import user from '../model/admin.model.js';
 import Role from '../model/role.model.js';
+import Permission from '../model/permission.model.js';
 
 export const createUserService = async (data) => {
     if (data.password) {
@@ -12,7 +13,11 @@ export const createUserService = async (data) => {
 
 export const getUsersService = () => {
     return user.findAll({
-        include: [{ model: Role, as: 'role' }]
+        include: [{
+            model: Role,
+            as: 'role',
+            include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }]
+        }]
     });
 };
 

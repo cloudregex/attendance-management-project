@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, ToggleButtonGroup, ToggleButton, Paper, useTheme } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 import PermissionDefinitionList from '../components/PermissionDefinitionList';
@@ -9,23 +9,12 @@ import { People as PeopleIcon, List as ListIcon, Security as SecurityIcon } from
 const PermissionsPage = () => {
   const theme = useTheme();
   const mode = theme.palette.mode;
-  const [searchParams] = useSearchParams();
-  const [view, setView] = useState(() => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = (() => {
     const v = searchParams.get('view');
     if (v === 'roles' || v === 'definitions') return v;
     return 'manage_users';
-  });
-
-  useEffect(() => {
-    const currentView = searchParams.get('view');
-    if (currentView === 'roles') {
-      setView('roles');
-    } else if (currentView === 'definitions') {
-      setView('definitions');
-    } else {
-      setView('manage_users');
-    }
-  }, [searchParams]);
+  })();
 
   const getTitle = () => {
     if (view === 'manage_users') return 'User Management';
@@ -41,7 +30,11 @@ const PermissionsPage = () => {
 
   const handleViewChange = (event, nextView) => {
     if (nextView !== null) {
-      setView(nextView);
+      if (nextView === 'manage_users') {
+        setSearchParams({});
+      } else {
+        setSearchParams({ view: nextView });
+      }
     }
   };
 

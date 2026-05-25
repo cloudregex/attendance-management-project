@@ -1,0 +1,90 @@
+🔄 Starting DB Sync...
+Executing (default): SELECT 1+1 AS result
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Roles' AND TABLE_SCHEMA = 'Attendance_System'
+✅ Database connected successfully
+Executing (default): SHOW INDEX FROM `Roles`
+Executing (4823833e-c261-4d0e-9f05-aaaee89f132d): START TRANSACTION;
+Executing (4823833e-c261-4d0e-9f05-aaaee89f132d): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'admin';
+Executing (4823833e-c261-4d0e-9f05-aaaee89f132d): COMMIT;
+Executing (a189d7ff-23f6-4f20-9bbc-a5abcc13f110): START TRANSACTION;
+Executing (a189d7ff-23f6-4f20-9bbc-a5abcc13f110): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'teacher';
+Executing (a189d7ff-23f6-4f20-9bbc-a5abcc13f110): COMMIT;
+Executing (38cb2520-edaf-4997-8a1d-b10da3e38fb9): START TRANSACTION;
+Executing (38cb2520-edaf-4997-8a1d-b10da3e38fb9): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'staff';
+Executing (38cb2520-edaf-4997-8a1d-b10da3e38fb9): COMMIT;
+Executing (40e2a9b4-d9d6-4a8b-92b9-a524ccea0484): START TRANSACTION;
+Executing (40e2a9b4-d9d6-4a8b-92b9-a524ccea0484): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'subadmin';
+Executing (40e2a9b4-d9d6-4a8b-92b9-a524ccea0484): COMMIT;
+✅ Roles synced and seeded
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'ActivityLogs' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `ActivityLogs`
+✅ ActivityLog synced
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Roles' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `Roles`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Admins' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `Admins`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'departments' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `departments`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'students' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `students`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'teachers' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `teachers`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'courses' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `courses`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'subjects' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `subjects`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'semesters' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `semesters`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'credits' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `credits`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'curriculum' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `curriculum`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'subject_allocation' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `subject_allocation`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Permissions' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `Permissions`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'ActivityLogs' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `ActivityLogs`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'RolePermissions' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW INDEX FROM `RolePermissions`
+✅ All models synced
+Executing (30e164e2-ec49-4ffc-8f38-5b1a61bf28d6): START TRANSACTION;
+Executing (30e164e2-ec49-4ffc-8f38-5b1a61bf28d6): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'inquiry index';
+Executing (30e164e2-ec49-4ffc-8f38-5b1a61bf28d6): COMMIT;
+Executing (3117d8f6-b20a-4a06-9833-80cd1ba1b406): START TRANSACTION;
+Executing (3117d8f6-b20a-4a06-9833-80cd1ba1b406): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'database backup';
+Executing (3117d8f6-b20a-4a06-9833-80cd1ba1b406): COMMIT;
+Executing (ce391d4e-6fe9-4412-93ca-236b31d0aa7d): START TRANSACTION;
+Executing (ce391d4e-6fe9-4412-93ca-236b31d0aa7d): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'activity logs';
+Executing (ce391d4e-6fe9-4412-93ca-236b31d0aa7d): COMMIT;
+Executing (92137321-5015-4093-85cc-bf2917a00427): START TRANSACTION;
+Executing (92137321-5015-4093-85cc-bf2917a00427): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'teacher details';
+Executing (92137321-5015-4093-85cc-bf2917a00427): COMMIT;
+Executing (b06e2a0d-ed93-489c-b789-1af04ca0c1a4): START TRANSACTION;
+Executing (b06e2a0d-ed93-489c-b789-1af04ca0c1a4): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'student details';
+Executing (b06e2a0d-ed93-489c-b789-1af04ca0c1a4): COMMIT;
+Executing (c763e977-15be-4866-9423-3749bd24dc56): START TRANSACTION;
+Executing (c763e977-15be-4866-9423-3749bd24dc56): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'user list';
+Executing (c763e977-15be-4866-9423-3749bd24dc56): COMMIT;
+Executing (41623b83-6161-4ce3-a171-354a5148fca5): START TRANSACTION;
+Executing (41623b83-6161-4ce3-a171-354a5148fca5): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'user delete';
+Executing (41623b83-6161-4ce3-a171-354a5148fca5): COMMIT;
+Executing (4a81b759-2035-499f-ae01-c0c4404609f0): START TRANSACTION;
+Executing (4a81b759-2035-499f-ae01-c0c4404609f0): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'user create';
+Executing (4a81b759-2035-499f-ae01-c0c4404609f0): COMMIT;
+Executing (7d8328d9-da58-4dcf-8ce4-b58f2ccd8a60): START TRANSACTION;
+Executing (7d8328d9-da58-4dcf-8ce4-b58f2ccd8a60): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'user edit';
+Executing (7d8328d9-da58-4dcf-8ce4-b58f2ccd8a60): COMMIT;
+Executing (153ae258-4830-47c8-bf0d-ca820f9382cf): START TRANSACTION;
+Executing (153ae258-4830-47c8-bf0d-ca820f9382cf): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'role management';
+Executing (153ae258-4830-47c8-bf0d-ca820f9382cf): COMMIT;
+Executing (431aa3b0-8f2d-4543-bac5-d8303c614f9f): START TRANSACTION;
+Executing (431aa3b0-8f2d-4543-bac5-d8303c614f9f): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'financial reports';
+Executing (431aa3b0-8f2d-4543-bac5-d8303c614f9f): COMMIT;
+Executing (797cca92-4715-4934-967d-ef46ccb3f8d0): START TRANSACTION;
+Executing (797cca92-4715-4934-967d-ef46ccb3f8d0): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'system settings';
+Executing (797cca92-4715-4934-967d-ef46ccb3f8d0): COMMIT;
+✅ Default data seeded
+✅ Server is running on port 5000
+Health check: http://localhost:5000/api/health
+DB test: http://localhost:5000/api/db-test

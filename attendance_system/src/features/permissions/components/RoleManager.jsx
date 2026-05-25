@@ -22,6 +22,7 @@ import {
     Chip,
     Avatar,
     Alert,
+    CircularProgress,
     useTheme,
     Stack,
     Tooltip,
@@ -278,7 +279,13 @@ export const RoleManager = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {roles.map((role) => (
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                                    <CircularProgress size={24} />
+                                </TableCell>
+                            </TableRow>
+                        ) : roles.map((role) => (
                             <TableRow key={role.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                 <TableCell>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -358,6 +365,13 @@ export const RoleManager = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
+                        {!loading && roles.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                                    <Typography color="text.secondary">No roles found.</Typography>
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </Paper>
