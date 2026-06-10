@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Box,
     Typography,
@@ -16,7 +16,8 @@ import {
     CssBaseline,
     Container,
     useTheme,
-    CircularProgress
+    CircularProgress,
+    Snackbar
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { Visibility, VisibilityOff, LockOutlined, AccountTree, CheckCircleOutline } from '@mui/icons-material';
@@ -24,6 +25,24 @@ import { Visibility, VisibilityOff, LockOutlined, AccountTree, CheckCircleOutlin
 const AdminLogin = () => {
     const theme = useTheme();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+
+    // Handle logout message from location state
+    useEffect(() => {
+        if (location.state?.message) {
+            setSnackbar({
+                open: true,
+                message: location.state.message,
+                severity: location.state.severity || 'info'
+            });
+            // Clear location state to prevent showing on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
+
+    const handleCloseSnackbar = () => setSnackbar(prev => ({ ...prev, open: false }));
 
     // Check if already logged in
     useEffect(() => {
@@ -93,8 +112,8 @@ const AdminLogin = () => {
 
                 if (response.ok && data.admin) {
                     console.log('Login success:', data);
-                    localStorage.setItem('adminToken', data.token);
-                    localStorage.setItem('adminEmail', data.admin.email);
+                    localStorage.setItem('adminToken', data.accessToken || data.token);
+                    localStorage.setItem('adminEmail', data.admin.email || formData.email);
                     localStorage.setItem('adminRole', data.admin.roleId || 'admin');
                     localStorage.setItem('adminPermissions', JSON.stringify(data.admin.role || {}));
                     setIsSubmitted(true);
@@ -399,6 +418,18 @@ const AdminLogin = () => {
                     </Box>
                 </Box>
             </Grid>
+
+            {/* Logout/Status Snackbar */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={5000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius: '12px' }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

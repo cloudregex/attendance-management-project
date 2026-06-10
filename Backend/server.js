@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import sequelize from './config/db.js';
 
 // ── Import models so Sequelize knows about them before sync ───────────────
@@ -119,7 +120,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control'],
 }));
 app.use(express.json());
-app.use("/api/users", adminRoutes);
+app.use(cookieParser());
+
+// ── Route mounting ─────────────────────────────────────────────────────────
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions/definitions", permissionRoutes);
 app.use("/api/activity-logs", activityRoutes);
@@ -131,6 +134,10 @@ app.use("/api/timetable", timetableRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/old-users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/departments", departmentRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/teachers", teacherRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // ✅ Correct DB connection check
 sequelize.authenticate()
@@ -174,13 +181,14 @@ const syncDB = async () => {
     await seedDefaultPermissions();
     console.log("✅ Default data seeded");
 
-    app.listen(PORT, () => {
-      console.log(`✅ Server is running on port ${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`Health check: http://localhost:${PORT}/api/health`);
       console.log(`DB test: http://localhost:${PORT}/api/db-test`);
     });
   } catch (error) {
     console.error("❌ DB Sync Error:", error);
+    process.exit(1);
   }
 };
 

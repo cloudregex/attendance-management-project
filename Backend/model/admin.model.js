@@ -22,6 +22,10 @@ const Admin = sequelize.define("Admin", {
     type: DataTypes.STRING,
     allowNull: false
   },
+  refreshToken: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   roleId: {
     type: DataTypes.STRING,
     allowNull: false,

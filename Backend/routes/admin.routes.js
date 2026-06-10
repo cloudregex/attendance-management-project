@@ -1,25 +1,31 @@
-import express from "express";
+import express from 'express';
 import rateLimit from "express-rate-limit";
 import {
     loginAdmin,
+    refreshAdminToken,
+    logoutAdmin,
     getUsers,
     createUser,
     updateUser,
     deleteUser
 } from "../controller/admin.controller.js";
-import { checkAuth, checkPermission } from "../middleware/auth.middleware.js";
+import { checkAuth, checkPermission, verifyAdmin } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
 router.post('/login', loginAdmin);
+router.post('/refresh-token', refreshAdminToken);
+router.post('/logout', logoutAdmin);
 
 // Protected routes
 router.use(checkAuth);
 
+// Protected route to verify token and get current admin info
 router.get('/me', (req, res) => {
     res.status(200).json({
         message: "Protected admin route accessed successfully",
         admin: req.user
+
     });
 });
 

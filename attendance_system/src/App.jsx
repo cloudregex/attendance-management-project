@@ -62,6 +62,10 @@ const ProtectedRoute = ({ children, requiredPermission, requiredPermissions }) =
 };
 
 function App() {
+  useEffect(() => {
+    generateToken();
+  }, []);
+
   return (
     <ThemeProviderWrapper>
       <CssBaseline />
