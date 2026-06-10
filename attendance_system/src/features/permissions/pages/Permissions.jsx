@@ -39,8 +39,14 @@ const PermissionsPage = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', minHeight: '80vh' }}>
-      {/* Header with Toggle */}
+    <Box
+      sx={{
+        width: '100%',
+        minHeight: '100vh',
+        p: 0,
+        background: 'transparent'
+      }}
+    >
       <Box sx={{
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
@@ -50,10 +56,24 @@ const PermissionsPage = () => {
         mb: 2.5
       }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.5 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 900,
+              color: 'text.primary',
+              mb: 0.5,
+              letterSpacing: 0,
+              lineHeight: 1.05
+            }}
+          >
             {getTitle()}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary'
+            }}
+          >
             {getSubtitle()}
           </Typography>
         </Box>
@@ -65,7 +85,8 @@ const PermissionsPage = () => {
             borderRadius: 2,
             bgcolor: mode === 'dark' ? 'background.paper' : 'grey.100',
             border: '1px solid',
-            borderColor: 'divider'
+            borderColor: 'divider',
+            boxShadow: 'none'
           }}
         >
           <ToggleButtonGroup
@@ -81,7 +102,7 @@ const PermissionsPage = () => {
                 px: 2,
                 py: 1,
                 textTransform: 'none',
-                fontWeight: 600,
+                fontWeight: 800,
                 color: 'text.secondary',
                 '&.Mui-selected': {
                   bgcolor: mode === 'dark' ? '#1E293B' : 'white',

@@ -223,7 +223,7 @@ const Layout = ({ children }) => {
 
     const topMenuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-        { text: 'Departments', icon: <BusinessIcon />, path: '/departments', permission: 'canManageDepts' },
+        { text: 'Faculty', icon: <BusinessIcon />, path: '/departments', permission: 'canManageDepts' },
         { text: 'Academics', icon: <MenuBookIcon />, path: '/academics', permission: 'canManageDepts' },
         { text: 'Timetable', icon: <EventNoteIcon />, path: '/timetable', permission: 'canManageDepts' },
         { text: 'Activity Logs', icon: <HistoryIcon />, path: '/activity-logs', permission: 'canAccessLogs' }

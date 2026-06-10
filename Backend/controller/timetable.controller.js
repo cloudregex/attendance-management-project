@@ -101,3 +101,23 @@ export const updateLectureSlot = async (req, res) => {
         sendError(res, error, 'Error updating lecture slot');
     }
 };
+
+export const getLectureSlots = async (_req, res) => {
+    try {
+        const slots = await timetableService.getLectureSlotsService();
+        res.status(200).json(slots);
+    } catch (error) {
+        sendError(res, error, 'Error fetching lecture slots');
+    }
+};
+
+export const deleteLectureSlot = async (req, res) => {
+    try {
+        const removed = await timetableService.deleteLectureSlotService(req.params.id);
+        if (!removed) return res.status(404).json({ message: 'Lecture slot not found.' });
+        await logActivity(req.user?.id, 'DELETE_LECTURE_SLOT', 'LectureSlot', req.params.id);
+        res.status(200).json({ message: 'Lecture slot deleted successfully.' });
+    } catch (error) {
+        sendError(res, error, 'Error deleting lecture slot');
+    }
+};

@@ -8,29 +8,32 @@ import {
     TableRow,
     TableCell,
     TableBody,
-    IconButton,
     Button,
     TextField,
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
-    MenuItem,
-    Select,
-    FormControl,
-    InputLabel,
-    Chip,
     Avatar,
     Alert,
     CircularProgress,
     useTheme,
     Stack,
-    Tooltip,
+    Checkbox,
+    Chip,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Security as SecurityIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import {
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    Add as AddIcon,
+    Security as SecurityIcon,
+    Groups as GroupsIcon,
+    School as SchoolIcon,
+} from '@mui/icons-material';
 
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../utils/axiosInstance';
+import { buildPermissionGroups } from '../utils/permissionGroups';
 
 export const RoleManager = () => {
     const theme = useTheme();
@@ -208,50 +211,133 @@ export const RoleManager = () => {
         setRoleToDelete(null);
     };
 
+    const permissionGroups = buildPermissionGroups(permissionsList);
+
+    const handlePermissionToggle = (permissionId) => {
+        setPermissions(prev => (
+            prev.includes(permissionId)
+                ? prev.filter(id => id !== permissionId)
+                : [...prev, permissionId]
+        ));
+    };
+
+    const handlePermissionGroupToggle = (groupPermissions) => {
+        const allSelected = groupPermissions.every((permission) => permissions.includes(permission.id));
+        const groupIds = groupPermissions.map((permission) => permission.id);
+
+        setPermissions(prev => (
+            allSelected
+                ? prev.filter((id) => !groupIds.includes(id))
+                : [...new Set([...prev, ...groupIds])]
+        ));
+    };
+
+    const PermissionGroupCard = ({ title, groupPerms }) => {
+        const allSelected = groupPerms.every((permission) => permissions.includes(permission.id));
+
+        return (
+            <Paper
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    height: '100%',
+                    bgcolor: mode === 'dark' ? '#0F172A' : '#ffffff'
+                }}
+            >
+                <Box
+                    sx={{
+                        bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'grey.50',
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                        px: 1.5,
+                        py: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                    }}
+                >
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.9rem', color: 'text.primary' }}>
+                        {title}
+                    </Typography>
+                    <Checkbox
+                        size="small"
+                        checked={allSelected}
+                        onChange={() => handlePermissionGroupToggle(groupPerms)}
+                    />
+                </Box>
+                <Box sx={{ p: 1.5 }}>
+                    <Stack spacing={0.5}>
+                        {groupPerms.map((permission) => (
+                            <Box key={permission.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Checkbox
+                                    size="small"
+                                    color="primary"
+                                    checked={permissions.includes(permission.id)}
+                                    onChange={() => handlePermissionToggle(permission.id)}
+                                    sx={{ p: 0.5 }}
+                                />
+                                <Typography variant="body2" sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
+                                    {permission.name}
+                                </Typography>
+                            </Box>
+                        ))}
+                    </Stack>
+                </Box>
+            </Paper>
+        );
+    };
+
+    const roleColors = ['#3b82f6', '#39d176', '#ffb020', '#9b6cff', '#22d3ee'];
+    const badgeStyles = {
+        User: { icon: GroupsIcon, color: '#a78bfa' },
+        Student: { icon: SchoolIcon, color: '#6ee7a0' },
+        Permission: { icon: SecurityIcon, color: '#60a5fa' }
+    };
+
+    const getPermissionBadges = (role) => {
+        const rolePermissionNames = new Set((role.permissions || []).map((permission) => permission.name?.toLowerCase()));
+        const priorityGroups = ['User Permissions', 'Student Permissions', 'Permission Permissions'];
+
+        const badges = priorityGroups
+            .map((title) => {
+                const group = permissionGroups.find((item) => item.title === title);
+                const count = group?.permissions.filter((permission) => rolePermissionNames.has(permission.name.toLowerCase())).length || 0;
+                return {
+                    label: title.replace(' Permissions', ''),
+                    count
+                };
+            })
+            .filter((badge) => badge.count > 0);
+
+        const displayedCount = badges.reduce((total, badge) => total + badge.count, 0);
+        const moreCount = Math.max((role.permissions?.length || 0) - displayedCount, 0);
+        return { badges, moreCount };
+    };
+
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.9rem', color: 'text.primary' }}>
-                        ROLE MANAGEMENT
-                    </Typography>
-                    <Box sx={{ bgcolor: 'primary.light', color: 'primary.main', px: 1, py: 0.2, borderRadius: 10, fontSize: '0.7rem', fontWeight: 800, opacity: 0.8 }}>
-                        {roles.length} ROLES
-                    </Box>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
-                    <Tooltip title="Refresh Data">
-                        <IconButton
-                            onClick={fetchRoles}
-                            sx={{
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                borderRadius: 2,
-                                bgcolor: mode === 'dark' ? '#1E293B' : 'white'
-                            }}
-                        >
-                            <RefreshIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    <Button
-                        startIcon={<AddIcon />}
-                        variant="contained"
-                        onClick={() => handleOpen()}
-                        sx={{
-                            borderRadius: 2,
-                            textTransform: 'none',
-                            px: 3,
-                            boxShadow: 'none',
-                            bgcolor: mode === 'dark' ? 'primary.main' : '#4484f4',
-                            '&:hover': {
-                                bgcolor: mode === 'dark' ? 'primary.dark' : '#3374e3',
-                                boxShadow: '0 4px 12px rgba(68, 132, 244, 0.2)'
-                            }
-                        }}
-                    >
-                        Add New Role
-                    </Button>
-                </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+                <Button
+                    startIcon={<AddIcon />}
+                    variant="contained"
+                    onClick={() => handleOpen()}
+                    sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        px: 3,
+                        boxShadow: 'none',
+                        bgcolor: mode === 'dark' ? 'primary.main' : '#4484f4',
+                        '&:hover': {
+                            bgcolor: mode === 'dark' ? 'primary.dark' : '#3374e3',
+                            boxShadow: '0 4px 12px rgba(68, 132, 244, 0.2)'
+                        }
+                    }}
+                >
+                    Add New Role
+                </Button>
             </Box>
 
             <Alert severity="info" sx={{ mb: 3, borderRadius: 2, border: '1px solid', borderColor: mode === 'dark' ? 'rgba(56, 189, 248, 0.2)' : 'info.light' }}>
@@ -285,86 +371,111 @@ export const RoleManager = () => {
                                     <CircularProgress size={24} />
                                 </TableCell>
                             </TableRow>
-                        ) : roles.map((role) => (
-                            <TableRow key={role.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                <TableCell>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                        <Avatar sx={{
-                                            width: 40, height: 40,
-                                            bgcolor: 'primary.main',
-                                            fontSize: '0.9rem', fontWeight: 700
-                                        }}>
-                                            <SecurityIcon fontSize="small" />
-                                        </Avatar>
-                                        <Box>
-                                            <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>{role.name}</Typography>
-                                            <Typography variant="caption" color="text.secondary">ID: {role.id}</Typography>
+                        ) : roles.map((role, index) => {
+                            const avatarColor = role.id === 'admin' ? 'primary.main' : 'primary.light';
+                            const { badges, moreCount } = getPermissionBadges(role);
+
+                            return (
+                                <TableRow
+                                    key={role.id}
+                                    hover
+                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                >
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            <Avatar
+                                                sx={{
+                                                    width: 40,
+                                                    height: 40,
+                                                    bgcolor: avatarColor,
+                                                    fontSize: '1.2rem',
+                                                    fontWeight: 700
+                                                }}
+                                            >
+                                                <SecurityIcon sx={{ fontSize: 22 }} />
+                                            </Avatar>
+                                            <Box>
+                                                <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>{role.name}</Typography>
+                                                <Typography variant="caption" color="text.secondary">ID: {role.id}</Typography>
+                                            </Box>
                                         </Box>
-                                    </Box>
-                                </TableCell>
-                                <TableCell>
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {role.permissions && role.permissions.map(perm => (
-                                            <Chip
-                                                key={perm.id}
-                                                label={perm.name}
-                                                size="small"
-                                                color="primary"
+                                    </TableCell>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                            {badges.map((badge) => {
+                                                const style = badgeStyles[badge.label];
+                                                const Icon = style.icon;
+
+                                                return (
+                                                    <Chip
+                                                        key={badge.label}
+                                                        icon={<Icon sx={{ fontSize: '1rem !important', color: style.color }} />}
+                                                        label={badge.label}
+                                                        size="small"
+                                                        sx={{ fontWeight: 600, borderRadius: 1, bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'grey.100' }}
+                                                    />
+                                                );
+                                            })}
+                                            {moreCount > 0 && (
+                                                <Chip
+                                                    label={`+${moreCount} more`}
+                                                    size="small"
+                                                    variant="outlined"
+                                                    sx={{ fontWeight: 600, borderRadius: 1 }}
+                                                />
+                                            )}
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                            <Button
                                                 variant="outlined"
-                                                sx={{ fontSize: '0.7rem', textTransform: 'capitalize' }}
-                                            />
-                                        ))}
-                                    </Box>
-                                </TableCell>
-                                <TableCell align="right">
-                                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
-                                            onClick={() => navigate(`/permissions/edit-role/${role.id}`)}
-                                            sx={{
-                                                borderRadius: 2,
-                                                textTransform: 'none',
-                                                fontWeight: 600,
-                                                borderColor: 'divider',
-                                                color: mode === 'dark' ? 'primary.light' : 'primary.main',
-                                                '&:hover': {
-                                                    bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
-                                                    borderColor: 'primary.main',
-                                                }
-                                            }}
-                                        >
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            startIcon={<DeleteIcon sx={{ fontSize: '1rem !important' }} />}
-                                            onClick={() => handleDelete(role)}
-                                            disabled={role.id === 'admin'}
-                                            sx={{
-                                                borderRadius: 2,
-                                                textTransform: 'none',
-                                                fontWeight: 600,
-                                                borderColor: 'divider',
-                                                color: mode === 'dark' ? '#fca5a5' : 'error.main',
-                                                '&:hover': {
-                                                    bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
-                                                    borderColor: 'error.main',
-                                                },
-                                                '&.Mui-disabled': {
+                                                size="small"
+                                                startIcon={<EditIcon sx={{ fontSize: '1rem !important' }} />}
+                                                onClick={() => navigate(`/permissions/edit-role/${role.id}`)}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    textTransform: 'none',
+                                                    fontWeight: 600,
                                                     borderColor: 'divider',
-                                                    opacity: mode === 'dark' ? 0.3 : 0.5
-                                                }
-                                            }}
-                                        >
-                                            Delete
-                                        </Button>
-                                    </Stack>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                                                    color: mode === 'dark' ? 'primary.light' : 'primary.main',
+                                                    '&:hover': {
+                                                        bgcolor: mode === 'dark' ? 'rgba(56, 189, 248, 0.1)' : 'primary.light',
+                                                        borderColor: 'primary.main',
+                                                    }
+                                                }}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                variant="outlined"
+                                                size="small"
+                                                startIcon={<DeleteIcon sx={{ fontSize: '1rem !important' }} />}
+                                                onClick={() => handleDelete(role)}
+                                                disabled={role.id === 'admin'}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    textTransform: 'none',
+                                                    fontWeight: 600,
+                                                    borderColor: 'divider',
+                                                    color: mode === 'dark' ? '#fca5a5' : 'error.main',
+                                                    '&:hover': {
+                                                        bgcolor: mode === 'dark' ? 'rgba(248, 113, 113, 0.1)' : 'error.light',
+                                                        borderColor: 'error.main',
+                                                    },
+                                                    '&.Mui-disabled': {
+                                                        borderColor: 'divider',
+                                                        opacity: mode === 'dark' ? 0.3 : 0.5
+                                                    }
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Stack>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                         {!loading && roles.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
@@ -424,24 +535,20 @@ export const RoleManager = () => {
                             Permissions
                         </Typography>
 
-                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
-                            {permissionsList.map((perm) => (
-                                <FormControl key={perm.id} component="fieldset" variant="standard">
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={permissions.includes(perm.id)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) setPermissions(prev => [...prev, perm.id]);
-                                                else setPermissions(prev => prev.filter(id => id !== perm.id));
-                                            }}
-                                            style={{ transform: 'scale(1.2)' }}
-                                        />
-                                        <Typography variant="body2" sx={{ fontWeight: 500, textTransform: 'capitalize' }}>
-                                            {perm.name}
-                                        </Typography>
-                                    </Box>
-                                </FormControl>
+                        <Box
+                            sx={{
+                                display: 'grid',
+                                gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                                gap: 2,
+                                maxHeight: 430,
+                                overflowY: 'auto',
+                                p: 0.5
+                            }}
+                        >
+                            {permissionGroups.map((group) => (
+                                <Box key={group.title} sx={{ minHeight: 190 }}>
+                                    <PermissionGroupCard title={group.title} groupPerms={group.permissions} />
+                                </Box>
                             ))}
                         </Box>
                     </Box>

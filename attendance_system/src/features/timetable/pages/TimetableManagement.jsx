@@ -22,6 +22,7 @@ import {
     TextField,
     Typography,
     useTheme,
+    IconButton,
 } from '@mui/material';
 import {
     AutoFixHigh as GenerateIcon,
@@ -31,6 +32,8 @@ import {
     MeetingRoom as RoomIcon,
     Save as SaveIcon,
     PictureAsPdf as PdfIcon,
+    Edit as EditIcon,
+    Delete as DeleteIcon,
 } from '@mui/icons-material';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -84,6 +87,14 @@ const TimetableManagement = () => {
     });
     const [departments, setDepartments] = useState([]);
     const [classroomForm, setClassroomForm] = useState(emptyClassroom());
+    const [slotForm, setSlotForm] = useState({
+        day_of_week: 'Monday',
+        start_time: '09:00',
+        end_time: '09:55',
+        slot_type: 'lecture',
+        sequence: 1,
+    });
+    const [editingSlotId, setEditingSlotId] = useState(null);
     const [toast, setToast] = useState({ open: false, severity: 'success', message: '' });
 
     const notify = (severity, message) => setToast({ open: true, severity, message });
@@ -222,6 +233,45 @@ const TimetableManagement = () => {
         }
     };
 
+    const saveSlot = async (event) => {
+        event.preventDefault();
+        try {
+            if (editingSlotId) {
+                await axiosInstance.put(`/timetable/slots/${editingSlotId}`, slotForm);
+                notify('success', 'Lecture slot updated.');
+            } else {
+                await axiosInstance.post('/timetable/slots', slotForm);
+                notify('success', 'Lecture slot added.');
+            }
+            setSlotForm({ day_of_week: 'Monday', start_time: '09:00', end_time: '09:55', slot_type: 'lecture', sequence: 1 });
+            setEditingSlotId(null);
+            loadData();
+        } catch (error) {
+            notify('error', error.response?.data?.message || 'Could not save lecture slot.');
+        }
+    };
+
+    const editSlot = (slot) => {
+        setSlotForm({
+            day_of_week: slot.day_of_week,
+            start_time: slot.start_time.slice(0, 5),
+            end_time: slot.end_time.slice(0, 5),
+            slot_type: slot.slot_type,
+            sequence: slot.sequence,
+        });
+        setEditingSlotId(slot.id);
+    };
+
+    const deleteSlot = async (id) => {
+        try {
+            await axiosInstance.delete(`/timetable/slots/${id}`);
+            notify('success', 'Lecture slot removed.');
+            loadData();
+        } catch (error) {
+            notify('error', error.response?.data?.message || 'Could not delete lecture slot.');
+        }
+    };
+
     const entriesByDay = useMemo(() => {
         const grouped = {};
         DAYS.forEach((day) => { grouped[day] = []; });
@@ -275,6 +325,7 @@ const TimetableManagement = () => {
                     <Tab label="Smart Generator" />
                     <Tab label="Weekly View" />
                     <Tab label="Classrooms & Workflow" />
+                    <Tab label="Manage Timings" />
                 </Tabs>
             </Paper>
 
@@ -449,6 +500,80 @@ const TimetableManagement = () => {
                                 <Chip key={slot.id} label={`${slot.day_of_week} ${slot.start_time.slice(0, 5)}`} sx={{ borderRadius: 1 }} />
                             ))}
                         </Stack>
+                    </Paper>
+                </Box>
+            )}
+
+            {tab === 3 && (
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '380px 1fr' }, gap: 3 }}>
+                    <Paper sx={{ p: 3, borderRadius: 2, border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 2 }}>
+                            {editingSlotId ? 'Edit Timing' : 'Create Timing'}
+                        </Typography>
+                        <Box component="form" onSubmit={saveSlot} sx={{ display: 'grid', gap: 2 }}>
+                            <TextField select required label="Day of Week" value={slotForm.day_of_week} onChange={(e) => setSlotForm((p) => ({ ...p, day_of_week: e.target.value }))}>
+                                {DAYS.map((day) => (
+                                    <MenuItem key={day} value={day}>{day}</MenuItem>
+                                ))}
+                            </TextField>
+                            <TextField required type="time" label="Start Time" InputLabelProps={{ shrink: true }} value={slotForm.start_time} onChange={(e) => setSlotForm((p) => ({ ...p, start_time: e.target.value }))} />
+                            <TextField required type="time" label="End Time" InputLabelProps={{ shrink: true }} value={slotForm.end_time} onChange={(e) => setSlotForm((p) => ({ ...p, end_time: e.target.value }))} />
+                            <TextField select required label="Slot Type" value={slotForm.slot_type} onChange={(e) => setSlotForm((p) => ({ ...p, slot_type: e.target.value }))}>
+                                <MenuItem value="lecture">Lecture</MenuItem>
+                                <MenuItem value="lab">Lab</MenuItem>
+                                <MenuItem value="break">Break</MenuItem>
+                                <MenuItem value="lunch">Lunch</MenuItem>
+                            </TextField>
+                            <TextField required type="number" label="Sequence" value={slotForm.sequence} onChange={(e) => setSlotForm((p) => ({ ...p, sequence: e.target.value }))} />
+                            
+                            <Stack direction="row" spacing={1}>
+                                <Button type="submit" variant="contained" startIcon={<SaveIcon />} fullWidth>
+                                    {editingSlotId ? 'Update' : 'Save'}
+                                </Button>
+                                {editingSlotId && (
+                                    <Button variant="outlined" onClick={() => { setEditingSlotId(null); setSlotForm({ day_of_week: 'Monday', start_time: '09:00', end_time: '09:55', slot_type: 'lecture', sequence: 1 }); }}>Cancel</Button>
+                                )}
+                            </Stack>
+                        </Box>
+                    </Paper>
+
+                    <Paper sx={{ p: 0, borderRadius: 2, border: '1px solid', borderColor: 'divider', boxShadow: 'none', overflow: 'hidden' }}>
+                        <Table>
+                            <TableHead sx={{ bgcolor: 'action.hover' }}>
+                                <TableRow>
+                                    <TableCell>Day</TableCell>
+                                    <TableCell>Timing</TableCell>
+                                    <TableCell>Type</TableCell>
+                                    <TableCell>Sequence</TableCell>
+                                    <TableCell align="right">Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {(overview.slots || []).map((slot) => (
+                                    <TableRow key={slot.id} hover>
+                                        <TableCell>{slot.day_of_week}</TableCell>
+                                        <TableCell>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</TableCell>
+                                        <TableCell>
+                                            <Chip label={slot.slot_type} size="small" variant="outlined" sx={{ textTransform: 'capitalize' }} />
+                                        </TableCell>
+                                        <TableCell>{slot.sequence}</TableCell>
+                                        <TableCell align="right">
+                                            <IconButton size="small" color="primary" onClick={() => editSlot(slot)}>
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                            <IconButton size="small" color="error" onClick={() => deleteSlot(slot.id)}>
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                {(overview.slots || []).length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>No timings found.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
                     </Paper>
                 </Box>
             )}

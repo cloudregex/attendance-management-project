@@ -347,3 +347,14 @@ export const updateLectureSlotService = async (id, data) => {
     return slot.update(data);
 };
 
+export const getLectureSlotsService = async () => {
+    return LectureSlot.findAll({ order: [['day_of_week', 'ASC'], ['sequence', 'ASC']] });
+};
+
+export const deleteLectureSlotService = async (id) => {
+    const slot = await LectureSlot.findByPk(id);
+    if (!slot) return null;
+    await slot.destroy();
+    return true;
+};
+

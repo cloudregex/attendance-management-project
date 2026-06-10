@@ -4,17 +4,17 @@ import Role from '../model/role.model.js';
 import Permission from '../model/permission.model.js';
 
 const permissionAliases = {
-    canGrant: ['grant permissions'],
-    canApprove: ['approve requests'],
-    canManageUsers: ['user list', 'user create', 'user edit', 'user delete', 'user management'],
-    canManageRoles: ['role management'],
-    canTakeAttendance: ['take attendance'],
-    canViewReports: ['attendance reports', 'financial reports', 'view reports'],
-    canModifyRecords: ['modify attendance records'],
-    canExportData: ['export attendance data', 'database backup'],
+    canGrant: ['grant permissions', 'permission assign', 'role assign permissions'],
+    canApprove: ['approve requests', 'attendance approve'],
+    canManageUsers: ['user list', 'user create', 'user edit', 'user delete', 'user soft delete', 'user hard delete', 'user restore', 'user trash', 'user status', 'user management'],
+    canManageRoles: ['role management', 'role list', 'role create', 'role edit', 'role soft delete', 'role hard delete', 'role restore', 'role assign permissions', 'permission list', 'permission create', 'permission edit', 'permission assign'],
+    canTakeAttendance: ['take attendance', 'attendance index', 'attendance create'],
+    canViewReports: ['attendance reports', 'financial reports', 'view reports', 'report attendance', 'report student', 'report teacher', 'report financial'],
+    canModifyRecords: ['modify attendance records', 'attendance edit', 'attendance soft delete', 'attendance restore'],
+    canExportData: ['export attendance data', 'database backup', 'user export', 'student export', 'teacher export', 'attendance export', 'report export'],
     canAccessLogs: ['activity logs'],
-    canManageDepts: ['department management'],
-    canViewSchedules: ['class schedules', 'view schedules'],
+    canManageDepts: ['department management', 'department list', 'department create', 'department edit', 'department soft delete', 'department hard delete', 'department restore', 'course list', 'course create', 'course edit', 'semester list', 'semester create', 'semester edit', 'subject index', 'subject create', 'subject edit'],
+    canViewSchedules: ['class schedules', 'view schedules', 'timetable index'],
     canSystemConfig: ['system settings', 'system configuration']
 };
 

@@ -9,6 +9,8 @@ import {
     autoResolveConflicts,
     createLectureSlot,
     updateLectureSlot,
+    getLectureSlots,
+    deleteLectureSlot,
 } from '../controller/timetable.controller.js';
 import { checkAuth, checkPermission } from '../middleware/auth.middleware.js';
 
@@ -23,7 +25,9 @@ router.post('/publish', publishTimetable);
 router.post('/resolve', autoResolveConflicts);
 router.post('/classrooms', createClassroom);
 router.post('/slots', createLectureSlot);
+router.get('/slots', getLectureSlots);
 router.put('/slots/:id', updateLectureSlot);
+router.delete('/slots/:id', deleteLectureSlot);
 router.put('/entries/:id', updateTimetableEntry);
 router.delete('/entries/:id', deleteTimetableEntry);
 
