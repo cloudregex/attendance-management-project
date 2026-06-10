@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, ToggleButtonGroup, ToggleButton, Paper, useTheme } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 import PermissionDefinitionList from '../components/PermissionDefinitionList';
@@ -9,23 +9,12 @@ import { People as PeopleIcon, List as ListIcon, Security as SecurityIcon } from
 const PermissionsPage = () => {
   const theme = useTheme();
   const mode = theme.palette.mode;
-  const [searchParams] = useSearchParams();
-  const [view, setView] = useState(() => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = (() => {
     const v = searchParams.get('view');
     if (v === 'roles' || v === 'definitions') return v;
     return 'manage_users';
-  });
-
-  useEffect(() => {
-    const currentView = searchParams.get('view');
-    if (currentView === 'roles') {
-      setView('roles');
-    } else if (currentView === 'definitions') {
-      setView('definitions');
-    } else {
-      setView('manage_users');
-    }
-  }, [searchParams]);
+  })();
 
   const getTitle = () => {
     if (view === 'manage_users') return 'User Management';
@@ -41,13 +30,23 @@ const PermissionsPage = () => {
 
   const handleViewChange = (event, nextView) => {
     if (nextView !== null) {
-      setView(nextView);
+      if (nextView === 'manage_users') {
+        setSearchParams({});
+      } else {
+        setSearchParams({ view: nextView });
+      }
     }
   };
 
   return (
-    <Box sx={{ width: '100%', minHeight: '80vh' }}>
-      {/* Header with Toggle */}
+    <Box
+      sx={{
+        width: '100%',
+        minHeight: '100vh',
+        p: 0,
+        background: 'transparent'
+      }}
+    >
       <Box sx={{
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
@@ -57,10 +56,24 @@ const PermissionsPage = () => {
         mb: 2.5
       }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.5 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 900,
+              color: 'text.primary',
+              mb: 0.5,
+              letterSpacing: 0,
+              lineHeight: 1.05
+            }}
+          >
             {getTitle()}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary'
+            }}
+          >
             {getSubtitle()}
           </Typography>
         </Box>
@@ -72,7 +85,8 @@ const PermissionsPage = () => {
             borderRadius: 2,
             bgcolor: mode === 'dark' ? 'background.paper' : 'grey.100',
             border: '1px solid',
-            borderColor: 'divider'
+            borderColor: 'divider',
+            boxShadow: 'none'
           }}
         >
           <ToggleButtonGroup
@@ -88,7 +102,7 @@ const PermissionsPage = () => {
                 px: 2,
                 py: 1,
                 textTransform: 'none',
-                fontWeight: 600,
+                fontWeight: 800,
                 color: 'text.secondary',
                 '&.Mui-selected': {
                   bgcolor: mode === 'dark' ? '#1E293B' : 'white',

@@ -6,17 +6,14 @@ import {
     Paper,
     Stack,
     Alert,
-    Grid,
     Checkbox,
     useTheme,
     CircularProgress
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowBackIosNew as ArrowBackIosNewIcon } from '@mui/icons-material';
-import axios from 'axios';
-
-const API_ROLES = 'http://localhost:5000/api/roles';
-const API_PERMISSIONS = 'http://localhost:5000/api/permissions/definitions';
+import axiosInstance from '../../../utils/axiosInstance';
+import { buildPermissionGroups } from '../utils/permissionGroups';
 
 const EditRolePermissions = () => {
     const { roleId } = useParams();
@@ -32,11 +29,9 @@ const EditRolePermissions = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem('adminToken');
-                if (!token) return;
                 const [rolesRes, permsRes] = await Promise.all([
-                    axios.get(`${API_ROLES}/get`, { headers: { Authorization: `Bearer ${token}` } }),
-                    axios.get(`${API_PERMISSIONS}/get`, { headers: { Authorization: `Bearer ${token}` } })
+                    axiosInstance.get('/roles/get'),
+                    axiosInstance.get('/permissions/definitions/get')
                 ]);
 
                 setPermissionsList(permsRes.data);
@@ -70,16 +65,9 @@ const EditRolePermissions = () => {
             // Convert boolean map back to an array of IDs
             const selectedPermissionIds = Object.keys(permissions).filter(id => permissions[id]).map(Number);
 
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                alert('Session expired. Please log in again.');
-                return;
-            }
-            await axios.put(`${API_ROLES}/update/${role.id}`, {
+            await axiosInstance.put(`/roles/update/${role.id}`, {
                 name: role.name,
                 permissions: selectedPermissionIds
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
             navigate('/permissions?view=roles');
         } catch (error) {
@@ -104,26 +92,28 @@ const EditRolePermissions = () => {
             <Paper
                 elevation={0}
                 sx={{
-                    borderRadius: 1.5,
+                    borderRadius: 0.75,
                     overflow: 'hidden',
                     border: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: mode === 'dark' ? 'rgba(148, 163, 184, 0.18)' : '#dbe4f0',
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    bgcolor: 'background.paper'
+                    bgcolor: mode === 'dark' ? '#111827' : '#ffffff'
                 }}
             >
                 <Box sx={{
-                    bgcolor: mode === 'dark' ? 'primary.dark' : '#4484f4',
+                    background: mode === 'dark'
+                        ? 'linear-gradient(90deg, #1d4ed8 0%, #3b82f6 100%)'
+                        : 'linear-gradient(90deg, #0f7bf2 0%, #6ea8ff 100%)',
                     color: 'white',
-                    px: 2,
-                    py: 1,
+                    px: 1,
+                    py: 0.8,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between'
                 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.95rem' }}>
                         {title}
                     </Typography>
                     <Checkbox
@@ -133,8 +123,8 @@ const EditRolePermissions = () => {
                         sx={{ p: 0, color: 'rgba(255,255,255,0.7)', '&.Mui-checked': { color: 'white' } }}
                     />
                 </Box>
-                <Box sx={{ p: 2, flex: 1, bgcolor: mode === 'dark' ? 'background.default' : 'white' }}>
-                    <Stack spacing={1}>
+                <Box sx={{ p: 1, flex: 1 }}>
+                    <Stack spacing={0.45}>
                         {groupPerms.map((p) => (
                             <Box key={p.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Checkbox
@@ -142,9 +132,12 @@ const EditRolePermissions = () => {
                                     checked={!!permissions[p.id]}
                                     onChange={() => handleToggle(p.id)}
                                     color="success"
-                                    sx={{ p: 0.5 }}
+                                    sx={{
+                                        p: 0.35,
+                                        '& .MuiSvgIcon-root': { fontSize: 22 }
+                                    }}
                                 />
-                                <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.85rem', textTransform: 'capitalize' }}>
+                                <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.9rem', textTransform: 'capitalize', lineHeight: 1.45 }}>
                                     {p.name}
                                 </Typography>
                             </Box>
@@ -172,12 +165,7 @@ const EditRolePermissions = () => {
         );
     }
 
-    const permissionStructure = [
-        {
-            title: "Dynamic Permissions",
-            permissions: permissionsList
-        }
-    ];
+    const permissionStructure = buildPermissionGroups(permissionsList);
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: mode === 'dark' ? 'background.default' : '#f8fafc', pb: 10 }}>
@@ -257,16 +245,27 @@ const EditRolePermissions = () => {
                     </Box>
                 </Box>
 
-                <Grid container spacing={3}>
-                    {permissionStructure.map((group, idx) => (
-                        <Grid item xs={12} md={4} key={idx}>
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' },
+                        gap: 0,
+                        border: '1px solid',
+                        borderColor: mode === 'dark' ? 'rgba(148, 163, 184, 0.18)' : '#dbe4f0',
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        bgcolor: mode === 'dark' ? '#020617' : '#f8fafc'
+                    }}
+                >
+                    {permissionStructure.map((group) => (
+                        <Box key={group.title} sx={{ minHeight: 205 }}>
                             <PermissionGroupCard
                                 title={group.title}
                                 groupPerms={group.permissions}
                             />
-                        </Grid>
+                        </Box>
                     ))}
-                </Grid>
+                </Box>
 
                 <Box sx={{
                     mt: 6,

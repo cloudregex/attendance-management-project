@@ -28,17 +28,32 @@ import {
     Security,
     Person,
     Palette,
-    Language,
     CloudUpload,
     Backup,
-    Vibration,
     Mail,
     PhoneIphone,
-    NavigateNext,
     Save,
     Refresh,
-    Edit as EditIcon,
 } from '@mui/icons-material';
+
+const SettingItem = ({ icon, title, subtitle, action, hoverBg }) => (
+    <ListItem
+        sx={{
+            py: 2,
+            px: 3,
+            '&:hover': { bgcolor: hoverBg },
+        }}
+    >
+        <ListItemIcon sx={{ color: 'primary.main', minWidth: 48 }}>
+            {icon}
+        </ListItemIcon>
+        <ListItemText
+            primary={<Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{title}</Typography>}
+            secondary={<Typography variant="body2" color="text.secondary">{subtitle}</Typography>}
+        />
+        {action}
+    </ListItem>
+);
 
 const Settings = () => {
     const theme = useTheme();
@@ -47,13 +62,13 @@ const Settings = () => {
     const { mode, setMode } = useColorMode();
 
     // Mapping of paths to tab indices
-    const tabPaths = [
+    const tabPaths = React.useMemo(() => [
         '/settings/account',
         '/settings/notifications',
         '/settings/security',
         '/settings/appearance',
         '/settings/backup'
-    ];
+    ], []);
 
     const [tabIndex, setTabIndex] = useState(() => {
         const index = tabPaths.indexOf(location.pathname);
@@ -82,7 +97,7 @@ const Settings = () => {
         } else if (location.pathname === '/settings' || location.pathname === '/settings/') {
             navigate('/settings/account', { replace: true });
         }
-    }, [location.pathname]);
+    }, [location.pathname, navigate, tabPaths]);
 
     const handleTabChange = (event, newValue) => {
         setTabIndex(newValue);
@@ -93,24 +108,7 @@ const Settings = () => {
         setSettings({ ...settings, [setting]: !settings[setting] });
     };
 
-    const SettingItem = ({ icon, title, subtitle, action }) => (
-        <ListItem
-            sx={{
-                py: 2,
-                px: 3,
-                '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.02) },
-            }}
-        >
-            <ListItemIcon sx={{ color: 'primary.main', minWidth: 48 }}>
-                {icon}
-            </ListItemIcon>
-            <ListItemText
-                primary={<Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{title}</Typography>}
-                secondary={<Typography variant="body2" color="text.secondary">{subtitle}</Typography>}
-            />
-            {action}
-        </ListItem>
-    );
+    const settingHoverBg = alpha(theme.palette.primary.main, 0.02);
 
     return (
         <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: 1200, margin: '0 auto' }}>
@@ -250,6 +248,7 @@ const Settings = () => {
                                         icon={<Mail />}
                                         title="Email Notifications"
                                         subtitle="Receive daily summaries and critical alerts via email."
+                                        hoverBg={settingHoverBg}
                                         action={<Switch checked={settings.emailNotifications} onChange={() => handleToggle('emailNotifications')} />}
                                     />
                                     <Divider />
@@ -257,6 +256,7 @@ const Settings = () => {
                                         icon={<Notifications />}
                                         title="Push Notifications"
                                         subtitle="Get real-time browser alerts for immediate actions."
+                                        hoverBg={settingHoverBg}
                                         action={<Switch checked={settings.pushNotifications} onChange={() => handleToggle('pushNotifications')} />}
                                     />
                                     <Divider />
@@ -264,6 +264,7 @@ const Settings = () => {
                                         icon={<PhoneIphone />}
                                         title="SMS Alerts"
                                         subtitle="Send emergency alerts directly to your mobile device."
+                                        hoverBg={settingHoverBg}
                                         action={<Switch />}
                                     />
                                 </List>

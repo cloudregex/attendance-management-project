@@ -5,7 +5,7 @@ import Layout from './shared/components/Layout';
 import AdminDashboard from './features/dashboard/pages/AdminDashboard';
 import DeptDashboard from './features/dashboard/pages/DeptDashboard';
 import AdminLogin from './features/auth/pages/AdminLogin';
-import { EmployeesPage, ReportsPage } from './shared/pages/Placeholders';
+import { EmployeesPage } from './shared/pages/Placeholders';
 import SettingsPage from './features/settings/pages/Settings';
 import PermissionsPage from './features/permissions/pages/Permissions';
 import EditRolePermissions from './features/permissions/pages/EditRolePermissions';
@@ -14,10 +14,11 @@ import EditUserPermissions from './features/permissions/pages/EditUserPermission
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import SystemAdmin from './features/admin/pages/SystemAdmin';
-import { generateToken } from './Notifications/firebase';
-import React, { useEffect } from 'react';
+import SubjectCourseManagement from './features/academics/pages/SubjectCourseManagement';
+import TimetableManagement from './features/timetable/pages/TimetableManagement';
+import AttendanceReports from './features/reports/pages/AttendanceReports';
 
-const ProtectedRoute = ({ children, requiredPermission }) => {
+const ProtectedRoute = ({ children, requiredPermission, requiredPermissions }) => {
   const token = localStorage.getItem('adminToken');
   if (!token) return <Navigate to="/login" replace />;
 
@@ -26,8 +27,35 @@ const ProtectedRoute = ({ children, requiredPermission }) => {
 
   const permissionsStr = localStorage.getItem('adminPermissions');
   const adminPermissions = permissionsStr ? JSON.parse(permissionsStr) : {};
+  const permissionAliases = {
+    canGrant: ['grant permissions'],
+    canApprove: ['approve requests'],
+    canManageUsers: ['user list', 'user create', 'user edit', 'user delete', 'user management'],
+    canManageRoles: ['role management'],
+    canTakeAttendance: ['take attendance'],
+    canViewReports: ['attendance reports', 'financial reports', 'view reports'],
+    canModifyRecords: ['modify attendance records'],
+    canExportData: ['export attendance data', 'database backup'],
+    canAccessLogs: ['activity logs'],
+    canManageDepts: ['department management'],
+    canViewSchedules: ['class schedules', 'view schedules'],
+    canSystemConfig: ['system settings', 'system configuration']
+  };
+  const hasDynamicPermission = (permissionKey) => {
+    const aliases = permissionAliases[permissionKey] || [];
+    return adminPermissions.permissions?.some((permission) =>
+      aliases.includes(permission.name?.toLowerCase())
+    );
+  };
 
-  if (requiredPermission && !adminPermissions[requiredPermission]) {
+  const canAccess = (permissionKey) =>
+    adminPermissions[permissionKey] === true || hasDynamicPermission(permissionKey);
+
+  if (requiredPermission && !canAccess(requiredPermission)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (requiredPermissions?.length && !requiredPermissions.some(canAccess)) {
     return <Navigate to="/dashboard" replace />;
   }
   return children;
@@ -56,9 +84,11 @@ function App() {
                     <Routes>
                       <Route path="/dashboard" element={<AdminDashboard />} />
                       <Route path="/departments" element={<ProtectedRoute requiredPermission="canManageDepts"><DeptDashboard /></ProtectedRoute>} />
+                      <Route path="/academics" element={<ProtectedRoute requiredPermission="canManageDepts"><SubjectCourseManagement /></ProtectedRoute>} />
+                      <Route path="/timetable" element={<ProtectedRoute requiredPermission="canManageDepts"><TimetableManagement /></ProtectedRoute>} />
                       <Route path="/employees" element={<ProtectedRoute requiredPermission="canManageUsers"><EmployeesPage /></ProtectedRoute>} />
-                      <Route path="/reports" element={<ProtectedRoute requiredPermission="canViewReports"><ReportsPage /></ProtectedRoute>} />
-                      <Route path="/permissions" element={<ProtectedRoute requiredPermission="canManageUsers"><PermissionsPage /></ProtectedRoute>} />
+                      <Route path="/reports" element={<ProtectedRoute requiredPermission="canViewReports"><AttendanceReports /></ProtectedRoute>} />
+                      <Route path="/permissions" element={<ProtectedRoute requiredPermissions={['canManageUsers', 'canManageRoles']}><PermissionsPage /></ProtectedRoute>} />
                       <Route path="/permissions/edit/:userId" element={<ProtectedRoute requiredPermission="canManageUsers"><EditUserPermissions /></ProtectedRoute>} />
                       <Route path="/permissions/edit-role/:roleId" element={<ProtectedRoute requiredPermission="canManageRoles"><EditRolePermissions /></ProtectedRoute>} />
                       <Route path="/activity-logs" element={<ProtectedRoute requiredPermission="canAccessLogs"><ActivityLogsPage /></ProtectedRoute>} />

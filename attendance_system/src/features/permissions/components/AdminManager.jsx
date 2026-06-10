@@ -23,6 +23,7 @@ import {
     Chip,
     Avatar,
     Alert,
+    CircularProgress,
     useTheme,
     Stack,
 } from '@mui/material';
@@ -275,7 +276,7 @@ const UserManager = () => {
             const url = editingUser ? `/users/update/${editingUser.id}` : `/users/create`;
             const method = editingUser ? 'put' : 'post';
 
-            const response = await axiosInstance({
+            await axiosInstance({
                 method,
                 url,
                 data: userData
@@ -397,7 +398,13 @@ const UserManager = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {users.map((user) => (
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                                    <CircularProgress size={24} />
+                                </TableCell>
+                            </TableRow>
+                        ) : users.map((user) => (
                             <TableRow key={user.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                 <TableCell>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -481,6 +488,13 @@ const UserManager = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
+                        {!loading && users.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                                    <Typography color="text.secondary">No users found.</Typography>
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </Paper>

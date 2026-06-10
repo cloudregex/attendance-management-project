@@ -137,10 +137,6 @@ const PermissionDefinitionList = () => {
     const totalRecords = filteredPermissions.length;
     const paginatedPermissions = filteredPermissions.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
-    const handlePageChange = (event, value) => {
-        setPage(value);
-    };
-
     // Export Logic
     const handleExportClick = (event) => setExportAnchorEl(event.currentTarget);
     const handleExportClose = () => setExportAnchorEl(null);

@@ -91,6 +91,12 @@ const emptyForm = () => ({
     confirm_password: '',
 });
 
+const toTeacherPayload = (form) => {
+    const payload = { ...form };
+    delete payload.confirm_password;
+    return payload;
+};
+
 const AddTeacherForm = ({ open, onClose, onSubmit }) => {
     const theme = useTheme();
     const mode = theme.palette.mode;
@@ -224,8 +230,7 @@ const AddTeacherForm = ({ open, onClose, onSubmit }) => {
                 setLoading(false);
                 setActiveStep(2);
                 if (onSubmit) {
-                    const { confirm_password, ...payload } = formData;
-                    onSubmit(payload);
+                    onSubmit(toTeacherPayload(formData));
                 }
             }, 1200);
         } else {

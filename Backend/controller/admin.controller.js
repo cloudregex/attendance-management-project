@@ -11,6 +11,7 @@ import {
 } from '../utils/token.service.js';
 import redisClient from '../config/redis.js';
 import Role from '../model/role.model.js';
+import Permission from '../model/permission.model.js';
 import {
     getUsersService,
     createUserService,
@@ -47,7 +48,11 @@ export const loginAdmin = async (req, res) => {
         const { email, password } = req.body;
         const adminUser = await Admin.findOne({
             where: { email },
-            include: [{ model: Role, as: 'role' }]
+            include: [{
+                model: Role,
+                as: 'role',
+                include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }]
+            }]
         });
 
         if (!adminUser) {

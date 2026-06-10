@@ -110,14 +110,18 @@ const AddStudentForm = ({ open, onClose, onAdd }) => {
 
     // ── reset on close ────────────────────────────────────────────
     useEffect(() => {
-        if (!open) {
+        if (open) return undefined;
+
+        const resetTimer = window.setTimeout(() => {
             setActiveStep(0);
             setLoading(false);
             setFormData(emptyForm());
             setFaceData({ face_front: null, face_left: null, face_right: null, face_embedding: null });
             setErrors({});
             setShowPwd(false);
-        }
+        }, 0);
+
+        return () => window.clearTimeout(resetTimer);
     }, [open]);
 
     const handleChange = (e) => {

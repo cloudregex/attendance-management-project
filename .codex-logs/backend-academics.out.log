@@ -1,0 +1,289 @@
+
+> backend@1.0.0 dev
+> nodemon server.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,json[39m
+[32m[nodemon] starting `node server.js server.js`[39m
+🔄 Starting DB Sync...
+Executing (default): SELECT 1+1 AS result
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Roles' AND TABLE_SCHEMA = 'Attendance_System'
+✅ Database connected successfully
+Executing (default): SHOW FULL COLUMNS FROM `Roles`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'Roles' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `canGrant` `canGrant` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canApprove` `canApprove` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canTakeAttendance` `canTakeAttendance` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageUsers` `canManageUsers` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageRoles` `canManageRoles` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `updatedAt` `updatedAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `canViewReports` `canViewReports` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canModifyRecords` `canModifyRecords` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canExportData` `canExportData` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canAccessLogs` `canAccessLogs` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageDepts` `canManageDepts` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canViewSchedules` `canViewSchedules` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canSystemConfig` `canSystemConfig` TINYINT(1) DEFAULT false;
+Executing (default): SHOW INDEX FROM `Roles`
+Executing (eab4769d-a9ca-4111-be03-84ea481fc014): START TRANSACTION;
+Executing (eab4769d-a9ca-4111-be03-84ea481fc014): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'admin';
+Executing (eab4769d-a9ca-4111-be03-84ea481fc014): COMMIT;
+Executing (3c5b7ab2-c25f-4741-9e39-42dcd59144c9): START TRANSACTION;
+Executing (3c5b7ab2-c25f-4741-9e39-42dcd59144c9): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'teacher';
+Executing (3c5b7ab2-c25f-4741-9e39-42dcd59144c9): COMMIT;
+Executing (1a0ae2c4-aa04-4ee9-bef5-9fb76c4cc1f3): START TRANSACTION;
+Executing (1a0ae2c4-aa04-4ee9-bef5-9fb76c4cc1f3): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'staff';
+Executing (1a0ae2c4-aa04-4ee9-bef5-9fb76c4cc1f3): COMMIT;
+Executing (49f1dcf5-7dcc-45d0-a0f0-575a3bd9c49d): START TRANSACTION;
+Executing (49f1dcf5-7dcc-45d0-a0f0-575a3bd9c49d): SELECT `id`, `name`, `canGrant`, `canApprove`, `canManageUsers`, `canManageRoles`, `canTakeAttendance`, `canViewReports`, `canModifyRecords`, `canExportData`, `canAccessLogs`, `canManageDepts`, `canViewSchedules`, `canSystemConfig`, `createdAt`, `updatedAt` FROM `Roles` AS `Role` WHERE `Role`.`id` = 'subadmin';
+Executing (49f1dcf5-7dcc-45d0-a0f0-575a3bd9c49d): COMMIT;
+✅ Roles synced and seeded
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'ActivityLogs' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `ActivityLogs`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'ActivityLogs' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `adminId` `adminId` INTEGER;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `action` `action` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `entityType` `entityType` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `entityId` `entityId` VARCHAR(255);
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `details` `details` JSON;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `ActivityLogs`
+✅ ActivityLog synced
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Roles' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `Roles`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'Roles' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `canGrant` `canGrant` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canApprove` `canApprove` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canTakeAttendance` `canTakeAttendance` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageUsers` `canManageUsers` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageRoles` `canManageRoles` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `updatedAt` `updatedAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Roles` CHANGE `canViewReports` `canViewReports` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canModifyRecords` `canModifyRecords` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canExportData` `canExportData` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canAccessLogs` `canAccessLogs` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canManageDepts` `canManageDepts` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canViewSchedules` `canViewSchedules` TINYINT(1) DEFAULT false;
+Executing (default): ALTER TABLE `Roles` CHANGE `canSystemConfig` `canSystemConfig` TINYINT(1) DEFAULT false;
+Executing (default): SHOW INDEX FROM `Roles`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Admins' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `Admins`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'Admins' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `Admins` CHANGE `email` `email` VARCHAR(255) NOT NULL UNIQUE;
+Executing (default): ALTER TABLE `Admins` CHANGE `password` `password` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `Admins` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Admins` CHANGE `updatedAt` `updatedAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Admins` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `Admins` CHANGE `phone` `phone` VARCHAR(255);
+Executing (default): ALTER TABLE `Admins` ADD FOREIGN KEY (`roleId`) REFERENCES `Roles` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+Executing (default): SHOW INDEX FROM `Admins`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'departments' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `departments`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'departments' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `departments` CHANGE `name` `name` VARCHAR(255) NOT NULL UNIQUE;
+Executing (default): ALTER TABLE `departments` CHANGE `code` `code` VARCHAR(255) UNIQUE;
+Executing (default): ALTER TABLE `departments` CHANGE `status` `status` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `departments` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `departments` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `departments`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'students' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `students`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'students' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `students` CHANGE `first_name` `first_name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `students` CHANGE `middle_name` `middle_name` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `last_name` `last_name` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `email` `email` VARCHAR(255) NOT NULL UNIQUE;
+Executing (default): ALTER TABLE `students` CHANGE `mobile` `mobile` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `whatsapp_number` `whatsapp_number` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `password` `password` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `students` CHANGE `gender` `gender` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `date_of_birth` `date_of_birth` DATE;
+Executing (default): ALTER TABLE `students` CHANGE `address` `address` TEXT;
+Executing (default): ALTER TABLE `students` CHANGE `city` `city` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `state` `state` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `pincode` `pincode` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `roll_number` `roll_number` VARCHAR(255) NOT NULL UNIQUE;
+Executing (default): ALTER TABLE `students` CHANGE `department_id` `department_id` BIGINT NOT NULL;
+Executing (default): ALTER TABLE `students` CHANGE `course` `course` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `class_name` `class_name` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `semester` `semester` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `admission_year` `admission_year` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `parent_name` `parent_name` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `parent_mobile` `parent_mobile` VARCHAR(255);
+Executing (default): ALTER TABLE `students` CHANGE `status` `status` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `students` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `students` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `students`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'teachers' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `teachers`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'teachers' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `teachers` CHANGE `first_name` `first_name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `teachers` CHANGE `middle_name` `middle_name` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `last_name` `last_name` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `email` `email` VARCHAR(255) NOT NULL UNIQUE;
+Executing (default): ALTER TABLE `teachers` CHANGE `mobile` `mobile` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `whatsapp_number` `whatsapp_number` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `password` `password` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `teachers` CHANGE `gender` `gender` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `date_of_birth` `date_of_birth` DATE;
+Executing (default): ALTER TABLE `teachers` CHANGE `address` `address` TEXT;
+Executing (default): ALTER TABLE `teachers` CHANGE `city` `city` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `state` `state` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `pincode` `pincode` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `employee_id` `employee_id` VARCHAR(255) NOT NULL UNIQUE;
+Executing (default): ALTER TABLE `teachers` CHANGE `department_id` `department_id` BIGINT NOT NULL;
+Executing (default): ALTER TABLE `teachers` CHANGE `designation` `designation` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `qualification` `qualification` VARCHAR(255);
+Executing (default): ALTER TABLE `teachers` CHANGE `subjects` `subjects` JSON;
+Executing (default): ALTER TABLE `teachers` CHANGE `classes` `classes` JSON;
+Executing (default): ALTER TABLE `teachers` CHANGE `joining_date` `joining_date` DATE;
+Executing (default): ALTER TABLE `teachers` CHANGE `status` `status` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `teachers` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `teachers` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `teachers`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'courses' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `courses`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'courses' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `courses` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `courses` CHANGE `code` `code` VARCHAR(255) NOT NULL UNIQUE;
+Executing (default): ALTER TABLE `courses` ADD FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `courses` CHANGE `duration_semesters` `duration_semesters` INTEGER NOT NULL DEFAULT 8;
+Executing (default): ALTER TABLE `courses` CHANGE `academic_year` `academic_year` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `courses` CHANGE `status` `status` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `courses` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `courses` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `courses`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'subjects' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `subjects`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'subjects' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `subjects` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `subjects` CHANGE `code` `code` VARCHAR(255) NOT NULL UNIQUE;
+Executing (default): ALTER TABLE `subjects` ADD FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `subjects` CHANGE `subject_type` `subject_type` ENUM('core', 'elective', 'lab') NOT NULL DEFAULT 'core';
+Executing (default): ALTER TABLE `subjects` CHANGE `prerequisites` `prerequisites` JSON;
+Executing (default): ALTER TABLE `subjects` CHANGE `syllabus_url` `syllabus_url` VARCHAR(255);
+Executing (default): ALTER TABLE `subjects` CHANGE `syllabus_status` `syllabus_status` ENUM('pending', 'uploaded', 'approved') DEFAULT 'pending';
+Executing (default): ALTER TABLE `subjects` CHANGE `status` `status` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `subjects` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `subjects` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `subjects`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'semesters' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `semesters`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'semesters' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `semesters` ADD FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `semesters` CHANGE `semester_number` `semester_number` INTEGER NOT NULL;
+Executing (default): ALTER TABLE `semesters` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `semesters` CHANGE `academic_year` `academic_year` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `semesters` CHANGE `status` `status` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `semesters` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `semesters` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `semesters`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'credits' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `credits`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'credits' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `credits` ADD FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `credits` CHANGE `lecture` `lecture` INTEGER DEFAULT 0;
+Executing (default): ALTER TABLE `credits` CHANGE `tutorial` `tutorial` INTEGER DEFAULT 0;
+Executing (default): ALTER TABLE `credits` CHANGE `practical` `practical` INTEGER DEFAULT 0;
+Executing (default): ALTER TABLE `credits` CHANGE `total` `total` INTEGER DEFAULT 0;
+Executing (default): ALTER TABLE `credits` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `credits` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `credits`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'curriculum' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `curriculum`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'curriculum' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `curriculum` ADD FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `curriculum` ADD FOREIGN KEY (`semester_id`) REFERENCES `semesters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `curriculum` ADD FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `curriculum` CHANGE `academic_year` `academic_year` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `curriculum` CHANGE `plan_version` `plan_version` VARCHAR(255) DEFAULT 'v1';
+Executing (default): ALTER TABLE `curriculum` CHANGE `is_mandatory` `is_mandatory` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `curriculum` CHANGE `notes` `notes` TEXT;
+Executing (default): ALTER TABLE `curriculum` CHANGE `status` `status` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `curriculum` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `curriculum` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `curriculum`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'subject_allocation' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `subject_allocation`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'subject_allocation' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `subject_allocation` ADD FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `subject_allocation` ADD FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `subject_allocation` ADD FOREIGN KEY (`semester_id`) REFERENCES `semesters` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `subject_allocation` ADD FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `subject_allocation` ADD FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+Executing (default): ALTER TABLE `subject_allocation` CHANGE `academic_year` `academic_year` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `subject_allocation` CHANGE `weekly_periods` `weekly_periods` INTEGER DEFAULT 4;
+Executing (default): ALTER TABLE `subject_allocation` CHANGE `status` `status` TINYINT(1) DEFAULT true;
+Executing (default): ALTER TABLE `subject_allocation` CHANGE `created_at` `created_at` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `subject_allocation` CHANGE `updated_at` `updated_at` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `subject_allocation`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Permissions' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `Permissions`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'Permissions' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `Permissions` CHANGE `name` `name` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `Permissions` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `Permissions` CHANGE `updatedAt` `updatedAt` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `Permissions`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'ActivityLogs' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `ActivityLogs`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'ActivityLogs' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `adminId` `adminId` INTEGER;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `action` `action` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `entityType` `entityType` VARCHAR(255) NOT NULL;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `entityId` `entityId` VARCHAR(255);
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `details` `details` JSON;
+Executing (default): ALTER TABLE `ActivityLogs` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `ActivityLogs`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'RolePermissions' AND TABLE_SCHEMA = 'Attendance_System'
+Executing (default): SHOW FULL COLUMNS FROM `RolePermissions`;
+Executing (default): SELECT CONSTRAINT_NAME as constraint_name,CONSTRAINT_NAME as constraintName,CONSTRAINT_SCHEMA as constraintSchema,CONSTRAINT_SCHEMA as constraintCatalog,TABLE_NAME as tableName,TABLE_SCHEMA as tableSchema,TABLE_SCHEMA as tableCatalog,COLUMN_NAME as columnName,REFERENCED_TABLE_SCHEMA as referencedTableSchema,REFERENCED_TABLE_SCHEMA as referencedTableCatalog,REFERENCED_TABLE_NAME as referencedTableName,REFERENCED_COLUMN_NAME as referencedColumnName FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME = 'RolePermissions' AND CONSTRAINT_NAME!='PRIMARY' AND CONSTRAINT_SCHEMA='Attendance_System' AND REFERENCED_TABLE_NAME IS NOT NULL;
+Executing (default): ALTER TABLE `RolePermissions` CHANGE `createdAt` `createdAt` DATETIME NOT NULL;
+Executing (default): ALTER TABLE `RolePermissions` CHANGE `updatedAt` `updatedAt` DATETIME NOT NULL;
+Executing (default): SHOW INDEX FROM `RolePermissions`
+✅ All models synced
+Executing (e6201cb5-9d50-429a-bb17-e178677d9ff6): START TRANSACTION;
+Executing (e6201cb5-9d50-429a-bb17-e178677d9ff6): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'inquiry index';
+Executing (e6201cb5-9d50-429a-bb17-e178677d9ff6): COMMIT;
+Executing (2412a7de-fe33-4480-8802-0d6bb9aece29): START TRANSACTION;
+Executing (2412a7de-fe33-4480-8802-0d6bb9aece29): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'database backup';
+Executing (2412a7de-fe33-4480-8802-0d6bb9aece29): COMMIT;
+Executing (3f6c9ca3-12b4-4dcd-b32d-146871dc1437): START TRANSACTION;
+Executing (3f6c9ca3-12b4-4dcd-b32d-146871dc1437): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'activity logs';
+Executing (3f6c9ca3-12b4-4dcd-b32d-146871dc1437): COMMIT;
+Executing (385e4a91-09d8-4d4d-b1ee-35971b76c013): START TRANSACTION;
+Executing (385e4a91-09d8-4d4d-b1ee-35971b76c013): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'teacher details';
+Executing (385e4a91-09d8-4d4d-b1ee-35971b76c013): COMMIT;
+Executing (f60efe95-1b02-4eb6-9799-7318dc2f3bcb): START TRANSACTION;
+Executing (f60efe95-1b02-4eb6-9799-7318dc2f3bcb): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'student details';
+Executing (f60efe95-1b02-4eb6-9799-7318dc2f3bcb): COMMIT;
+Executing (511e102c-0ae6-4e5b-9f33-d52d1459ace2): START TRANSACTION;
+Executing (511e102c-0ae6-4e5b-9f33-d52d1459ace2): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'user list';
+Executing (511e102c-0ae6-4e5b-9f33-d52d1459ace2): COMMIT;
+Executing (558e0b85-5b02-4b66-8a4a-68fda9012a29): START TRANSACTION;
+Executing (558e0b85-5b02-4b66-8a4a-68fda9012a29): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'user delete';
+Executing (558e0b85-5b02-4b66-8a4a-68fda9012a29): COMMIT;
+Executing (e765fc7a-7c83-4cbe-b2ce-53673b18a18e): START TRANSACTION;
+Executing (e765fc7a-7c83-4cbe-b2ce-53673b18a18e): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'user create';
+Executing (e765fc7a-7c83-4cbe-b2ce-53673b18a18e): COMMIT;
+Executing (0b9a6b8a-96c2-4197-ad9c-ca96b099cd4e): START TRANSACTION;
+Executing (0b9a6b8a-96c2-4197-ad9c-ca96b099cd4e): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'user edit';
+Executing (0b9a6b8a-96c2-4197-ad9c-ca96b099cd4e): COMMIT;
+Executing (c0dd64cb-1db7-4622-89ef-8a588e86b880): START TRANSACTION;
+Executing (c0dd64cb-1db7-4622-89ef-8a588e86b880): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'role management';
+Executing (c0dd64cb-1db7-4622-89ef-8a588e86b880): COMMIT;
+Executing (c2951499-c728-4a16-b5b4-4b7bdc9127de): START TRANSACTION;
+Executing (c2951499-c728-4a16-b5b4-4b7bdc9127de): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'financial reports';
+Executing (c2951499-c728-4a16-b5b4-4b7bdc9127de): COMMIT;
+Executing (5eacfa23-a73b-4255-9479-05fc0edc7cd1): START TRANSACTION;
+Executing (5eacfa23-a73b-4255-9479-05fc0edc7cd1): SELECT `id`, `name`, `createdAt`, `updatedAt` FROM `Permissions` AS `Permission` WHERE `Permission`.`name` = 'system settings';
+Executing (5eacfa23-a73b-4255-9479-05fc0edc7cd1): COMMIT;
+✅ Default data seeded
+✅ Server is running on port 5000
+Health check: http://localhost:5000/api/health
+DB test: http://localhost:5000/api/db-test

@@ -34,4 +34,11 @@ router.post("/users", checkPermission("canManageUsers"), createUser);
 router.put("/users/:id", checkPermission("canManageUsers"), updateUser);
 router.delete("/users/:id", checkPermission("canManageUsers"), deleteUser);
 
+// Compatibility routes used by the permissions frontend when this router is
+// mounted at /api/users.
+router.get("/get", checkPermission("canManageUsers"), getUsers);
+router.post("/create", checkPermission("canManageUsers"), createUser);
+router.put("/update/:id", checkPermission("canManageUsers"), updateUser);
+router.delete("/delete/:id", checkPermission("canManageUsers"), deleteUser);
+
 export default router;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,18 +14,10 @@ import {
   useTheme
 } from '@mui/material';
 
-const PermissionForm = ({ open, onClose, user, onSave }) => {
-  const [permissions, setPermissions] = useState({});
+const PermissionFormContent = ({ open, onClose, user, onSave }) => {
+  const [permissions, setPermissions] = useState(user?.permissions || {});
   const theme = useTheme();
   const mode = theme.palette.mode;
-
-  useEffect(() => {
-    if (user) {
-      setPermissions(user.permissions || {});
-    } else {
-      setPermissions({});
-    }
-  }, [user]);
 
   const handleToggle = (key) => {
     setPermissions((p) => ({ ...p, [key]: !p[key] }));
@@ -105,5 +97,9 @@ const PermissionForm = ({ open, onClose, user, onSave }) => {
     </Dialog>
   );
 };
+
+const PermissionForm = (props) => (
+  <PermissionFormContent key={props.user?.id || 'new-user-permissions'} {...props} />
+);
 
 export default PermissionForm;
