@@ -290,7 +290,6 @@ export const RoleManager = () => {
         );
     };
 
-    const roleColors = ['#3b82f6', '#39d176', '#ffb020', '#9b6cff', '#22d3ee'];
     const badgeStyles = {
         User: { icon: GroupsIcon, color: '#a78bfa' },
         Student: { icon: SchoolIcon, color: '#6ee7a0' },
@@ -371,7 +370,7 @@ export const RoleManager = () => {
                                     <CircularProgress size={24} />
                                 </TableCell>
                             </TableRow>
-                        ) : roles.map((role, index) => {
+                        ) : roles.map((role) => {
                             const avatarColor = role.id === 'admin' ? 'primary.main' : 'primary.light';
                             const { badges, moreCount } = getPermissionBadges(role);
 

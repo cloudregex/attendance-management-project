@@ -34,6 +34,7 @@ import teacherRoutes from './routes/teacher.routes.js';
 import academicRoutes from './routes/academic.routes.js';
 import timetableRoutes from './routes/timetable.routes.js';
 import attendanceRoutes from './routes/attendance.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 // Models
 import Admin from './model/admin.model.js';
@@ -175,8 +176,8 @@ const syncDB = async () => {
     await ActivityLog.sync();
     console.log("✅ ActivityLog synced");
 
-    await sequelize.sync();
-    console.log("✅ All models synced");
+    await sequelize.sync({ alter: true });
+    console.log("✅ All models synced with alter: true");
 
     await seedDefaultPermissions();
     console.log("✅ Default data seeded");
