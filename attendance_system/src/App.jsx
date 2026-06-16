@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import ThemeProviderWrapper from './shared/components/ThemeContext';
@@ -17,6 +18,7 @@ import SystemAdmin from './features/admin/pages/SystemAdmin';
 import SubjectCourseManagement from './features/academics/pages/SubjectCourseManagement';
 import TimetableManagement from './features/timetable/pages/TimetableManagement';
 import AttendanceReports from './features/reports/pages/AttendanceReports';
+import { generateToken } from './Notifications/firebase';
 
 const ProtectedRoute = ({ children, requiredPermission, requiredPermissions }) => {
   const token = localStorage.getItem('adminToken');

@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import Admin from '../model/admin.model.js';
 import Role from '../model/role.model.js';
 import Permission from '../model/permission.model.js';
+import redisClient from '../config/redis.js';
 
 const permissionAliases = {
     canGrant: ['grant permissions', 'permission assign', 'role assign permissions'],

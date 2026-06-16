@@ -19,6 +19,7 @@
     "@mui/x-date-pickers": "^8.27.2",
     "axios": "^1.13.6",
     "dayjs": "^1.11.19",
+    "firebase": "^12.14.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "react": "^19.2.0",
