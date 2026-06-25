@@ -70,6 +70,7 @@ const PermissionList = () => {
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell>SR No.</TableCell>
             <TableCell>User</TableCell>
             <TableCell>Role</TableCell>
             <TableCell>Permissions</TableCell>
@@ -77,10 +78,11 @@ const PermissionList = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {users.map(user => {
+          {users.map((user, index) => {
             const eff = effectivePermissions(user);
             return (
               <TableRow key={user.id} hover>
+                <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Typography sx={{ fontWeight: 700 }}>{user.name}</Typography>

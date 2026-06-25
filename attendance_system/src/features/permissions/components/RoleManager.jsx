@@ -358,6 +358,7 @@ export const RoleManager = () => {
                 <Table>
                     <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
                         <TableRow>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>SR No.</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>Role</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>Permissions</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>Actions</TableCell>
@@ -366,11 +367,11 @@ export const RoleManager = () => {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                                <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
                                     <CircularProgress size={24} />
                                 </TableCell>
                             </TableRow>
-                        ) : roles.map((role) => {
+                        ) : roles.map((role, index) => {
                             const avatarColor = role.id === 'admin' ? 'primary.main' : 'primary.light';
                             const { badges, moreCount } = getPermissionBadges(role);
 
@@ -380,6 +381,7 @@ export const RoleManager = () => {
                                     hover
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 >
+                                    <TableCell>{index + 1}</TableCell>
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                             <Avatar
@@ -477,7 +479,7 @@ export const RoleManager = () => {
                         })}
                         {!loading && roles.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                                <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
                                     <Typography color="text.secondary">No roles found.</Typography>
                                 </TableCell>
                             </TableRow>

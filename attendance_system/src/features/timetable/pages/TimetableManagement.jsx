@@ -37,6 +37,7 @@ import {
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import TimetablePDFDocument from '../components/TimetablePDFDocument';
+import ConfirmDialog from '../../../shared/components/ConfirmDialog';
 import axiosInstance from '../../../utils/axiosInstance';
 
 const currentAcademicYear = () => {
@@ -95,6 +96,7 @@ const TimetableManagement = () => {
     });
     const [editingSlotId, setEditingSlotId] = useState(null);
     const [toast, setToast] = useState({ open: false, severity: 'success', message: '' });
+    const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', content: '', endpoint: '', successMessage: '' });
 
     const notify = (severity, message) => setToast({ open: true, severity, message });
 
@@ -222,14 +224,30 @@ const TimetableManagement = () => {
         }
     };
 
-    const deleteEntry = async (id) => {
+    const confirmDelete = (endpoint, successMessage, entityName) => {
+        setConfirmDialog({
+            open: true,
+            title: `Delete ${entityName}?`,
+            content: `Are you sure you want to delete ${entityName}? This action cannot be undone.`,
+            endpoint,
+            successMessage,
+        });
+    };
+
+    const executeDelete = async () => {
+        const { endpoint, successMessage } = confirmDialog;
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
         try {
-            await axiosInstance.delete(`/timetable/entries/${id}`);
-            notify('success', 'Timetable period removed.');
+            await axiosInstance.delete(endpoint);
+            notify('success', successMessage);
             loadData();
         } catch (error) {
-            notify('error', error.response?.data?.message || 'Could not delete timetable entry.');
+            notify('error', error.response?.data?.message || 'Delete failed.');
         }
+    };
+
+    const deleteEntry = (id) => {
+        confirmDelete(`/timetable/entries/${id}`, 'Timetable period removed.', 'this period');
     };
 
     const saveSlot = async (event) => {
@@ -261,14 +279,8 @@ const TimetableManagement = () => {
         setEditingSlotId(slot.id);
     };
 
-    const deleteSlot = async (id) => {
-        try {
-            await axiosInstance.delete(`/timetable/slots/${id}`);
-            notify('success', 'Lecture slot removed.');
-            loadData();
-        } catch (error) {
-            notify('error', error.response?.data?.message || 'Could not delete lecture slot.');
-        }
+    const deleteSlot = (id) => {
+        confirmDelete(`/timetable/slots/${id}`, 'Lecture slot removed.', 'this lecture slot');
     };
 
     const entriesByDay = useMemo(() => {
@@ -368,6 +380,7 @@ const TimetableManagement = () => {
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
+                                    <TableCell>SR No.</TableCell>
                                     <TableCell>Subject</TableCell>
                                     <TableCell>Faculty</TableCell>
                                     <TableCell>Course</TableCell>
@@ -375,8 +388,9 @@ const TimetableManagement = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {(overview.allocations || []).map((allocation) => (
+                                {(overview.allocations || []).map((allocation, index) => (
                                     <TableRow key={allocation.id}>
+                                        <TableCell>{index + 1}</TableCell>
                                         <TableCell>{allocation.subject?.code}</TableCell>
                                         <TableCell>{allocation.teacher?.first_name || 'Unassigned'}</TableCell>
                                         <TableCell>{allocation.course?.code}</TableCell>
@@ -397,6 +411,7 @@ const TimetableManagement = () => {
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell>SR No.</TableCell>
                                         <TableCell>Time</TableCell>
                                         <TableCell>Subject</TableCell>
                                         <TableCell>Course / Sem</TableCell>
@@ -407,8 +422,9 @@ const TimetableManagement = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {(entriesByDay[day] || []).map((entry) => (
+                                    {(entriesByDay[day] || []).map((entry, index) => (
                                         <TableRow key={entry.id} hover>
+                                            <TableCell>{index + 1}</TableCell>
                                             <TableCell>{entry.slot?.start_time?.slice(0, 5)} - {entry.slot?.end_time?.slice(0, 5)}</TableCell>
                                             <TableCell>
                                                 <Typography sx={{ fontWeight: 700 }}>{entry.subject?.name}</Typography>
@@ -445,7 +461,7 @@ const TimetableManagement = () => {
                                     ))}
                                     {(entriesByDay[day] || []).length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>No periods scheduled.</TableCell>
+                                            <TableCell colSpan={8} align="center" sx={{ py: 3, color: 'text.secondary' }}>No periods scheduled.</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
@@ -540,6 +556,7 @@ const TimetableManagement = () => {
                         <Table>
                             <TableHead sx={{ bgcolor: 'action.hover' }}>
                                 <TableRow>
+                                    <TableCell>SR No.</TableCell>
                                     <TableCell>Day</TableCell>
                                     <TableCell>Timing</TableCell>
                                     <TableCell>Type</TableCell>
@@ -548,8 +565,9 @@ const TimetableManagement = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {(overview.slots || []).map((slot) => (
+                                {(overview.slots || []).map((slot, index) => (
                                     <TableRow key={slot.id} hover>
+                                        <TableCell>{index + 1}</TableCell>
                                         <TableCell>{slot.day_of_week}</TableCell>
                                         <TableCell>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</TableCell>
                                         <TableCell>
@@ -568,7 +586,7 @@ const TimetableManagement = () => {
                                 ))}
                                 {(overview.slots || []).length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>No timings found.</TableCell>
+                                        <TableCell colSpan={6} align="center" sx={{ py: 3, color: 'text.secondary' }}>No timings found.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
@@ -580,6 +598,14 @@ const TimetableManagement = () => {
             <Box sx={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
                 <TimetablePDFDocument ref={pdfRef} overview={overview} academicYear={academicYear} />
             </Box>
+
+            <ConfirmDialog
+                open={confirmDialog.open}
+                onClose={() => setConfirmDialog(p => ({ ...p, open: false }))}
+                onConfirm={executeDelete}
+                title={confirmDialog.title}
+                content={confirmDialog.content}
+            />
 
             <Snackbar
                 open={toast.open}

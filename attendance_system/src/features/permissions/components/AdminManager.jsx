@@ -391,6 +391,7 @@ const UserManager = () => {
                 <Table>
                     <TableHead sx={{ bgcolor: mode === 'dark' ? '#0F172A' : 'grey.50' }}>
                         <TableRow>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>SR No.</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>User</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>Contact Info</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem' }}>Assigned Role</TableCell>
@@ -400,12 +401,13 @@ const UserManager = () => {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                                <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
                                     <CircularProgress size={24} />
                                 </TableCell>
                             </TableRow>
-                        ) : users.map((user) => (
+                        ) : users.map((user, index) => (
                             <TableRow key={user.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                <TableCell>{index + 1}</TableCell>
                                 <TableCell>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                         <Avatar sx={{
@@ -490,7 +492,7 @@ const UserManager = () => {
                         ))}
                         {!loading && users.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                                <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
                                     <Typography color="text.secondary">No users found.</Typography>
                                 </TableCell>
                             </TableRow>

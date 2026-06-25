@@ -135,6 +135,7 @@ app.use("/api/timetable", timetableRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/old-users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/users", adminRoutes); // Compatibility mapping
 app.use("/api/departments", departmentRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/teachers", teacherRoutes);

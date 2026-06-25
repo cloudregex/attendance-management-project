@@ -40,6 +40,7 @@ import {
     ViewColumn as ViewColumnIcon,
 } from '@mui/icons-material';
 import axiosInstance from '../../../utils/axiosInstance';
+import ConfirmDialog from '../../../shared/components/ConfirmDialog';
 
 const PermissionDefinitionList = () => {
     const [permissions, setPermissions] = useState([]);
@@ -60,6 +61,7 @@ const PermissionDefinitionList = () => {
 
     const [columnAnchorEl, setColumnAnchorEl] = useState(null);
     const [exportAnchorEl, setExportAnchorEl] = useState(null);
+    const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', content: '', idToDelete: null });
 
     const theme = useTheme();
     const mode = theme.palette.mode;
@@ -112,20 +114,31 @@ const PermissionDefinitionList = () => {
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = (id) => {
         if (id <= 12) {
             alert('Default permissions cannot be deleted');
             return;
         }
 
-        if (window.confirm('Are you sure you want to delete this permission?')) {
-            try {
-                await axiosInstance.delete(`/permissions/definitions/delete/${id}`);
-                fetchPermissions();
-            } catch (error) {
-                console.error('Error deleting permission:', error);
-                alert('Failed to delete permission');
-            }
+        setConfirmDialog({
+            open: true,
+            title: 'Confirm Delete',
+            content: 'Are you sure you want to delete this permission?',
+            idToDelete: id
+        });
+    };
+
+    const executeDelete = async () => {
+        const { idToDelete } = confirmDialog;
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+        if (!idToDelete) return;
+
+        try {
+            await axiosInstance.delete(`/permissions/definitions/delete/${idToDelete}`);
+            fetchPermissions();
+        } catch (error) {
+            console.error('Error deleting permission:', error);
+            alert('Failed to delete permission');
         }
     };
 
@@ -472,6 +485,14 @@ const PermissionDefinitionList = () => {
                     <Button variant="contained" onClick={handleSave} sx={{ borderRadius: 2, boxShadow: 'none', textTransform: 'none', fontWeight: 600, px: 3 }}>Save Permission</Button>
                 </DialogActions>
             </Dialog>
+        
+            <ConfirmDialog
+                open={confirmDialog.open}
+                onClose={() => setConfirmDialog(p => ({ ...p, open: false }))}
+                onConfirm={executeDelete}
+                title={confirmDialog.title}
+                content={confirmDialog.content}
+            />
         </Box>
     );
 };
