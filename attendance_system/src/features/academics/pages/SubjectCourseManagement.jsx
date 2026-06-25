@@ -22,6 +22,7 @@ import {
     TextField,
     Typography,
     useTheme,
+    IconButton,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
@@ -31,8 +32,10 @@ import {
     LibraryBooks as CourseIcon,
     Route as CurriculumIcon,
     Save as SaveIcon,
+    Edit as EditIcon,
 } from '@mui/icons-material';
 import axiosInstance from '../../../utils/axiosInstance';
+import ConfirmDialog from '../../../shared/components/ConfirmDialog';
 
 const currentAcademicYear = () => {
     const year = new Date().getFullYear();
@@ -193,6 +196,22 @@ const SubjectCourseManagement = () => {
     const [curriculumForm, setCurriculumForm] = useState(emptyCurriculum());
     const [allocationForm, setAllocationForm] = useState(emptyAllocation());
     const [toast, setToast] = useState({ open: false, severity: 'success', message: '' });
+    
+    // Edit states
+    const [editingSubjectId, setEditingSubjectId] = useState(null);
+    const [editingCourseId, setEditingCourseId] = useState(null);
+    const [editingSemesterId, setEditingSemesterId] = useState(null);
+    const [editingCurriculumId, setEditingCurriculumId] = useState(null);
+    const [editingAllocationId, setEditingAllocationId] = useState(null);
+
+    // Confirm dialog state
+    const [confirmDialog, setConfirmDialog] = useState({
+        open: false,
+        title: '',
+        content: '',
+        endpoint: '',
+        successMessage: '',
+    });
 
     const notify = (severity, message) => setToast({ open: true, severity, message });
 
@@ -230,24 +249,36 @@ const SubjectCourseManagement = () => {
     const submitSubject = async (event) => {
         event.preventDefault();
         try {
-            await axiosInstance.post('/academic/subjects', subjectForm);
+            if (editingSubjectId) {
+                await axiosInstance.put(`/academic/subjects/${editingSubjectId}`, subjectForm);
+                notify('success', 'Subject updated successfully.');
+                setEditingSubjectId(null);
+            } else {
+                await axiosInstance.post('/academic/subjects', subjectForm);
+                notify('success', 'Subject created successfully.');
+            }
             setSubjectForm(emptySubject());
-            notify('success', 'Subject created successfully.');
             loadData();
         } catch (error) {
-            notify('error', error.response?.data?.message || 'Failed to create subject.');
+            notify('error', error.response?.data?.message || 'Failed to save subject.');
         }
     };
 
     const submitCourse = async (event) => {
         event.preventDefault();
         try {
-            await axiosInstance.post('/academic/courses', courseForm);
+            if (editingCourseId) {
+                await axiosInstance.put(`/academic/courses/${editingCourseId}`, courseForm);
+                notify('success', 'Course updated successfully.');
+                setEditingCourseId(null);
+            } else {
+                await axiosInstance.post('/academic/courses', courseForm);
+                notify('success', 'Course created successfully.');
+            }
             setCourseForm(emptyCourse());
-            notify('success', 'Course created successfully.');
             loadData();
         } catch (error) {
-            notify('error', error.response?.data?.message || 'Failed to create course.');
+            notify('error', error.response?.data?.message || 'Failed to save course.');
         }
     };
 
@@ -258,21 +289,33 @@ const SubjectCourseManagement = () => {
                 ...semesterForm,
                 name: semesterForm.name || `Semester ${semesterForm.semester_number}`,
             };
-            await axiosInstance.post('/academic/semesters', payload);
+            if (editingSemesterId) {
+                await axiosInstance.put(`/academic/semesters/${editingSemesterId}`, payload);
+                notify('success', 'Semester updated successfully.');
+                setEditingSemesterId(null);
+            } else {
+                await axiosInstance.post('/academic/semesters', payload);
+                notify('success', 'Semester configured successfully.');
+            }
             setSemesterForm(emptySemester());
-            notify('success', 'Semester configured successfully.');
             loadData();
         } catch (error) {
-            notify('error', error.response?.data?.message || 'Failed to configure semester.');
+            notify('error', error.response?.data?.message || 'Failed to save semester.');
         }
     };
 
     const submitCurriculum = async (event) => {
         event.preventDefault();
         try {
-            await axiosInstance.post('/academic/curriculum', curriculumForm);
+            if (editingCurriculumId) {
+                await axiosInstance.put(`/academic/curriculum/${editingCurriculumId}`, curriculumForm);
+                notify('success', 'Curriculum mapping updated.');
+                setEditingCurriculumId(null);
+            } else {
+                await axiosInstance.post('/academic/curriculum', curriculumForm);
+                notify('success', 'Curriculum mapping saved.');
+            }
             setCurriculumForm(emptyCurriculum());
-            notify('success', 'Curriculum mapping saved.');
             loadData();
         } catch (error) {
             notify('error', error.response?.data?.message || 'Failed to save curriculum mapping.');
@@ -282,16 +325,34 @@ const SubjectCourseManagement = () => {
     const submitAllocation = async (event) => {
         event.preventDefault();
         try {
-            await axiosInstance.post('/academic/allocations', allocationForm);
+            if (editingAllocationId) {
+                await axiosInstance.put(`/academic/allocations/${editingAllocationId}`, allocationForm);
+                notify('success', 'Faculty subject allocation updated.');
+                setEditingAllocationId(null);
+            } else {
+                await axiosInstance.post('/academic/allocations', allocationForm);
+                notify('success', 'Faculty subject allocation saved.');
+            }
             setAllocationForm(emptyAllocation());
-            notify('success', 'Faculty subject allocation saved.');
             loadData();
         } catch (error) {
             notify('error', error.response?.data?.message || 'Failed to save faculty allocation.');
         }
     };
 
-    const deleteRecord = async (endpoint, successMessage) => {
+    const confirmDelete = (endpoint, successMessage, entityName = 'this record') => {
+        setConfirmDialog({
+            open: true,
+            title: `Delete ${entityName}?`,
+            content: `Are you sure you want to delete ${entityName}? This action cannot be undone.`,
+            endpoint,
+            successMessage,
+        });
+    };
+
+    const executeDelete = async () => {
+        const { endpoint, successMessage } = confirmDialog;
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
         try {
             await axiosInstance.delete(endpoint);
             notify('success', successMessage);
@@ -299,6 +360,70 @@ const SubjectCourseManagement = () => {
         } catch (error) {
             notify('error', error.response?.data?.message || 'Delete failed.');
         }
+    };
+
+    // Edit Handlers
+    const handleEditSubject = (subject) => {
+        setSubjectForm({
+            name: subject.name,
+            code: subject.code,
+            department_id: subject.department_id || '',
+            subject_type: subject.subject_type || 'core',
+            prerequisites: subject.prerequisites ? subject.prerequisites.join(', ') : '',
+            syllabus_url: subject.syllabus_url || '',
+            syllabus_status: subject.syllabus_status || 'pending',
+            status: subject.status,
+            credit: subject.credit || { lecture: 3, tutorial: 0, practical: 1 },
+        });
+        setEditingSubjectId(subject.id);
+        setTab(0);
+        window.scrollTo(0, 0);
+    };
+
+    const handleEditCourse = (course) => {
+        setCourseForm({
+            name: course.name,
+            code: course.code,
+            department_id: course.department_id || '',
+            duration_semesters: course.duration_semesters || 8,
+            academic_year: course.academic_year || currentAcademicYear(),
+            status: course.status,
+        });
+        setEditingCourseId(course.id);
+        setTab(1);
+        window.scrollTo(0, 0);
+    };
+
+    const handleEditCurriculum = (curriculum) => {
+        setCurriculumForm({
+            course_id: curriculum.course_id || '',
+            semester_id: curriculum.semester_id || '',
+            subject_id: curriculum.subject_id || '',
+            academic_year: curriculum.academic_year || currentAcademicYear(),
+            plan_version: curriculum.plan_version || 'v1',
+            is_mandatory: curriculum.is_mandatory,
+            notes: curriculum.notes || '',
+            status: curriculum.status,
+        });
+        setEditingCurriculumId(curriculum.id);
+        setTab(2);
+        window.scrollTo(0, 0);
+    };
+
+    const handleEditAllocation = (allocation) => {
+        setAllocationForm({
+            subject_id: allocation.subject_id || '',
+            course_id: allocation.course_id || '',
+            semester_id: allocation.semester_id || '',
+            department_id: allocation.department_id || '',
+            teacher_id: allocation.teacher_id || '',
+            academic_year: allocation.academic_year || currentAcademicYear(),
+            weekly_periods: allocation.weekly_periods || 4,
+            status: allocation.status,
+        });
+        setEditingAllocationId(allocation.id);
+        setTab(2);
+        window.scrollTo(0, 0);
     };
 
     const departmentOptions = departments.length > 0
@@ -402,7 +527,16 @@ const SubjectCourseManagement = () => {
                                 <MenuItem value="approved">Approved</MenuItem>
                             </TextField>
                             <FormControlLabel control={<Switch checked={subjectForm.status} onChange={(e) => setSubjectForm((p) => ({ ...p, status: e.target.checked }))} />} label="Active Subject" />
-                            <Button type="submit" variant="contained" startIcon={<AddIcon />}>Create Subject</Button>
+                            <Stack direction="row" spacing={1}>
+                                <Button type="submit" variant="contained" startIcon={editingSubjectId ? <SaveIcon /> : <AddIcon />} fullWidth>
+                                    {editingSubjectId ? 'Update Subject' : 'Create Subject'}
+                                </Button>
+                                {editingSubjectId && (
+                                    <Button variant="outlined" onClick={() => { setEditingSubjectId(null); setSubjectForm(emptySubject()); }}>
+                                        Cancel
+                                    </Button>
+                                )}
+                            </Stack>
                         </Box>
                     </SectionPaper>
 
@@ -410,6 +544,7 @@ const SubjectCourseManagement = () => {
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
+                                    <TableCell>SR No.</TableCell>
                                     <TableCell>Subject</TableCell>
                                     <TableCell>Department</TableCell>
                                     <TableCell>Type</TableCell>
@@ -419,8 +554,9 @@ const SubjectCourseManagement = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {(overview.subjects || []).map((subject) => (
+                                {(overview.subjects || []).map((subject, index) => (
                                     <TableRow key={subject.id} hover>
+                                        <TableCell>{index + 1}</TableCell>
                                         <TableCell>
                                             <Typography sx={{ fontWeight: 700 }}>{subject.name}</Typography>
                                             <Typography variant="caption" color="text.secondary">{subject.code}</Typography>
@@ -430,9 +566,12 @@ const SubjectCourseManagement = () => {
                                         <TableCell>{getCreditTotal(subject.credit)}</TableCell>
                                         <TableCell><StatusChip active={subject.status} /></TableCell>
                                         <TableCell align="right">
-                                            <Button size="small" color="error" startIcon={<DeleteIcon />} onClick={() => deleteRecord(`/academic/subjects/${subject.id}`, 'Subject deleted.')}>
-                                                Delete
-                                            </Button>
+                                            <IconButton size="small" color="primary" onClick={() => handleEditSubject(subject)}>
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                            <IconButton size="small" color="error" onClick={() => confirmDelete(`/academic/subjects/${subject.id}`, 'Subject deleted.', 'Subject')}>
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -455,7 +594,16 @@ const SubjectCourseManagement = () => {
                                 <TextField label="Duration Semesters" type="number" value={courseForm.duration_semesters} onChange={(e) => setCourseForm((p) => ({ ...p, duration_semesters: e.target.value }))} />
                                 <TextField label="Academic Year" value={courseForm.academic_year} onChange={(e) => setCourseForm((p) => ({ ...p, academic_year: e.target.value }))} />
                                 <FormControlLabel control={<Switch checked={courseForm.status} onChange={(e) => setCourseForm((p) => ({ ...p, status: e.target.checked }))} />} label="Active Course" />
-                                <Button type="submit" variant="contained" startIcon={<AddIcon />}>Create Course</Button>
+                                <Stack direction="row" spacing={1}>
+                                    <Button type="submit" variant="contained" startIcon={editingCourseId ? <SaveIcon /> : <AddIcon />} fullWidth>
+                                        {editingCourseId ? 'Update Course' : 'Create Course'}
+                                    </Button>
+                                    {editingCourseId && (
+                                        <Button variant="outlined" onClick={() => { setEditingCourseId(null); setCourseForm(emptyCourse()); }}>
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </Stack>
                             </Box>
                         </SectionPaper>
 
@@ -467,7 +615,16 @@ const SubjectCourseManagement = () => {
                                 <TextField required label="Semester Number" type="number" value={semesterForm.semester_number} onChange={(e) => setSemesterForm((p) => ({ ...p, semester_number: e.target.value }))} />
                                 <TextField label="Semester Name" value={semesterForm.name} onChange={(e) => setSemesterForm((p) => ({ ...p, name: e.target.value }))} />
                                 <TextField label="Academic Year" value={semesterForm.academic_year} onChange={(e) => setSemesterForm((p) => ({ ...p, academic_year: e.target.value }))} />
-                                <Button type="submit" variant="outlined" startIcon={<AddIcon />}>Add Semester</Button>
+                                <Stack direction="row" spacing={1}>
+                                    <Button type="submit" variant="outlined" startIcon={editingSemesterId ? <SaveIcon /> : <AddIcon />} fullWidth>
+                                        {editingSemesterId ? 'Update Semester' : 'Add Semester'}
+                                    </Button>
+                                    {editingSemesterId && (
+                                        <Button variant="outlined" onClick={() => { setEditingSemesterId(null); setSemesterForm(emptySemester()); }}>
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </Stack>
                             </Box>
                         </SectionPaper>
                     </Stack>
@@ -476,6 +633,7 @@ const SubjectCourseManagement = () => {
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
+                                    <TableCell>SR No.</TableCell>
                                     <TableCell>Course</TableCell>
                                     <TableCell>Department</TableCell>
                                     <TableCell>Academic Year</TableCell>
@@ -485,10 +643,11 @@ const SubjectCourseManagement = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {(overview.courses || []).map((course) => {
+                                {(overview.courses || []).map((course, index) => {
                                     const semesterCount = (overview.semesters || []).filter((semester) => semester.course_id === course.id).length;
                                     return (
                                         <TableRow key={course.id} hover>
+                                            <TableCell>{index + 1}</TableCell>
                                             <TableCell>
                                                 <Typography sx={{ fontWeight: 700 }}>{course.name}</Typography>
                                                 <Typography variant="caption" color="text.secondary">{course.code}</Typography>
@@ -498,9 +657,12 @@ const SubjectCourseManagement = () => {
                                             <TableCell>{semesterCount} / {course.duration_semesters}</TableCell>
                                             <TableCell><StatusChip active={course.status} /></TableCell>
                                             <TableCell align="right">
-                                                <Button size="small" color="error" startIcon={<DeleteIcon />} onClick={() => deleteRecord(`/academic/courses/${course.id}`, 'Course deleted.')}>
-                                                    Delete
-                                                </Button>
+                                                <IconButton size="small" color="primary" onClick={() => handleEditCourse(course)}>
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton size="small" color="error" onClick={() => confirmDelete(`/academic/courses/${course.id}`, 'Course deleted.', 'Course')}>
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -532,7 +694,16 @@ const SubjectCourseManagement = () => {
                                 <TextField label="Plan Version" value={curriculumForm.plan_version} onChange={(e) => setCurriculumForm((p) => ({ ...p, plan_version: e.target.value }))} />
                                 <FormControlLabel control={<Switch checked={curriculumForm.is_mandatory} onChange={(e) => setCurriculumForm((p) => ({ ...p, is_mandatory: e.target.checked }))} />} label={curriculumForm.is_mandatory ? 'Core Subject' : 'Elective Subject'} />
                                 <TextField label="Planning Notes" multiline rows={2} value={curriculumForm.notes} onChange={(e) => setCurriculumForm((p) => ({ ...p, notes: e.target.value }))} />
-                                <Button type="submit" variant="contained" startIcon={<AddIcon />}>Save Curriculum</Button>
+                                <Stack direction="row" spacing={1}>
+                                    <Button type="submit" variant="contained" startIcon={editingCurriculumId ? <SaveIcon /> : <AddIcon />} fullWidth>
+                                        {editingCurriculumId ? 'Update Curriculum' : 'Save Curriculum'}
+                                    </Button>
+                                    {editingCurriculumId && (
+                                        <Button variant="outlined" onClick={() => { setEditingCurriculumId(null); setCurriculumForm(emptyCurriculum()); }}>
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </Stack>
                             </Box>
                         </SectionPaper>
 
@@ -548,7 +719,16 @@ const SubjectCourseManagement = () => {
                                 </TextField>
                                 <TextField label="Weekly Periods" type="number" value={allocationForm.weekly_periods} onChange={(e) => setAllocationForm((p) => ({ ...p, weekly_periods: e.target.value }))} />
                                 <TextField label="Academic Year" value={allocationForm.academic_year} onChange={(e) => setAllocationForm((p) => ({ ...p, academic_year: e.target.value }))} />
-                                <Button type="submit" variant="outlined" startIcon={<AddIcon />}>Assign Faculty</Button>
+                                <Stack direction="row" spacing={1}>
+                                    <Button type="submit" variant="outlined" startIcon={editingAllocationId ? <SaveIcon /> : <AddIcon />} fullWidth>
+                                        {editingAllocationId ? 'Update Faculty' : 'Assign Faculty'}
+                                    </Button>
+                                    {editingAllocationId && (
+                                        <Button variant="outlined" onClick={() => { setEditingAllocationId(null); setAllocationForm(emptyAllocation()); }}>
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </Stack>
                             </Box>
                         </SectionPaper>
                     </Stack>
@@ -558,6 +738,7 @@ const SubjectCourseManagement = () => {
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell>SR No.</TableCell>
                                         <TableCell>Course</TableCell>
                                         <TableCell>Semester</TableCell>
                                         <TableCell>Subject</TableCell>
@@ -566,8 +747,9 @@ const SubjectCourseManagement = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {(overview.curriculum || []).map((item) => (
+                                    {(overview.curriculum || []).map((item, index) => (
                                         <TableRow key={item.id} hover>
+                                            <TableCell>{index + 1}</TableCell>
                                             <TableCell>{item.course?.code || '-'}</TableCell>
                                             <TableCell>Sem {item.semester?.semester_number || '-'}</TableCell>
                                             <TableCell>
@@ -576,9 +758,12 @@ const SubjectCourseManagement = () => {
                                             </TableCell>
                                             <TableCell>{item.is_mandatory ? 'Core' : 'Elective'}</TableCell>
                                             <TableCell align="right">
-                                                <Button size="small" color="error" startIcon={<DeleteIcon />} onClick={() => deleteRecord(`/academic/curriculum/${item.id}`, 'Curriculum mapping deleted.')}>
-                                                    Delete
-                                                </Button>
+                                                <IconButton size="small" color="primary" onClick={() => handleEditCurriculum(item)}>
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton size="small" color="error" onClick={() => confirmDelete(`/academic/curriculum/${item.id}`, 'Curriculum mapping deleted.', 'Curriculum')}>
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -590,6 +775,7 @@ const SubjectCourseManagement = () => {
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell>SR No.</TableCell>
                                         <TableCell>Subject</TableCell>
                                         <TableCell>Faculty</TableCell>
                                         <TableCell>Course</TableCell>
@@ -599,17 +785,21 @@ const SubjectCourseManagement = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {(overview.allocations || []).map((allocation) => (
+                                    {(overview.allocations || []).map((allocation, index) => (
                                         <TableRow key={allocation.id} hover>
+                                            <TableCell>{index + 1}</TableCell>
                                             <TableCell>{allocation.subject?.code || '-'}</TableCell>
                                             <TableCell>{allocation.teacher?.first_name || 'Unassigned'}</TableCell>
                                             <TableCell>{allocation.course?.code || '-'}</TableCell>
                                             <TableCell>{allocation.weekly_periods}</TableCell>
                                             <TableCell><StatusChip active={allocation.status} /></TableCell>
                                             <TableCell align="right">
-                                                <Button size="small" color="error" startIcon={<DeleteIcon />} onClick={() => deleteRecord(`/academic/allocations/${allocation.id}`, 'Faculty allocation deleted.')}>
-                                                    Delete
-                                                </Button>
+                                                <IconButton size="small" color="primary" onClick={() => handleEditAllocation(allocation)}>
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton size="small" color="error" onClick={() => confirmDelete(`/academic/allocations/${allocation.id}`, 'Faculty allocation deleted.', 'Allocation')}>
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -619,6 +809,14 @@ const SubjectCourseManagement = () => {
                     </Stack>
                 </Box>
             )}
+
+            <ConfirmDialog
+                open={confirmDialog.open}
+                onClose={() => setConfirmDialog((prev) => ({ ...prev, open: false }))}
+                onConfirm={executeDelete}
+                title={confirmDialog.title}
+                content={confirmDialog.content}
+            />
 
             <Snackbar
                 open={toast.open}

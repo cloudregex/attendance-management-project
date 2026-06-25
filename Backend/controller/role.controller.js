@@ -49,6 +49,9 @@ export const deleteRole = async (req, res) => {
 
         res.json({ message: "Role deleted successfully" });
     } catch (error) {
+        if (error.message === 'ROLE_IN_USE') {
+            return res.status(400).json({ error: "Cannot delete role because it is assigned to one or more users." });
+        }
         res.status(500).json({ error: error.message });
     }
 }

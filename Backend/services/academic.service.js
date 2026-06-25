@@ -104,6 +104,14 @@ export const updateSubjectService = async (id, data) => {
 export const deleteSubjectService = async (id) => {
     const subject = await Subject.findByPk(id);
     if (!subject) return null;
+
+    const curriculumCount = await Curriculum.count({ where: { subject_id: id } });
+    const allocationCount = await SubjectAllocation.count({ where: { subject_id: id } });
+
+    if (curriculumCount > 0 || allocationCount > 0) {
+        throw new Error('SUBJECT_IN_USE');
+    }
+
     await subject.destroy();
     return true;
 };
@@ -129,6 +137,15 @@ export const updateCourseService = async (id, data) => {
 export const deleteCourseService = async (id) => {
     const course = await Course.findByPk(id);
     if (!course) return null;
+
+    const semesterCount = await Semester.count({ where: { course_id: id } });
+    const curriculumCount = await Curriculum.count({ where: { course_id: id } });
+    const allocationCount = await SubjectAllocation.count({ where: { course_id: id } });
+
+    if (semesterCount > 0 || curriculumCount > 0 || allocationCount > 0) {
+        throw new Error('COURSE_IN_USE');
+    }
+
     await course.destroy();
     return true;
 };
@@ -154,6 +171,14 @@ export const updateSemesterService = async (id, data) => {
 export const deleteSemesterService = async (id) => {
     const semester = await Semester.findByPk(id);
     if (!semester) return null;
+
+    const curriculumCount = await Curriculum.count({ where: { semester_id: id } });
+    const allocationCount = await SubjectAllocation.count({ where: { semester_id: id } });
+
+    if (curriculumCount > 0 || allocationCount > 0) {
+        throw new Error('SEMESTER_IN_USE');
+    }
+
     await semester.destroy();
     return true;
 };

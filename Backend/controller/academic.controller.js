@@ -2,6 +2,15 @@ import * as academicService from '../services/academic.service.js';
 import { logActivity } from '../services/activity.service.js';
 
 const sendError = (res, error, fallback = 'Academic module operation failed') => {
+    if (error.message === 'SUBJECT_IN_USE') {
+        return res.status(400).json({ message: 'Cannot delete because this subject is already assigned to a curriculum or faculty.' });
+    }
+    if (error.message === 'COURSE_IN_USE') {
+        return res.status(400).json({ message: 'Cannot delete because this course is already used by a semester, curriculum, or faculty.' });
+    }
+    if (error.message === 'SEMESTER_IN_USE') {
+        return res.status(400).json({ message: 'Cannot delete because this semester is already used in a curriculum or faculty allocation.' });
+    }
     if (error.name === 'SequelizeUniqueConstraintError') {
         return res.status(409).json({ message: 'A record with the same unique code already exists.' });
     }

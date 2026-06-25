@@ -1,5 +1,6 @@
 import Role from '../model/role.model.js';
 import Permission from '../model/permission.model.js';
+import Admin from '../model/admin.model.js';
 
 export const getAllRolesService = () => {
     return Role.findAll({
@@ -36,7 +37,15 @@ export const updateRoleService = async (id, data) => {
 export const deleteRoleService = async (id) => {
     const role = await Role.findByPk(id);
     if (!role) return null;
-    return role.destroy();
+    
+    // Check if role is in use
+    const usersCount = await Admin.count({ where: { roleId: id } });
+    if (usersCount > 0) {
+        throw new Error('ROLE_IN_USE');
+    }
+    
+    await role.destroy();
+    return true;
 };
 
 export const seedDefaultRoles = async () => {
