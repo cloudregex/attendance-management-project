@@ -99,7 +99,7 @@ const AdminDashboard = () => {
 
     return (
         <Box sx={{ width: '100%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <Box sx={{ mb: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: { xs: 2, sm: 0 }, flexShrink: 0 }}>
                 <Box>
                     <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary' }}>Welcome back, Alex</Typography>
                     <Typography variant="body2" sx={{ color: mode === 'dark' ? '#94A3B8' : 'text.secondary' }}>Here's what's happening with attendance today.</Typography>
@@ -187,9 +187,10 @@ const AdminDashboard = () => {
                         boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05)',
                         border: '1px solid',
                         borderColor: mode === 'dark' ? '#334155' : 'transparent',
+                        overflowX: 'auto',
                     }}>
                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', flexShrink: 0 }}>Weekly Student Attendance</Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', flexGrow: 1, pt: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', flexGrow: 1, pt: 2, minWidth: { xs: '400px', sm: '100%' } }}>
                             {[
                                 { day: 'Mon', present: 3250, total: 3450, color: '#135bec' },
                                 { day: 'Tue', present: 3380, total: 3450, color: '#2e7d32' },
@@ -231,9 +232,10 @@ const AdminDashboard = () => {
                         boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05)',
                         border: '1px solid',
                         borderColor: mode === 'dark' ? '#334155' : 'transparent',
+                        overflowX: 'auto',
                     }}>
                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', flexShrink: 0 }}>Department Student Count</Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', flexGrow: 1, pt: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', flexGrow: 1, pt: 2, minWidth: { xs: '400px', sm: '100%' } }}>
                             {departmentStats.map((dept) => {
                                 const percentage = ((dept.students / dept.capacity) * 100).toFixed(1);
 

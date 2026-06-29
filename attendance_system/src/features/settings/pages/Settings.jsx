@@ -112,7 +112,7 @@ const Settings = () => {
 
     return (
         <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: 1200, margin: '0 auto' }}>
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <Box sx={{ mb: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'flex-end' }, gap: { xs: 2, md: 0 } }}>
                 <Box>
                     <Typography variant="h4" sx={{ fontWeight: 800, color: mode === 'dark' ? '#F8FAFC' : '#1e293b', mb: 0.5 }}>
                         System Settings

@@ -142,12 +142,12 @@ const AdminLogin = () => {
             {/* Left Panel: Box Root (Branding Content) */}
             <Box
                 sx={{
-                    width: '50%',
+                    display: { xs: 'none', md: 'flex' },
+                    width: { xs: '100%', md: '50%' },
                     position: 'relative',
                     background: `linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2070')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -213,10 +213,11 @@ const AdminLogin = () => {
             {/* Right Panel: Grid Root (Login Content) */}
             <Grid
                 container
+                item
                 xs={12}
                 md={6}
                 sx={{
-                    width: '50%',
+                    width: { xs: '100%', md: '50%' },
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
