@@ -397,7 +397,7 @@ const DeptDashboard = () => {
                     </Typography>
                 </Breadcrumbs>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: { xs: 2, sm: 0 } }}>
                     <Box>
                         <Typography variant="h5" sx={{ fontWeight: 700, color: mode === 'dark' ? '#F8FAFC' : 'text.primary', letterSpacing: '-0.02em' }}>
                             {dept.id === 'all' ? 'All Departments' : `${dept.name} Team`}

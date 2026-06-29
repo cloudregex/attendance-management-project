@@ -541,7 +541,8 @@ const SubjectCourseManagement = () => {
                     </SectionPaper>
 
                     <SectionPaper title="Subject Catalog" subtitle="Active, elective, lab and prerequisite-aware subject list.">
-                        <Table size="small">
+                        <Box sx={{ overflowX: 'auto' }}>
+                            <Table size="small">
                             <TableHead>
                                 <TableRow>
                                     <TableCell>SR No.</TableCell>
@@ -577,6 +578,7 @@ const SubjectCourseManagement = () => {
                                 ))}
                             </TableBody>
                         </Table>
+                        </Box>
                     </SectionPaper>
                 </Box>
             )}
@@ -630,6 +632,7 @@ const SubjectCourseManagement = () => {
                     </Stack>
 
                     <SectionPaper title="Course Structure" subtitle="Department-wise course structure with semester planning.">
+                        <Box sx={{ overflowX: 'auto' }}>
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
@@ -669,6 +672,7 @@ const SubjectCourseManagement = () => {
                                 })}
                             </TableBody>
                         </Table>
+                        </Box>
 
                         <Divider sx={{ my: 3 }} />
 
@@ -735,6 +739,7 @@ const SubjectCourseManagement = () => {
 
                     <Stack spacing={3}>
                         <SectionPaper title="Curriculum Map" subtitle="Semester-wise subject allocation for active academic year.">
+                            <Box sx={{ overflowX: 'auto' }}>
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
@@ -769,9 +774,11 @@ const SubjectCourseManagement = () => {
                                     ))}
                                 </TableBody>
                             </Table>
+                            </Box>
                         </SectionPaper>
 
                         <SectionPaper title="Faculty Allocations" subtitle="Ready for timetable engine subject-period planning.">
+                            <Box sx={{ overflowX: 'auto' }}>
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
@@ -805,6 +812,7 @@ const SubjectCourseManagement = () => {
                                     ))}
                                 </TableBody>
                             </Table>
+                            </Box>
                         </SectionPaper>
                     </Stack>
                 </Box>

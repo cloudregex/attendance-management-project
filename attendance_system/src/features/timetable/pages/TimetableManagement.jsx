@@ -377,6 +377,7 @@ const TimetableManagement = () => {
                         )}
                         <Divider sx={{ my: 3 }} />
                         <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>Source Allocations</Typography>
+                        <Box sx={{ overflowX: 'auto' }}>
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
@@ -399,6 +400,7 @@ const TimetableManagement = () => {
                                 ))}
                             </TableBody>
                         </Table>
+                        </Box>
                     </Paper>
                 </Box>
             )}
@@ -408,6 +410,7 @@ const TimetableManagement = () => {
                     {DAYS.map((day) => (
                         <Paper key={day} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1 }}>{day}</Typography>
+                            <Box sx={{ overflowX: 'auto' }}>
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
@@ -466,6 +469,7 @@ const TimetableManagement = () => {
                                     )}
                                 </TableBody>
                             </Table>
+                            </Box>
                         </Paper>
                     ))}
                 </Stack>
@@ -552,7 +556,7 @@ const TimetableManagement = () => {
                         </Box>
                     </Paper>
 
-                    <Paper sx={{ p: 0, borderRadius: 2, border: '1px solid', borderColor: 'divider', boxShadow: 'none', overflow: 'hidden' }}>
+                    <Paper sx={{ p: 0, borderRadius: 2, border: '1px solid', borderColor: 'divider', boxShadow: 'none', overflowX: 'auto' }}>
                         <Table>
                             <TableHead sx={{ bgcolor: 'action.hover' }}>
                                 <TableRow>

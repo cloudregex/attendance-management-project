@@ -351,7 +351,7 @@ export const RoleManager = () => {
                     border: '1px solid',
                     borderColor: 'divider',
                     boxShadow: mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.05)',
-                    overflow: 'hidden',
+                    overflowX: 'auto',
                     bgcolor: mode === 'dark' ? '#1E293B' : 'white',
                 }}
             >

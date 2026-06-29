@@ -672,7 +672,7 @@ const Layout = ({ children }) => {
                     flexGrow: 1,
                     flexBasis: 0, // allow flex item to shrink properly alongside drawer
                     minWidth: 0, // prevents overflow when using flex
-                    p: 3,
+                    p: { xs: 2, sm: 3 },
                     mt: '64px',
                     overflowX: 'hidden',
                 }}
