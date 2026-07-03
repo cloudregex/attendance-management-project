@@ -118,9 +118,7 @@ const AdminLogin = () => {
                     localStorage.setItem('adminPermissions', JSON.stringify(data.admin.role || {}));
                     setIsSubmitted(true);
                     setLoginError('');
-                    setTimeout(() => {
-                        navigate('/dashboard');
-                    }, 1500);
+                    navigate('/dashboard');
                 } else {
                     setLoginError(data.message || 'Invalid email or password');
                 }

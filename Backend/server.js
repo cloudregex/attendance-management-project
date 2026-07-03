@@ -177,8 +177,8 @@ const syncDB = async () => {
     await ActivityLog.sync();
     console.log("✅ ActivityLog synced");
 
-    await sequelize.sync({ alter: true });
-    console.log("✅ All models synced with alter: true");
+    await sequelize.sync();
+    console.log("✅ All models synced (without alter)");
 
     await seedDefaultPermissions();
     console.log("✅ Default data seeded");

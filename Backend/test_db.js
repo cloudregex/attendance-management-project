@@ -1,25 +1,24 @@
-import 'dotenv/config';
-import Admin from './model/admin.model.js';
-import bcrypt from 'bcryptjs';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+config({ path: resolve(process.cwd(), '.env') });
+import sequelize from './config/db.js';
+import LectureSlot from './model/lectureSlot.model.js';
 
-async function test() {
+async function run() {
     try {
-        const adminUser = await Admin.findOne({ where: { email: 'admin@example.com' } });
-        if (!adminUser) {
-            console.log('Admin not found');
-            return;
-        }
-        console.log('Admin found:', adminUser.email);
-        console.log('Stored Password Hash:', adminUser.password);
-        
-        const isMatch = await bcrypt.compare('adminpassword123', adminUser.password);
-        console.log('Does adminpassword123 match?', isMatch);
-
-        const isMatch2 = await bcrypt.compare('adminpassword', adminUser.password);
-        console.log('Does adminpassword match?', isMatch2);
+        await sequelize.authenticate();
+        console.log('Connected to DB');
+        const res = await LectureSlot.create({
+            day_of_week: 'Monday',
+            start_time: '18:00',
+            end_time: '19:00',
+            slot_type: 'lecture',
+            sequence: 12
+        });
+        console.log('Created slot:', res.toJSON());
     } catch (e) {
-        console.error(e);
+        console.error('Error:', e.message);
     }
-    process.exit(0);
+    process.exit();
 }
-test();
+run();

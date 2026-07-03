@@ -529,6 +529,7 @@ const UserManager = () => {
                             required
                             error={touched.userName && !!errors.userName}
                             helperText={touched.userName && errors.userName}
+                            InputLabelProps={{ shrink: true }}
                         />
                         <TextField
                             fullWidth
@@ -541,6 +542,7 @@ const UserManager = () => {
                             required
                             error={touched.userEmail && !!errors.userEmail}
                             helperText={touched.userEmail && errors.userEmail}
+                            InputLabelProps={{ shrink: true }}
                         />
                         <TextField
                             fullWidth
@@ -552,6 +554,7 @@ const UserManager = () => {
                             required
                             error={touched.userPhone && !!errors.userPhone}
                             helperText={touched.userPhone && errors.userPhone}
+                            InputLabelProps={{ shrink: true }}
                         />
                         {!editingUser && (
                             <>
@@ -566,6 +569,7 @@ const UserManager = () => {
                                     required
                                     error={touched.userPassword && !!errors.userPassword}
                                     helperText={touched.userPassword && errors.userPassword}
+                                    InputLabelProps={{ shrink: true }}
                                 />
                                 <TextField
                                     fullWidth
@@ -578,6 +582,7 @@ const UserManager = () => {
                                     required
                                     error={touched.userConfirmPassword && !!errors.userConfirmPassword}
                                     helperText={touched.userConfirmPassword && errors.userConfirmPassword}
+                                    InputLabelProps={{ shrink: true }}
                                 />
                             </>
                         )}
@@ -593,6 +598,7 @@ const UserManager = () => {
                                     placeholder="Leave blank to keep current password"
                                     error={touched.userPassword && !!errors.userPassword}
                                     helperText={touched.userPassword && errors.userPassword}
+                                    InputLabelProps={{ shrink: true }}
                                 />
                                 <TextField
                                     fullWidth
@@ -604,6 +610,7 @@ const UserManager = () => {
                                     placeholder="Re-enter new password"
                                     error={touched.userConfirmPassword && !!errors.userConfirmPassword}
                                     helperText={touched.userConfirmPassword && errors.userConfirmPassword}
+                                    InputLabelProps={{ shrink: true }}
                                 />
                             </>
                         )}

@@ -34,6 +34,7 @@ import {
     Save as SaveIcon,
     Edit as EditIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../utils/axiosInstance';
 import ConfirmDialog from '../../../shared/components/ConfirmDialog';
 
@@ -178,6 +179,7 @@ const SectionPaper = ({ title, subtitle, children }) => {
 const SubjectCourseManagement = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
+    const navigate = useNavigate();
 
     const [tab, setTab] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -440,11 +442,15 @@ const SubjectCourseManagement = () => {
         <MenuItem key={subject.id} value={subject.id}>{subject.code} - {subject.name}</MenuItem>
     ));
 
-    const semesterOptions = (overview.semesters || []).map((semester) => (
-        <MenuItem key={semester.id} value={semester.id}>
-            {semester.course?.code || 'Course'} - Sem {semester.semester_number}
-        </MenuItem>
-    ));
+    const getSemesterOptions = (courseId) => {
+        return (overview.semesters || [])
+            .filter((semester) => !courseId || semester.course_id === courseId)
+            .map((semester) => (
+                <MenuItem key={semester.id} value={semester.id}>
+                    {semester.course?.code || 'Course'} - Sem {semester.semester_number}
+                </MenuItem>
+            ));
+    };
 
     const teacherOptions = teachers.map((teacher) => (
         <MenuItem key={teacher.id} value={teacher.id}>
@@ -506,8 +512,13 @@ const SubjectCourseManagement = () => {
                         <Box component="form" onSubmit={submitSubject} sx={{ display: 'grid', gap: 2 }}>
                             <TextField required label="Subject Name" value={subjectForm.name} onChange={(e) => setSubjectForm((p) => ({ ...p, name: e.target.value }))} />
                             <TextField required label="Subject Code" value={subjectForm.code} onChange={(e) => setSubjectForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))} />
-                            <TextField required select label="Department" value={subjectForm.department_id} onChange={(e) => setSubjectForm((p) => ({ ...p, department_id: e.target.value }))}>
+                            <TextField required select label="Department" value={subjectForm.department_id} onChange={(e) => {
+                                if (e.target.value === 'ADD_NEW_DEPT') navigate('/departments');
+                                else setSubjectForm((p) => ({ ...p, department_id: e.target.value }));
+                            }}>
                                 {departmentOptions}
+                                <Divider />
+                                <MenuItem value="ADD_NEW_DEPT" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Department</MenuItem>
                             </TextField>
                             <TextField select label="Subject Type" value={subjectForm.subject_type} onChange={(e) => setSubjectForm((p) => ({ ...p, subject_type: e.target.value }))}>
                                 <MenuItem value="core">Core</MenuItem>
@@ -526,7 +537,7 @@ const SubjectCourseManagement = () => {
                                 <MenuItem value="uploaded">Uploaded</MenuItem>
                                 <MenuItem value="approved">Approved</MenuItem>
                             </TextField>
-                            <FormControlLabel control={<Switch checked={subjectForm.status} onChange={(e) => setSubjectForm((p) => ({ ...p, status: e.target.checked }))} />} label="Active Subject" />
+                            <FormControlLabel control={<Switch checked={subjectForm.status} onChange={(e) => setSubjectForm((p) => ({ ...p, status: e.target.checked }))} />} label={subjectForm.status ? 'Active Subject' : 'Inactive Subject'} />
                             <Stack direction="row" spacing={1}>
                                 <Button type="submit" variant="contained" startIcon={editingSubjectId ? <SaveIcon /> : <AddIcon />} fullWidth>
                                     {editingSubjectId ? 'Update Subject' : 'Create Subject'}
@@ -590,12 +601,17 @@ const SubjectCourseManagement = () => {
                             <Box component="form" onSubmit={submitCourse} sx={{ display: 'grid', gap: 2 }}>
                                 <TextField required label="Course Name" value={courseForm.name} onChange={(e) => setCourseForm((p) => ({ ...p, name: e.target.value }))} />
                                 <TextField required label="Course Code" value={courseForm.code} onChange={(e) => setCourseForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))} />
-                                <TextField required select label="Department" value={courseForm.department_id} onChange={(e) => setCourseForm((p) => ({ ...p, department_id: e.target.value }))}>
+                                <TextField required select label="Department" value={courseForm.department_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_DEPT') navigate('/departments');
+                                    else setCourseForm((p) => ({ ...p, department_id: e.target.value }));
+                                }}>
                                     {departmentOptions}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_DEPT" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Department</MenuItem>
                                 </TextField>
                                 <TextField label="Duration Semesters" type="number" value={courseForm.duration_semesters} onChange={(e) => setCourseForm((p) => ({ ...p, duration_semesters: e.target.value }))} />
                                 <TextField label="Academic Year" value={courseForm.academic_year} onChange={(e) => setCourseForm((p) => ({ ...p, academic_year: e.target.value }))} />
-                                <FormControlLabel control={<Switch checked={courseForm.status} onChange={(e) => setCourseForm((p) => ({ ...p, status: e.target.checked }))} />} label="Active Course" />
+                                <FormControlLabel control={<Switch checked={courseForm.status} onChange={(e) => setCourseForm((p) => ({ ...p, status: e.target.checked }))} />} label={courseForm.status ? 'Active Course' : 'Inactive Course'} />
                                 <Stack direction="row" spacing={1}>
                                     <Button type="submit" variant="contained" startIcon={editingCourseId ? <SaveIcon /> : <AddIcon />} fullWidth>
                                         {editingCourseId ? 'Update Course' : 'Create Course'}
@@ -611,12 +627,18 @@ const SubjectCourseManagement = () => {
 
                         <SectionPaper title="Configure Semester" subtitle="Create semester containers for curriculum planning.">
                             <Box component="form" onSubmit={submitSemester} sx={{ display: 'grid', gap: 2 }}>
-                                <TextField required select label="Course" value={semesterForm.course_id} onChange={(e) => setSemesterForm((p) => ({ ...p, course_id: e.target.value }))}>
+                                <TextField required select label="Course" value={semesterForm.course_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_COURSE') { setTab(1); window.scrollTo(0, 0); }
+                                    else setSemesterForm((p) => ({ ...p, course_id: e.target.value }));
+                                }}>
                                     {courseOptions}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_COURSE" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Course</MenuItem>
                                 </TextField>
                                 <TextField required label="Semester Number" type="number" value={semesterForm.semester_number} onChange={(e) => setSemesterForm((p) => ({ ...p, semester_number: e.target.value }))} />
                                 <TextField label="Semester Name" value={semesterForm.name} onChange={(e) => setSemesterForm((p) => ({ ...p, name: e.target.value }))} />
                                 <TextField label="Academic Year" value={semesterForm.academic_year} onChange={(e) => setSemesterForm((p) => ({ ...p, academic_year: e.target.value }))} />
+                                <FormControlLabel control={<Switch checked={semesterForm.status} onChange={(e) => setSemesterForm((p) => ({ ...p, status: e.target.checked }))} />} label={semesterForm.status ? 'Active Semester' : 'Inactive Semester'} />
                                 <Stack direction="row" spacing={1}>
                                     <Button type="submit" variant="outlined" startIcon={editingSemesterId ? <SaveIcon /> : <AddIcon />} fullWidth>
                                         {editingSemesterId ? 'Update Semester' : 'Add Semester'}
@@ -691,12 +713,34 @@ const SubjectCourseManagement = () => {
                     <Stack spacing={3}>
                         <SectionPaper title="Curriculum Planning" subtitle="Allocate semester-wise subjects as core or elective.">
                             <Box component="form" onSubmit={submitCurriculum} sx={{ display: 'grid', gap: 2 }}>
-                                <TextField required select label="Course" value={curriculumForm.course_id} onChange={(e) => setCurriculumForm((p) => ({ ...p, course_id: e.target.value }))}>{courseOptions}</TextField>
-                                <TextField required select label="Semester" value={curriculumForm.semester_id} onChange={(e) => setCurriculumForm((p) => ({ ...p, semester_id: e.target.value }))}>{semesterOptions}</TextField>
-                                <TextField required select label="Subject" value={curriculumForm.subject_id} onChange={(e) => setCurriculumForm((p) => ({ ...p, subject_id: e.target.value }))}>{subjectOptions}</TextField>
+                                <TextField required select label="Course" value={curriculumForm.course_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_COURSE') { setTab(1); window.scrollTo(0, 0); }
+                                    else setCurriculumForm((p) => ({ ...p, course_id: e.target.value }));
+                                }}>
+                                    {courseOptions}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_COURSE" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Course</MenuItem>
+                                </TextField>
+                                <TextField required select label="Semester" value={curriculumForm.semester_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_SEMESTER') { setTab(1); window.scrollTo(0, 0); }
+                                    else setCurriculumForm((p) => ({ ...p, semester_id: e.target.value }));
+                                }}>
+                                    {getSemesterOptions(curriculumForm.course_id)}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_SEMESTER" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Semester</MenuItem>
+                                </TextField>
+                                <TextField required select label="Subject" value={curriculumForm.subject_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_SUBJECT') { setTab(0); window.scrollTo(0, 0); }
+                                    else setCurriculumForm((p) => ({ ...p, subject_id: e.target.value }));
+                                }}>
+                                    {subjectOptions}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_SUBJECT" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Subject</MenuItem>
+                                </TextField>
                                 <TextField label="Academic Year" value={curriculumForm.academic_year} onChange={(e) => setCurriculumForm((p) => ({ ...p, academic_year: e.target.value }))} />
                                 <TextField label="Plan Version" value={curriculumForm.plan_version} onChange={(e) => setCurriculumForm((p) => ({ ...p, plan_version: e.target.value }))} />
                                 <FormControlLabel control={<Switch checked={curriculumForm.is_mandatory} onChange={(e) => setCurriculumForm((p) => ({ ...p, is_mandatory: e.target.checked }))} />} label={curriculumForm.is_mandatory ? 'Core Subject' : 'Elective Subject'} />
+                                <FormControlLabel control={<Switch checked={curriculumForm.status} onChange={(e) => setCurriculumForm((p) => ({ ...p, status: e.target.checked }))} />} label={curriculumForm.status ? 'Active Mapping' : 'Inactive Mapping'} />
                                 <TextField label="Planning Notes" multiline rows={2} value={curriculumForm.notes} onChange={(e) => setCurriculumForm((p) => ({ ...p, notes: e.target.value }))} />
                                 <Stack direction="row" spacing={1}>
                                     <Button type="submit" variant="contained" startIcon={editingCurriculumId ? <SaveIcon /> : <AddIcon />} fullWidth>
@@ -713,16 +757,50 @@ const SubjectCourseManagement = () => {
 
                         <SectionPaper title="Faculty Subject Assignment" subtitle="Assign faculty and weekly periods for timetable engine.">
                             <Box component="form" onSubmit={submitAllocation} sx={{ display: 'grid', gap: 2 }}>
-                                <TextField required select label="Subject" value={allocationForm.subject_id} onChange={(e) => setAllocationForm((p) => ({ ...p, subject_id: e.target.value }))}>{subjectOptions}</TextField>
-                                <TextField required select label="Course" value={allocationForm.course_id} onChange={(e) => setAllocationForm((p) => ({ ...p, course_id: e.target.value }))}>{courseOptions}</TextField>
-                                <TextField required select label="Semester" value={allocationForm.semester_id} onChange={(e) => setAllocationForm((p) => ({ ...p, semester_id: e.target.value }))}>{semesterOptions}</TextField>
-                                <TextField required select label="Department" value={allocationForm.department_id} onChange={(e) => setAllocationForm((p) => ({ ...p, department_id: e.target.value }))}>{departmentOptions}</TextField>
-                                <TextField select label="Faculty" value={allocationForm.teacher_id} onChange={(e) => setAllocationForm((p) => ({ ...p, teacher_id: e.target.value }))}>
+                                <TextField required select label="Subject" value={allocationForm.subject_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_SUBJECT') { setTab(0); window.scrollTo(0, 0); }
+                                    else setAllocationForm((p) => ({ ...p, subject_id: e.target.value }));
+                                }}>
+                                    {subjectOptions}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_SUBJECT" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Subject</MenuItem>
+                                </TextField>
+                                <TextField required select label="Course" value={allocationForm.course_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_COURSE') { setTab(1); window.scrollTo(0, 0); }
+                                    else setAllocationForm((p) => ({ ...p, course_id: e.target.value }));
+                                }}>
+                                    {courseOptions}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_COURSE" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Course</MenuItem>
+                                </TextField>
+                                <TextField required select label="Semester" value={allocationForm.semester_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_SEMESTER') { setTab(1); window.scrollTo(0, 0); }
+                                    else setAllocationForm((p) => ({ ...p, semester_id: e.target.value }));
+                                }}>
+                                    {getSemesterOptions(allocationForm.course_id)}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_SEMESTER" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Semester</MenuItem>
+                                </TextField>
+                                <TextField required select label="Department" value={allocationForm.department_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_DEPT') navigate('/departments');
+                                    else setAllocationForm((p) => ({ ...p, department_id: e.target.value }));
+                                }}>
+                                    {departmentOptions}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_DEPT" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Department</MenuItem>
+                                </TextField>
+                                <TextField select label="Faculty" value={allocationForm.teacher_id} onChange={(e) => {
+                                    if (e.target.value === 'ADD_NEW_FACULTY') navigate('/employees');
+                                    else setAllocationForm((p) => ({ ...p, teacher_id: e.target.value }));
+                                }}>
                                     <MenuItem value="">Unassigned</MenuItem>
                                     {teacherOptions}
+                                    <Divider />
+                                    <MenuItem value="ADD_NEW_FACULTY" sx={{ color: 'primary.main', fontWeight: 'bold' }}>+ Add New Faculty</MenuItem>
                                 </TextField>
                                 <TextField label="Weekly Periods" type="number" value={allocationForm.weekly_periods} onChange={(e) => setAllocationForm((p) => ({ ...p, weekly_periods: e.target.value }))} />
                                 <TextField label="Academic Year" value={allocationForm.academic_year} onChange={(e) => setAllocationForm((p) => ({ ...p, academic_year: e.target.value }))} />
+                                <FormControlLabel control={<Switch checked={allocationForm.status} onChange={(e) => setAllocationForm((p) => ({ ...p, status: e.target.checked }))} />} label={allocationForm.status ? 'Active Allocation' : 'Inactive Allocation'} />
                                 <Stack direction="row" spacing={1}>
                                     <Button type="submit" variant="outlined" startIcon={editingAllocationId ? <SaveIcon /> : <AddIcon />} fullWidth>
                                         {editingAllocationId ? 'Update Faculty' : 'Assign Faculty'}
@@ -748,6 +826,7 @@ const SubjectCourseManagement = () => {
                                         <TableCell>Semester</TableCell>
                                         <TableCell>Subject</TableCell>
                                         <TableCell>Type</TableCell>
+                                        <TableCell>Status</TableCell>
                                         <TableCell align="right">Action</TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -762,6 +841,7 @@ const SubjectCourseManagement = () => {
                                                 <Typography variant="caption" color="text.secondary">{item.academic_year} | {item.plan_version}</Typography>
                                             </TableCell>
                                             <TableCell>{item.is_mandatory ? 'Core' : 'Elective'}</TableCell>
+                                            <TableCell><StatusChip active={item.status} /></TableCell>
                                             <TableCell align="right">
                                                 <IconButton size="small" color="primary" onClick={() => handleEditCurriculum(item)}>
                                                     <EditIcon fontSize="small" />
