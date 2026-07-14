@@ -11,7 +11,7 @@ async function runSeed() {
         await sequelize.authenticate();
         console.log("✅ Database connected for seeding");
 
-        const hashedPassword = await bcrypt.hash('adminpassword123', 10);
+        const hashedPassword = await bcrypt.hash('system12345', 10);
 
         // Sync and seed Role model first
         await Role.sync();
@@ -21,7 +21,7 @@ async function runSeed() {
         await Admin.sync();
 
         const [admin, created] = await Admin.findOrCreate({
-            where: { email: 'admin@example.com' },
+            where: { email: 'system@gmail.com' },
             defaults: {
                 name: 'Super Admin',
                 password: hashedPassword,
@@ -30,7 +30,7 @@ async function runSeed() {
         });
 
         if (created) {
-            console.log('✅ Admin account created: admin@example.com / adminpassword123');
+            console.log('✅ Admin account created: ');
         } else {
             console.log('ℹ️ Admin account already exists.');
         }

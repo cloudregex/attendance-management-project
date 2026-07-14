@@ -193,7 +193,7 @@ const AdminLogin = () => {
                             { label: 'Cloud Security', icon: <CheckCircleOutline sx={{ fontSize: 24 }} /> },
                             { label: 'AI Analytics', icon: <CheckCircleOutline sx={{ fontSize: 24 }} /> }
                         ].map((item, iconIdx) => (
-                            <Grid item xs={4} key={iconIdx}>
+                            <Grid size={{ xs: 4 }} key={iconIdx}>
                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
                                     <Box sx={{ color: theme.palette.primary.light, display: 'flex', p: 1.5, bgcolor: alpha('#fff', 0.1), borderRadius: '50%' }}>{item.icon}</Box>
                                     <Typography variant="subtitle2" sx={{ fontWeight: 700, opacity: 0.9, letterSpacing: '0.5px' }}>{item.label}</Typography>
@@ -211,9 +211,7 @@ const AdminLogin = () => {
             {/* Right Panel: Grid Root (Login Content) */}
             <Grid
                 container
-                item
-                xs={12}
-                md={6}
+                size={{ xs: 12, md: 6 }}
                 sx={{
                     width: { xs: '100%', md: '50%' },
                     display: 'flex',

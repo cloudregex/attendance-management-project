@@ -48,12 +48,9 @@ export const seedDefaultPermissions = async () => {
         'financial reports'
     ];
 
-    for (const name of [...permissionCatalog, ...legacyPerms]) {
-        await Permission.findOrCreate({
-            where: { name },
-            defaults: { name }
-        });
-    }
+    const allNames = [...permissionCatalog, ...legacyPerms];
+    const records = allNames.map(name => ({ name }));
+    await Permission.bulkCreate(records, { ignoreDuplicates: true });
 
     const allPermissions = await Permission.findAll();
     const permissionsByName = new Map(allPermissions.map((permission) => [permission.name, permission]));
