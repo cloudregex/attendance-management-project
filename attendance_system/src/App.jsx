@@ -1,4 +1,4 @@
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, CircularProgress, Box } from '@mui/material';
 import ThemeProviderWrapper from './shared/components/ThemeContext';
@@ -7,19 +7,19 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { generateToken } from './Notifications/firebase';
 
-import AdminDashboard from './features/dashboard/pages/AdminDashboard';
-import DeptDashboard from './features/dashboard/pages/DeptDashboard';
-import AdminLogin from './features/auth/pages/AdminLogin';
-import { EmployeesPage } from './shared/pages/Placeholders';
-import SettingsPage from './features/settings/pages/Settings';
-import PermissionsPage from './features/permissions/pages/Permissions';
-import EditRolePermissions from './features/permissions/pages/EditRolePermissions';
-import ActivityLogsPage from './features/activity-logs/pages/ActivityLogs';
-import EditUserPermissions from './features/permissions/pages/EditUserPermissions';
-import SystemAdmin from './features/admin/pages/SystemAdmin';
-import SubjectCourseManagement from './features/academics/pages/SubjectCourseManagement';
-import TimetableManagement from './features/timetable/pages/TimetableManagement';
-import AttendanceReports from './features/reports/pages/AttendanceReports';
+const AdminDashboard = lazy(() => import('./features/dashboard/pages/AdminDashboard'));
+const DeptDashboard = lazy(() => import('./features/dashboard/pages/DeptDashboard'));
+const AdminLogin = lazy(() => import('./features/auth/pages/AdminLogin'));
+const EmployeesPage = lazy(() => import('./shared/pages/Placeholders').then(m => ({ default: m.EmployeesPage })));
+const SettingsPage = lazy(() => import('./features/settings/pages/Settings'));
+const PermissionsPage = lazy(() => import('./features/permissions/pages/Permissions'));
+const EditRolePermissions = lazy(() => import('./features/permissions/pages/EditRolePermissions'));
+const ActivityLogsPage = lazy(() => import('./features/activity-logs/pages/ActivityLogs'));
+const EditUserPermissions = lazy(() => import('./features/permissions/pages/EditUserPermissions'));
+const SystemAdmin = lazy(() => import('./features/admin/pages/SystemAdmin'));
+const SubjectCourseManagement = lazy(() => import('./features/academics/pages/SubjectCourseManagement'));
+const TimetableManagement = lazy(() => import('./features/timetable/pages/TimetableManagement'));
+const AttendanceReports = lazy(() => import('./features/reports/pages/AttendanceReports'));
 
 const LoadingFallback = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>

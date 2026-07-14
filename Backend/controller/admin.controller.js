@@ -71,7 +71,7 @@ export const loginAdmin = async (req, res) => {
         const token = jwt.sign(
             { id: adminUser.id, email: adminUser.email, roleId: adminUser.roleId },
             process.env.JWT_SECRET,
-            { expiresIn: '5d' }
+            { expiresIn: '15m' }
         );
 
         // Store hashed refresh token in DB
@@ -183,8 +183,12 @@ export const logoutAdmin = async (req, res) => {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 const expiry = decoded.exp - Math.floor(Date.now() / 1000);
                 if (expiry > 0) {
-                    await redisClient.setEx(`bl_${token}`, expiry, 'true');
-                    console.log(`  - ✅ Token blacklisted in Redis for ${expiry} seconds`);
+                    try {
+                        await redisClient.setEx(`bl_${token}`, expiry, 'true');
+                        console.log(`  - ✅ Token blacklisted in Redis for ${expiry} seconds`);
+                    } catch (redisError) {
+                        console.error(`  - ⚠️ Redis set failed during token blacklist:`, redisError.message);
+                    }
                 }
             } catch (err) {
                 console.log("  - ⚠️ Blacklisting failed or token expired:", err.message);
