@@ -86,6 +86,9 @@ const TimetableManagement = () => {
         conflicts: [],
     });
     const [departments, setDepartments] = useState([]);
+    const [teachers, setTeachers] = useState([]);
+    const [subjects, setSubjects] = useState([]);
+    const [selectedDay, setSelectedDay] = useState('Monday');
     const [classroomForm, setClassroomForm] = useState(emptyClassroom());
     const [slotForm, setSlotForm] = useState({
         day_of_week: 'Monday',
@@ -103,12 +106,16 @@ const TimetableManagement = () => {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const [timetableRes, departmentsRes] = await Promise.all([
+            const [timetableRes, departmentsRes, teachersRes, subjectsRes] = await Promise.all([
                 axiosInstance.get('/timetable/overview'),
                 axiosInstance.get('/departments'),
+                axiosInstance.get('/teachers'),
+                axiosInstance.get('/academic/subjects'),
             ]);
             setOverview(timetableRes.data || {});
             setDepartments(Array.isArray(departmentsRes.data) ? departmentsRes.data : []);
+            setTeachers(Array.isArray(teachersRes.data) ? teachersRes.data : []);
+            setSubjects(Array.isArray(subjectsRes.data) ? subjectsRes.data : []);
         } catch (error) {
             notify('error', error.response?.data?.message || 'Could not load timetable data.');
         } finally {
@@ -407,71 +414,140 @@ const TimetableManagement = () => {
 
             {tab === 1 && (
                 <Stack spacing={2}>
-                    {DAYS.map((day) => (
-                        <Paper key={day} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1 }}>{day}</Typography>
-                            <Box sx={{ overflowX: 'auto' }}>
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>SR No.</TableCell>
-                                        <TableCell>Time</TableCell>
-                                        <TableCell>Subject</TableCell>
-                                        <TableCell>Course / Sem</TableCell>
-                                        <TableCell>Faculty</TableCell>
-                                        <TableCell>Room</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell align="right">Action</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {(entriesByDay[day] || []).map((entry, index) => (
-                                        <TableRow key={entry.id} hover>
-                                            <TableCell>{index + 1}</TableCell>
-                                            <TableCell>{entry.slot?.start_time?.slice(0, 5)} - {entry.slot?.end_time?.slice(0, 5)}</TableCell>
-                                            <TableCell>
-                                                <Typography sx={{ fontWeight: 700 }}>{entry.subject?.name}</Typography>
-                                                <Typography variant="caption" color="text.secondary">{entry.subject?.code}</Typography>
-                                            </TableCell>
-                                            <TableCell>{entry.course?.code} / Sem {entry.semester?.semester_number}</TableCell>
-                                            <TableCell>{entry.teacher?.first_name || 'Unassigned'}</TableCell>
-                                            <TableCell sx={{ minWidth: 180 }}>
-                                                <TextField
-                                                    select
-                                                    size="small"
-                                                    fullWidth
-                                                    value={entry.classroom_id || ''}
-                                                    onChange={(e) => updateEntry(entry.id, 'classroom_id', e.target.value)}
-                                                >
-                                                    <MenuItem value="">Unassigned</MenuItem>
-                                                    {(overview.classrooms || []).map((room) => (
-                                                        <MenuItem key={room.id} value={room.id}>{room.code}</MenuItem>
+                    <Paper sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5 }}>Day Selector</Typography>
+                        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                            {DAYS.map((day) => (
+                                <Button
+                                    key={day}
+                                    variant={selectedDay === day ? 'contained' : 'outlined'}
+                                    onClick={() => setSelectedDay(day)}
+                                    size="small"
+                                    sx={{ borderRadius: 2 }}
+                                >
+                                    {day}
+                                </Button>
+                            ))}
+                        </Stack>
+                    </Paper>
+
+                    <Paper sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 2 }}>{selectedDay}'s Schedule</Typography>
+                        <Box sx={{ overflowX: 'auto' }}>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>SR No.</TableCell>
+                                    <TableCell sx={{ minWidth: 150 }}>Time (Slot)</TableCell>
+                                    <TableCell sx={{ minWidth: 180 }}>Subject</TableCell>
+                                    <TableCell>Course / Sem</TableCell>
+                                    <TableCell sx={{ minWidth: 180 }}>Faculty (Teacher)</TableCell>
+                                    <TableCell sx={{ minWidth: 150 }}>Room</TableCell>
+                                    <TableCell>Status</TableCell>
+                                    <TableCell align="right">Action</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {(entriesByDay[selectedDay] || []).map((entry, index) => (
+                                    <TableRow key={entry.id} hover>
+                                        <TableCell>{index + 1}</TableCell>
+                                        
+                                        {/* Time (Slot) Dropdown Selector */}
+                                        <TableCell>
+                                            <TextField
+                                                select
+                                                size="small"
+                                                fullWidth
+                                                value={entry.lecture_slot_id || ''}
+                                                onChange={(e) => updateEntry(entry.id, 'lecture_slot_id', e.target.value)}
+                                            >
+                                                {(overview.slots || [])
+                                                    .filter(s => s.day_of_week === selectedDay)
+                                                    .map((slot) => (
+                                                        <MenuItem key={slot.id} value={slot.id}>
+                                                            {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)} ({slot.slot_type})
+                                                        </MenuItem>
                                                     ))}
-                                                </TextField>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    size="small"
-                                                    label={entry.timetable_status}
-                                                    color={entry.timetable_status === 'published' ? 'success' : 'warning'}
-                                                    sx={{ borderRadius: 1, textTransform: 'capitalize', fontWeight: 700 }}
-                                                />
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Button size="small" color="error" onClick={() => deleteEntry(entry.id)}>Remove</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {(entriesByDay[day] || []).length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={8} align="center" sx={{ py: 3, color: 'text.secondary' }}>No periods scheduled.</TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                            </Box>
-                        </Paper>
-                    ))}
+                                            </TextField>
+                                        </TableCell>
+
+                                        {/* Subject Dropdown Selector */}
+                                        <TableCell>
+                                            <TextField
+                                                select
+                                                size="small"
+                                                fullWidth
+                                                value={entry.subject_id || ''}
+                                                onChange={(e) => updateEntry(entry.id, 'subject_id', e.target.value)}
+                                            >
+                                                <MenuItem value="">Unassigned</MenuItem>
+                                                {subjects.map((sub) => (
+                                                    <MenuItem key={sub.id} value={sub.id}>
+                                                        {sub.name} ({sub.code})
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </TableCell>
+
+                                        <TableCell>{entry.course?.code} / Sem {entry.semester?.semester_number}</TableCell>
+
+                                        {/* Faculty Dropdown Selector */}
+                                        <TableCell>
+                                            <TextField
+                                                select
+                                                size="small"
+                                                fullWidth
+                                                value={entry.teacher_id || ''}
+                                                onChange={(e) => updateEntry(entry.id, 'teacher_id', e.target.value)}
+                                            >
+                                                <MenuItem value="">Unassigned</MenuItem>
+                                                {teachers.map((teach) => (
+                                                    <MenuItem key={teach.id} value={teach.id}>
+                                                        {teach.first_name} ({teach.employee_id})
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </TableCell>
+
+                                        {/* Classroom Dropdown Selector */}
+                                        <TableCell>
+                                            <TextField
+                                                select
+                                                size="small"
+                                                fullWidth
+                                                value={entry.classroom_id || ''}
+                                                onChange={(e) => updateEntry(entry.id, 'classroom_id', e.target.value)}
+                                            >
+                                                <MenuItem value="">Unassigned</MenuItem>
+                                                {(overview.classrooms || []).map((room) => (
+                                                    <MenuItem key={room.id} value={room.id}>{room.code}</MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <Chip
+                                                size="small"
+                                                label={entry.timetable_status}
+                                                color={entry.timetable_status === 'published' ? 'success' : 'warning'}
+                                                sx={{ borderRadius: 1, textTransform: 'capitalize', fontWeight: 700 }}
+                                            />
+                                        </TableCell>
+                                        
+                                        <TableCell align="right">
+                                            <Button size="small" color="error" onClick={() => deleteEntry(entry.id)}>Remove</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                {(entriesByDay[selectedDay] || []).length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={8} align="center" sx={{ py: 3, color: 'text.secondary' }}>No periods scheduled.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                        </Box>
+                    </Paper>
                 </Stack>
             )}
 

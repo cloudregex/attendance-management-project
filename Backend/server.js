@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import sequelize from './config/db.js';
 
 // ── Import models so Sequelize knows about them before sync ───────────────
@@ -115,8 +116,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ── Middleware ─────────────────────────────────────────────────────────────
+app.use(helmet());
 app.use(cors({
-  origin: true,
+  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:5173',
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control'],
 }));
@@ -177,8 +180,8 @@ const syncDB = async () => {
     await ActivityLog.sync();
     console.log("✅ ActivityLog synced");
 
-    await sequelize.sync({ alter: true });
-    console.log("✅ All models synced with alter: true");
+    await sequelize.sync();
+    console.log("✅ All models synced (without alter)");
 
     await seedDefaultPermissions();
     console.log("✅ Default data seeded");

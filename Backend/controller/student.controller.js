@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import Student from '../model/student.model.js';
 
 // POST /api/students/add
@@ -19,9 +20,11 @@ export const addStudent = async (req, res) => {
             return res.status(400).json({ message: 'first_name, email, roll_number and department_id are required.' });
         }
 
-        // Hash password (default to roll_number if no password provided)
-        const rawPassword = password || roll_number;
+        // Hash password (generate secure random password if none provided)
+        const rawPassword = password || crypto.randomBytes(8).toString('hex');
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
+        
+        // TODO: In a production app, securely email the rawPassword to the student here.
 
         const student = await Student.create({
             first_name,

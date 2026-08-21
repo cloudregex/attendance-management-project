@@ -55,6 +55,16 @@ const Timetable = sequelize.define('Timetable', {
     tableName: 'timetable',
     timestamps: true,
     underscored: true,
+    indexes: [
+        {
+            unique: false,
+            fields: ['department_id', 'semester_id']
+        },
+        {
+            unique: false,
+            fields: ['teacher_id']
+        }
+    ]
 });
 
 export default Timetable;

@@ -42,6 +42,11 @@ const allocationIncludes = [
 ];
 
 export const seedTimetableDefaults = async () => {
+    const slotCount = await LectureSlot.count();
+    if (slotCount > 0) {
+        return; // Already seeded, skip to avoid executing 40+ redundant findOrCreate queries.
+    }
+
     for (const day of DAYS) {
         for (let index = 0; index < DEFAULT_SLOTS.length; index += 1) {
             const [start_time, end_time, slot_type] = DEFAULT_SLOTS[index];

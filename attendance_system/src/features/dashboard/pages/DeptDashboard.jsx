@@ -35,6 +35,7 @@ import {
 } from '@mui/x-data-grid';
 import AddTeacherForm from '../../employees/components/AddTeacherForm';
 import AddStudentForm from '../../students/components/AddStudentForm';
+import AddDepartmentForm from '../components/AddDepartmentForm';
 import { useToast } from '../hooks/useToast.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -59,20 +60,31 @@ const DeptDashboard = () => {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
     const [teacherFormOpen, setTeacherFormOpen] = useState(false);
     const [studentFormOpen, setStudentFormOpen] = useState(false);
+    const [departmentFormOpen, setDepartmentFormOpen] = useState(false);
+    const [loadingDepartments, setLoadingDepartments] = useState(true);
 
     // ── fetch departments ───────────────────────────────────────────────
-    const fetchDepartments = useCallback(async () => {
+    const fetchDepartments = useCallback(async (silent = false) => {
+        if (!silent) setLoadingDepartments(true);
         try {
             const res = await fetch(`${API}/departments`);
             const data = await res.json();
             if (res.ok && Array.isArray(data)) {
-                const mapped = data.map(d => ({ id: String(d.id), name: d.name }));
+                const mapped = data.map(d => ({ 
+                    id: String(d.id), 
+                    name: d.name, 
+                    code: d.code || '—', 
+                    status: d.status ? 'Active' : 'Inactive' 
+                }));
                 setDepartments([ALL_DEPT, ...mapped]);
+                if (!silent) toast.success(`Loaded ${mapped.length} department(s).`, 'Departments');
             } else {
                 toast.error(data?.message || 'Failed to load departments.', 'Departments');
             }
         } catch {
             toast.error('Could not reach server. Check your connection.', 'Departments');
+        } finally {
+            setLoadingDepartments(false);
         }
     }, []);
 
@@ -134,9 +146,9 @@ const DeptDashboard = () => {
     }, []);
 
     useEffect(() => {
-        fetchDepartments();
-        fetchStudents();
-        fetchTeachers();
+        fetchDepartments(true);
+        fetchStudents(true);
+        fetchTeachers(true);
     }, []);
 
     // ── delete student ──────────────────────────────────────────────────
@@ -170,6 +182,22 @@ const DeptDashboard = () => {
             toast.error('Network error. Could not delete teacher.', 'Delete Failed');
         }
     }, [fetchTeachers]);
+
+    // ── delete department ───────────────────────────────────────────────
+    const handleDeleteDepartment = useCallback(async (id, name) => {
+        try {
+            const res = await fetch(`${API}/departments/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success(`Department "${name}" deleted.`, 'Deleted');
+                fetchDepartments(true);
+            } else {
+                toast.error(data.message || 'Failed to delete department.', 'Delete Failed');
+            }
+        } catch {
+            toast.error('Network error. Could not delete department.', 'Delete Failed');
+        }
+    }, [fetchDepartments]);
 
     // ── columns ─────────────────────────────────────────────────────────
     const studentColumns = useMemo(() => [
@@ -264,6 +292,47 @@ const DeptDashboard = () => {
             )
         }
     ], [handleDeleteTeacher]);
+
+    const departmentColumns = useMemo(() => [
+        { 
+            field: 'name', headerName: 'Department Name', flex: 1.5, minWidth: 200,
+            renderCell: (p) => (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, height: '100%' }}>
+                    <Avatar sx={{ 
+                        width: 32, height: 32, fontSize: '0.875rem', 
+                        bgcolor: alpha('#7C3AED', 0.1), color: '#7C3AED', 
+                        fontWeight: 700 
+                    }}>
+                        {(p.row.name || '?').slice(0, 2).toUpperCase()}
+                    </Avatar>
+                    <Typography variant="body2" sx={{ fontWeight: 600, noWrap: true }}>{p.value}</Typography>
+                </Box>
+            )
+        },
+        { field: 'code', headerName: 'Code', flex: 1, minWidth: 120 },
+        { 
+            field: 'status', headerName: 'Status', width: 120,
+            renderCell: (p) => (
+                <Chip 
+                    label={p.value} size="small" 
+                    sx={{ 
+                        borderRadius: 1, fontWeight: 700, 
+                        bgcolor: p.value === 'Active' ? alpha('#10B981', 0.1) : alpha('#F59E0B', 0.1),
+                        color: p.value === 'Active' ? '#059669' : '#D97706',
+                        border: 'none', height: 24, fontSize: '0.65rem'
+                    }} 
+                />
+            )
+        },
+        {
+            field: 'actions', headerName: 'Actions', width: 100, sortable: false,
+            renderCell: (p) => (
+                <IconButton size="small" color="error" onClick={() => handleDeleteDepartment(p.id, p.row.name)}>
+                    <DeleteIcon fontSize="small" />
+                </IconButton>
+            )
+        }
+    ], [handleDeleteDepartment]);
 
     // ── add teacher ─────────────────────────────────────────────────────
     const handleAddTeacher = async (formData) => {
@@ -370,18 +439,45 @@ const DeptDashboard = () => {
         }
     };
 
+    // ── add department ──────────────────────────────────────────────────
+    const handleAddDepartment = async (formData) => {
+        try {
+            toast.info('Saving department…', 'Please wait');
+
+            const res = await fetch(`${API}/departments/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+            const result = await res.json();
+
+            if (res.ok) {
+                toast.success(`"${formData.name}" added successfully!`, 'Department Added');
+                fetchDepartments(true);
+                setDepartmentFormOpen(false);
+            } else if (res.status === 409) {
+                toast.warning(result.message || 'Department name or code already exists.', 'Duplicate');
+            } else {
+                toast.error(result.message || 'Failed to add department.', 'Error');
+            }
+        } catch {
+            toast.error('Network error. Please check your connection.', 'Network Error');
+        }
+    };
+
     const handleViewChange = (_, newView) => { if (newView !== null) setView(newView); };
 
     // ── filtered data ───────────────────────────────────────────────────
-    const filteredStudents = studentsData.filter(s => dept.id === 'all' || s.deptId === dept.id);
-    const filteredTeachers = teachersData.filter(t => dept.id === 'all' || t.deptId === dept.id);
+    const filteredStudents = useMemo(() => studentsData.filter(s => dept.id === 'all' || s.deptId === dept.id), [studentsData, dept]);
+    const filteredTeachers = useMemo(() => teachersData.filter(t => dept.id === 'all' || t.deptId === dept.id), [teachersData, dept]);
+    const filteredDepartments = useMemo(() => departments.filter(d => d.id !== 'all'), [departments]);
 
-    const deptStats = [
+    const deptStats = useMemo(() => [
         { label: 'Total Students',  value: filteredStudents.length,                                    icon: <SchoolIcon />, color: '#2563EB' },
         { label: 'Total Teachers',  value: filteredTeachers.length,                                    icon: <WorkIcon />,   color: '#059669' },
         { label: 'Active Students', value: filteredStudents.filter(s => s.status === 'Active').length, icon: <PeopleIcon />, color: '#EA580C' },
         { label: 'Active Teachers', value: filteredTeachers.filter(t => t.status === 'Active').length, icon: <PersonIcon />, color: '#7C3AED' },
-    ];
+    ], [filteredStudents, filteredTeachers]);
 
 
     // ── render ───────────────────────────────────────────────────────────
@@ -409,7 +505,11 @@ const DeptDashboard = () => {
                     <Button
                         variant="contained"
                         startIcon={<AddIcon />}
-                        onClick={() => view === 'students' ? setStudentFormOpen(true) : setTeacherFormOpen(true)}
+                        onClick={() => {
+                            if (view === 'students') setStudentFormOpen(true);
+                            else if (view === 'teachers') setTeacherFormOpen(true);
+                            else setDepartmentFormOpen(true);
+                        }}
                         sx={{ 
                             borderRadius: 1.5, 
                             textTransform: 'none', 
@@ -423,7 +523,7 @@ const DeptDashboard = () => {
                             } 
                         }}
                     >
-                        Add {view === 'students' ? 'Student' : 'Teacher'}
+                        Add {view === 'students' ? 'Student' : view === 'teachers' ? 'Teacher' : 'Department'}
                     </Button>
                 </Box>
             </Box>
@@ -447,6 +547,7 @@ const DeptDashboard = () => {
                 <ToggleButtonGroup size="small" value={view} exclusive onChange={handleViewChange}>
                     <ToggleButton value="students">Students</ToggleButton>
                     <ToggleButton value="teachers">Teachers</ToggleButton>
+                    <ToggleButton value="departments">Departments</ToggleButton>
                 </ToggleButtonGroup>
             </Box>
 
@@ -459,9 +560,9 @@ const DeptDashboard = () => {
                     boxShadow: 'none'
                 }}>
                     <DataGrid
-                        rows={view === 'students' ? filteredStudents : filteredTeachers}
-                        columns={view === 'students' ? studentColumns : teacherColumns}
-                        loading={loadingStudents || loadingTeachers}
+                        rows={view === 'students' ? filteredStudents : view === 'teachers' ? filteredTeachers : filteredDepartments}
+                        columns={view === 'students' ? studentColumns : view === 'teachers' ? teacherColumns : departmentColumns}
+                        loading={view === 'students' ? loadingStudents : view === 'teachers' ? loadingTeachers : loadingDepartments}
                         initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
                         pageSizeOptions={[10, 25, 50]}
                         disableSelectionOnClick
@@ -532,6 +633,7 @@ const DeptDashboard = () => {
             {/* Forms */}
             <AddTeacherForm open={teacherFormOpen} onClose={() => setTeacherFormOpen(false)} onSubmit={handleAddTeacher} />
             <AddStudentForm open={studentFormOpen} onClose={() => setStudentFormOpen(false)} onAdd={handleAddStudent} />
+            <AddDepartmentForm open={departmentFormOpen} onClose={() => setDepartmentFormOpen(false)} onSubmit={handleAddDepartment} />
 
             {/* Notifications */}
             <ToastSnackbar sx={{ mb: 4 }} />

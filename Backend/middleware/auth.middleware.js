@@ -34,8 +34,13 @@ export const verifyToken = async (req, res, next) => {
 
         const token = authHeader.split(' ')[1];
 
-        // 1. Check Redis Blacklist
-        const isBlacklisted = await redisClient.get(`bl_${token}`);
+        // 1. Check Redis Blacklist (Fail-Open Strategy)
+        let isBlacklisted = null;
+        try {
+            isBlacklisted = await redisClient.get(`bl_${token}`);
+        } catch (err) {
+            console.error("⚠️ Redis connection error during token blacklist check (failing open):", err.message);
+        }
         if (isBlacklisted) {
             return res.status(401).json({ message: "Token has been revoked. Please login again." });
         }
@@ -58,8 +63,13 @@ export const verifyAdmin = async (req, res, next) => {
 
         const token = authHeader.split(' ')[1];
 
-        // 1. Check Redis Blacklist
-        const isBlacklisted = await redisClient.get(`bl_${token}`);
+        // 1. Check Redis Blacklist (Fail-Open Strategy)
+        let isBlacklisted = null;
+        try {
+            isBlacklisted = await redisClient.get(`bl_${token}`);
+        } catch (err) {
+            console.error("⚠️ Redis connection error during admin token blacklist check (failing open):", err.message);
+        }
         if (isBlacklisted) {
             return res.status(401).json({ message: "Token has been revoked. Please login again." });
         }
@@ -83,8 +93,13 @@ export const checkAuth = async (req, res, next) => {
     if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.split(' ')[1];
         try {
-            // Check Redis Blacklist
-            const isBlacklisted = await redisClient.get(`bl_${token}`);
+            // Check Redis Blacklist (Fail-Open Strategy)
+            let isBlacklisted = null;
+            try {
+                isBlacklisted = await redisClient.get(`bl_${token}`);
+            } catch (err) {
+                console.error("⚠️ Redis connection error during checkAuth blacklist check (failing open):", err.message);
+            }
             if (isBlacklisted) {
                 return res.status(401).json({ message: "Token has been revoked. Please login again." });
             }

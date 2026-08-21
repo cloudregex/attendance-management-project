@@ -30,6 +30,16 @@ const Attendance = sequelize.define('Attendance', {
     tableName: 'attendance',
     timestamps: true,
     underscored: true,
+    indexes: [
+        {
+            unique: false,
+            fields: ['student_id', 'date']
+        },
+        {
+            unique: false,
+            fields: ['timetable_id', 'date']
+        }
+    ]
 });
 
 export default Attendance;

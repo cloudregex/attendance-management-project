@@ -1,28 +1,33 @@
-import axios from 'axios';
+import jwt from 'jsonwebtoken';
+import fetch from 'node-fetch';
 
-const BASE_URL = 'http://localhost:5000/api';
+const token = jwt.sign(
+    { id: 1, role: 'admin', email: 'admin@example.com' },
+    'attendance_pro_secret_key_2026',
+    { expiresIn: '1h' }
+);
 
-async function testEndpoints() {
+async function test() {
     try {
-        console.log('Testing Permissions Get...');
-        const permGet = await axios.get(`${BASE_URL}/permissions/definitions/get`);
-        console.log('Permissions Get Success:', permGet.data.length, 'records');
-
-        console.log('Testing Roles Get...');
-        const rolesGet = await axios.get(`${BASE_URL}/roles/get`);
-        console.log('Roles Get Success:', rolesGet.data.length, 'records');
-
-        console.log('Testing Users Get...');
-        const usersGet = await axios.get(`${BASE_URL}/users/get`);
-        console.log('Users Get Success:', usersGet.data.length, 'records');
-
-    } catch (error) {
-        console.error('Test Failed:', error.message);
-        if (error.response) {
-            console.error('Response data:', error.response.data);
-            console.error('Response status:', error.response.status);
-        }
+        const res = await fetch('http://localhost:5000/api/timetable/slots', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                day_of_week: 'Monday',
+                start_time: '09:00',
+                end_time: '09:55',
+                slot_type: 'lecture',
+                sequence: 1
+            })
+        });
+        const data = await res.json();
+        console.log('Status:', res.status);
+        console.log('Response:', data);
+    } catch (e) {
+        console.error(e);
     }
 }
-
-testEndpoints();
+test();
