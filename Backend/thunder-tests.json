@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "test_req_health",
+    "name": "Health check status code is 200",
+    "requestId": "req_health",
+    "test": {
+      "type": "res-code",
+      "action": "equal",
+      "value": "200"
+    }
+  },
+  {
+    "_id": "test_req_login_admin",
+    "name": "Admin Login status code is 200 and extracts JWT",
+    "requestId": "req_login_admin",
+    "test": {
+      "type": "res-code",
+      "action": "equal",
+      "value": "200"
+    }
+  },
+  {
+    "_id": "test_req_admin_me",
+    "name": "Get Current Admin status code is 200",
+    "requestId": "req_admin_me",
+    "test": {
+      "type": "res-code",
+      "action": "equal",
+      "value": "200"
+    }
+  },
+  {
+    "_id": "test_req_get_depts",
+    "name": "Get Departments status code is 200",
+    "requestId": "req_get_depts",
+    "test": {
+      "type": "res-code",
+      "action": "equal",
+      "value": "200"
+    }
+  },
+  {
+    "_id": "test_req_get_students",
+    "name": "Get Students status code is 200",
+    "requestId": "req_get_students",
+    "test": {
+      "type": "res-code",
+      "action": "equal",
+      "value": "200"
+    }
+  },
+  {
+    "_id": "test_req_get_teachers",
+    "name": "Get Teachers status code is 200",
+    "requestId": "req_get_teachers",
+    "test": {
+      "type": "res-code",
+      "action": "equal",
+      "value": "200"
+    }
+  }
+]

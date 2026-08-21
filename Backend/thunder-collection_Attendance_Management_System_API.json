@@ -1,0 +1,382 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Attendance Management System API",
+  "collectionId": "col_attendance_mgmt_api",
+  "dateExported": "2026-07-26T04:40:00.000Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "_id": "fold_auth_admin",
+      "name": "01. Auth & Admin",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "fold_departments",
+      "name": "02. Departments",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "fold_students",
+      "name": "03. Students",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "fold_teachers",
+      "name": "04. Teachers",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "fold_roles_permissions",
+      "name": "05. Roles & Permissions",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "fold_academics",
+      "name": "06. Academic Management",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "fold_timetable",
+      "name": "07. Timetable",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "fold_attendance",
+      "name": "08. Attendance",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "fold_activity_notifications",
+      "name": "09. Activity & Notifications",
+      "containerId": "",
+      "created": "2026-07-26T04:40:00.000Z"
+    }
+  ],
+  "requests": [
+    {
+      "_id": "req_health",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "",
+      "name": "System Health Check",
+      "url": "{{baseUrl}}/api/health",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "headers": []
+    },
+    {
+      "_id": "req_login_admin",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_auth_admin",
+      "name": "Admin Login (Extract Token)",
+      "url": "{{baseUrl}}/api/admin/login",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "headers": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"system@gmail.com\",\n  \"password\": \"system12345\"\n}"
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "set-env-var",
+          "custom": "json.accessToken",
+          "action": "setto",
+          "value": "{{jwtToken}}"
+        }
+      ]
+    },
+    {
+      "_id": "req_admin_me",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_auth_admin",
+      "name": "Get Current Admin Profile",
+      "url": "{{baseUrl}}/api/admin/me",
+      "method": "GET",
+      "sortNum": 30000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "headers": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      }
+    },
+    {
+      "_id": "req_get_users",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_auth_admin",
+      "name": "Get All Admin Users",
+      "url": "{{baseUrl}}/api/admin/users",
+      "method": "GET",
+      "sortNum": 40000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "headers": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      }
+    },
+    {
+      "_id": "req_create_user",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_auth_admin",
+      "name": "Create Admin User",
+      "url": "{{baseUrl}}/api/admin/users",
+      "method": "POST",
+      "sortNum": 50000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "headers": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"QA Test User\",\n  \"email\": \"qa.user@example.com\",\n  \"password\": \"password123\",\n  \"roleId\": \"admin\"\n}"
+      }
+    },
+    {
+      "_id": "req_add_dept",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_departments",
+      "name": "Add Department",
+      "url": "{{baseUrl}}/api/departments/add",
+      "method": "POST",
+      "sortNum": 60000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "headers": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Computer Science & Engineering\",\n  \"code\": \"CSE\",\n  \"status\": true\n}"
+      }
+    },
+    {
+      "_id": "req_get_depts",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_departments",
+      "name": "Get All Departments",
+      "url": "{{baseUrl}}/api/departments",
+      "method": "GET",
+      "sortNum": 70000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "headers": []
+    },
+    {
+      "_id": "req_get_dept_by_id",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_departments",
+      "name": "Get Department By ID",
+      "url": "{{baseUrl}}/api/departments/:id",
+      "method": "GET",
+      "sortNum": 80000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "params": [
+        {
+          "name": "id",
+          "value": "1",
+          "isPath": true
+        }
+      ]
+    },
+    {
+      "_id": "req_update_dept",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_departments",
+      "name": "Update Department",
+      "url": "{{baseUrl}}/api/departments/:id",
+      "method": "PUT",
+      "sortNum": 90000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "params": [
+        {
+          "name": "id",
+          "value": "1",
+          "isPath": true
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Computer Science and Automation\"\n}"
+      }
+    },
+    {
+      "_id": "req_delete_dept",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_departments",
+      "name": "Delete Department",
+      "url": "{{baseUrl}}/api/departments/:id",
+      "method": "DELETE",
+      "sortNum": 100000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "params": [
+        {
+          "name": "id",
+          "value": "999",
+          "isPath": true
+        }
+      ]
+    },
+    {
+      "_id": "req_add_student",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_students",
+      "name": "Add Student",
+      "url": "{{baseUrl}}/api/students/add",
+      "method": "POST",
+      "sortNum": 110000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"first_name\": \"Alex\",\n  \"last_name\": \"Smith\",\n  \"email\": \"alex.smith@student.edu\",\n  \"roll_number\": \"CS2026001\",\n  \"department_id\": 1,\n  \"course\": \"B.Tech\",\n  \"semester\": 1\n}"
+      }
+    },
+    {
+      "_id": "req_get_students",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_students",
+      "name": "Get All Students",
+      "url": "{{baseUrl}}/api/students",
+      "method": "GET",
+      "sortNum": 120000,
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "req_add_teacher",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_teachers",
+      "name": "Add Teacher",
+      "url": "{{baseUrl}}/api/teachers/add",
+      "method": "POST",
+      "sortNum": 130000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"teacher_name\": \"Dr. Alan Turing\",\n  \"email\": \"alan.turing@university.edu\",\n  \"password\": \"Secr3tP@ss\",\n  \"employee_id\": \"EMP_001\",\n  \"department_id\": 1,\n  \"designation\": \"Professor\"\n}"
+      }
+    },
+    {
+      "_id": "req_get_teachers",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_teachers",
+      "name": "Get All Teachers",
+      "url": "{{baseUrl}}/api/teachers",
+      "method": "GET",
+      "sortNum": 140000,
+      "created": "2026-07-26T04:40:00.000Z"
+    },
+    {
+      "_id": "req_get_roles",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_roles_permissions",
+      "name": "Get Roles",
+      "url": "{{baseUrl}}/api/roles/get",
+      "method": "GET",
+      "sortNum": 150000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      }
+    },
+    {
+      "_id": "req_get_permissions",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_roles_permissions",
+      "name": "Get Permissions Definitions",
+      "url": "{{baseUrl}}/api/permissions/definitions/get",
+      "method": "GET",
+      "sortNum": 160000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      }
+    },
+    {
+      "_id": "req_academic_overview",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_academics",
+      "name": "Get Academic Overview",
+      "url": "{{baseUrl}}/api/academic/overview",
+      "method": "GET",
+      "sortNum": 170000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      }
+    },
+    {
+      "_id": "req_timetable_overview",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_timetable",
+      "name": "Get Timetable Overview",
+      "url": "{{baseUrl}}/api/timetable/overview",
+      "method": "GET",
+      "sortNum": 180000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      }
+    },
+    {
+      "_id": "req_attendance_report",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_attendance",
+      "name": "Get Attendance Report",
+      "url": "{{baseUrl}}/api/attendance/report",
+      "method": "GET",
+      "sortNum": 190000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      }
+    },
+    {
+      "_id": "req_activity_logs",
+      "colId": "col_attendance_mgmt_api",
+      "containerId": "fold_activity_notifications",
+      "name": "Get Activity Logs",
+      "url": "{{baseUrl}}/api/activity-logs/get",
+      "method": "GET",
+      "sortNum": 200000,
+      "created": "2026-07-26T04:40:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{jwtToken}}"
+      }
+    }
+  ],
+  "settings": {
+    "options": {
+      "baseUrl": "{{baseUrl}}"
+    }
+  },
+  "variables": [
+    {
+      "name": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "name": "jwtToken",
+      "value": ""
+    }
+  ]
+}

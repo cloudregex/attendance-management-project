@@ -1,6 +1,4 @@
-import { config } from 'dotenv';
-import { resolve } from 'path';
-config({ path: resolve(process.cwd(), '.env') });
+import 'dotenv/config';
 import sequelize from './config/db.js';
 import LectureSlot from './model/lectureSlot.model.js';
 
